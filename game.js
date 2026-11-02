@@ -137,6 +137,12 @@ class GameScene extends Phaser.Scene {
     // Karo katmanları: arka duvarlar + şelaleler (çarpışmasız) ve zemin
     this.arkaKatman = this.karoKatmani(L.arka, -5);
     this.onKatman = this.karoKatmani(L.on, 1);
+    // Toprak zeminler: tek kesintisiz doku, dünya koordinatına hizalı (bloklar arası dikiş olmaz)
+    const tk = CONFIG.toprakDoku / this.textures.get('toprak').getSourceImage().width;
+    (L.toprak || []).forEach(([x, y, w, h]) => {
+      this.add.tileSprite(x, y, w, h, 'toprak').setOrigin(0, 0).setDepth(1)
+        .setTileScale(tk, tk).setTilePosition(x / tk, y / tk);
+    });
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
 
     // Tek yönlü platformlar: { tip, x, y, n }  (bu bölümde yok, istenirse eklenir)

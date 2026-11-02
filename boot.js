@@ -5,6 +5,7 @@ class BootScene extends Phaser.Scene {
   preload() {
     // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
     this.load.image('tileset', 'assets/tileset.png');
+    this.load.image('toprak', 'assets/toprak.jpg');   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
   }
 
