@@ -123,8 +123,8 @@ const LEVEL1 = {
   ],
 
   ipuclari: [
-    { col: 3, row: 9, text: "← →  Yürü\nSPACE: Zıpla (basılı tut = daha yüksek)" },
-    { col: 37, row: 7, text: "Havadayken ↓ basılı tut = POGO!\nDüşmanlara ve dikenlere zıpla" },
+    { col: 3, row: 9, text: "← →  Yürü\n↑ veya SPACE: Zıpla (basılı tut = daha yüksek)" },
+    { col: 37, row: 7, text: "↓ basılı tut = POGO (yerde de seker)!\nDüşmanlara ve dikenlere zıpla" },
     { col: 60, row: 8, text: "X: Bastonu salla\nBlokları kırar, düşmana vurur" },
     { col: 68, row: 7, text: "Asansöre bin: seni yukarı taşır" },
     { col: 74, row: 4, text: "Sarmaşık: ↑ / ↓ ile tırman" },

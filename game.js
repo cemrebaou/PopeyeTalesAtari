@@ -18,7 +18,7 @@ class GameScene extends Phaser.Scene {
     this.saldiriZaman = 0; this.saldiriBekleme = 0; this.vurulan = new Set();
     this.pogoModu = false; this.tirmaniyor = false; this.bakis = 1;
     this.coyote = 0; this.ziplaTampon = 0; this.ziplarken = false;
-    this.oncekiZipla = false; this.oncekiSaldir = false;
+    this.oncekiZipla = false; this.oncekiZiplaTus = false; this.oncekiSaldir = false;
     this.bantItme = 0;
     this.k = null;
     this.touch = { sol: false, sag: false, yukari: false, asagi: false, zipla: false, saldir: false };
@@ -49,33 +49,39 @@ class GameScene extends Phaser.Scene {
     this.physics.add.existing(z, true);
     this.solids.add(z);
 
+    const OV = 1.2;                    // parçalar arası bindirme: aralarında boşluk kalmasın
     const yUst = Z - A.zTM.yuzey;      // üst sıranın görsel üstü
-    const yDolgu = yUst + A.zTM.h;     // dolgu sırasının üstü
-    const xa = x0 + A.zFL.w, xb = x1 - A.zFR.w;
+    const yDolgu = yUst + A.zTM.yb - A.zFM.yt - 0.8;   // dolgu sırası, üst sıranın toprak altına bindirir
 
+    // Arka dolgu: ince çatlaklardan gökyüzü görünmesin
+    this.add.rectangle(x0 + 3, Z + 6, x1 - x0 - 6, this.dunyaY - Z + 40, A.zFM.renk)
+      .setOrigin(0, 0).setDepth(0.5);
+
+    // Parçalar toprağın gerçek kenarlarına (xl/xr) göre hizalanır
     const gor = (ad, x, y) => this.add.image(x, y, ad).setOrigin(0, 0)
       .setDisplaySize(A[ad].w, A[ad].h).setDepth(1);
+    const sw = (ad) => A[ad].xr - A[ad].xl;
 
-    // Sol ve sağ köşeler (eğrelti toprağın dışına taşar)
-    gor('zTL', x0 - A.zTL.tasma, Z - A.zTL.yuzey);
-    gor('zTR', x1 - (A.zTR.w - A.zTR.tasma), Z - A.zTR.yuzey);
-    // Sol ve sağ dolgu kenarları
-    gor('zFL', x0, yDolgu);
-    gor('zFR', x1 - A.zFR.w, yDolgu);
-    // Ortalar: parça parça yan yana
-    this.serit('zTM', xa, xb, yUst);
-    this.serit('zFM', xa, xb, yDolgu);
+    // Üst sıra: sol köşe, sağ köşe, ortası
+    gor('zTL', x0 - A.zTL.xl, Z - A.zTL.yuzey);
+    gor('zTR', x1 - A.zTR.xr, Z - A.zTR.yuzey);
+    this.serit('zTM', x0 + sw('zTL') - OV, x1 - sw('zTR') + OV, yUst, OV);
+    // Dolgu sırası: sol kenar, sağ kenar, ortası
+    gor('zFL', x0 - A.zFL.xl, yDolgu);
+    gor('zFR', x1 - A.zFR.xr, yDolgu);
+    this.serit('zFM', x0 + sw('zFL') - OV, x1 - sw('zFR') + OV, yDolgu, OV);
   }
 
-  // Bir parçayı xa..xb arasında yan yana döşer (son parça kırpılır)
-  serit(ad, xa, xb, y) {
+  // Bir parçayı xs..xe arasında, toprak kenarları birbirine bindirilerek yan yana döşer
+  serit(ad, xs, xe, y, ov) {
     const A = ASSETLER[ad];
     const tex = this.textures.get(ad).getSourceImage();
     const sx = A.w / tex.width, sy = A.h / tex.height;
-    for (let x = xa; x < xb - 0.5; x += A.w) {
-      const w = Math.min(A.w, xb - x);
-      const im = this.add.image(x, y, ad).setOrigin(0, 0).setScale(sx, sy).setDepth(1);
-      if (w < A.w - 0.1) im.setCrop(0, 0, w / sx, tex.height);
+    const sw = A.xr - A.xl;
+    for (let x = xs; x < xe - 0.3; x += sw - ov) {
+      const gorunen = Math.min(sw, xe - x);
+      const im = this.add.image(x - A.xl, y, ad).setOrigin(0, 0).setScale(sx, sy).setDepth(1);
+      if (gorunen < sw - 0.1) im.setCrop(0, 0, (A.xl + gorunen) / sx, tex.height);
     }
   }
 

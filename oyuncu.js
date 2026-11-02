@@ -3,7 +3,8 @@ Object.assign(GameScene.prototype, {
 
   girdi() {
     const K = this.keys, T = this.touch;
-    const zipla = K.zipla.isDown || K.z.isDown || T.zipla;
+    const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
+    const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // ↑ de zıplatır
     const saldir = K.saldir.isDown || K.k.isDown || T.saldir;
     const k = {
       sol: K.sol.isDown || K.a.isDown || T.sol,
@@ -12,9 +13,11 @@ Object.assign(GameScene.prototype, {
       asagi: K.asagi.isDown || K.s.isDown || T.asagi,
       zipla, saldir,
       ziplaBas: zipla && !this.oncekiZipla,
+      ziplaBasTus: ziplaTus && !this.oncekiZiplaTus,
       saldirBas: saldir && !this.oncekiSaldir
     };
     this.oncekiZipla = zipla;
+    this.oncekiZiplaTus = ziplaTus;
     this.oncekiSaldir = saldir;
     return k;
   },
@@ -60,8 +63,9 @@ Object.assign(GameScene.prototype, {
     }
     if (yerde && b.velocity.y >= 0) this.ziplarken = false;
 
-    // POGO: havadayken aşağı basılı tut
-    this.pogoModu = !yerde && k.asagi;
+    // POGO: aşağı basılı tutunca baston çıkar; havada düşmana/dikene, yerde zemine zıplar
+    this.pogoModu = k.asagi;
+    if (this.pogoModu && yerde && b.velocity.y >= 0 && this.knock <= 0) this.pogoZipla();
 
     // Baston salla (X)
     if (k.saldirBas && this.saldiriBekleme <= 0) {
@@ -156,10 +160,10 @@ Object.assign(GameScene.prototype, {
       return;
     }
     const v = this.sarmasikBul(b);
-    if (!v || k.ziplaBas || (yerde && k.asagi && !k.yukari)) {
+    if (!v || k.ziplaBasTus || (yerde && k.asagi && !k.yukari)) {
       this.tirmaniyor = false;
       b.setAllowGravity(true);
-      if (k.ziplaBas) {
+      if (k.ziplaBasTus) {
         b.setVelocity(((k.sag ? 1 : 0) - (k.sol ? 1 : 0)) * 140, F.ziplama * 0.8);
         this.ziplaTampon = 0;
       } else if (!v && k.yukari) {

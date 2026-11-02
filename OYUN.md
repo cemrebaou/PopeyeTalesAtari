@@ -1,14 +1,14 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.02 (`config.js` → `surum`)
+Sürüm: v0.03 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller: zemin ve platformlar `assets/` içindeki yeni görseller; karakter, düşman, toplanabilir, diken, sarmaşık, kırılabilir blok ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
 
 ## Kontroller
 - ← → (A/D): yürü
-- SPACE / Z: zıpla (basılı tut = yüksek, bırak = kısa)
-- Havadayken ↓ (S) basılı tut: **POGO** — düşmanlara ve dikenlere zıpla, blokları kır. Pogo sırasında zıpla basılıysa daha yüksek seker.
+- ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek, bırak = kısa). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
+- ↓ (S) basılı tut: **POGO** — baston her zaman çıkar. Havada düşmanlara ve dikenlere zıplar, blokları kırar; yerde de zeminden seker (basılı tuttukça sürekli zıplar). Pogo sırasında ↑/SPACE basılıysa daha yüksek seker.
 - X / K: baston salla (kısa menzil; düşmana vurur, blokları kırar)
 - ↑ / ↓: sarmaşıkta tırman (zıpla ile bırak)
 - R: bölümü yeniden başlat
@@ -20,7 +20,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Puan: elmas 100, sandık 1000, düşman 200, patron 5000.
 
 ## Platform türleri (görsel: `assets/`, boyutlar: `assetlar.js`)
-- Zemin: kahve toprak, çimenli. Sol köşe, orta, sağ köşe + dolgu (sol kenar, orta, sağ kenar). Çarpışma görünmez bir gövde, görsel yan yana döşenir.
+- Zemin: kahve toprak, çimenli. Sol köşe, orta, sağ köşe + dolgu (sol kenar, orta, sağ kenar). Çarpışma görünmez bir gövde; görseller toprağın gerçek kenarlarına göre ~1 px bindirilerek döşenir ve arkada toprak renginde bir dolgu vardır (parçalar arası boşluk kalmaz).
 - Tek yönlü (alttan geçilir): kütük (`kutuk`), taş levha (`tas`), ip köprü (`kopru`), yüzen ada (`ada`), ağaç dalı (`dal`), mantar (`mantar`, sadece tepesine basılır).
 - Yatay hareketli: taş levha, 70 px/sn, iki sütun arasında gidip gelir.
 - Asansör (`asansor`): dikey çıkıp iner, uçlarda 1 sn bekler, 60 px/sn.
