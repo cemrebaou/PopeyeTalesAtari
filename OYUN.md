@@ -1,17 +1,18 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.10 (`config.js` → `surum`)
+Sürüm: v0.11 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Karakter, düşman, elmas, bomba ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
-- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, 512 px, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.07): `assets/cimen.png` toprağın tüm açık üst kenarlarına şapka gibi döşenir; toprağın üst çizgisi çimen görselinin yarısına denk gelir (`level1.js` → `cimen`, çimen görselinin tek bir tekrarı (500 px) tam bir toprak karesi genişliğinde (`CONFIG.cimenGenislik` = 32 px), yükseklik orantılı ≈ 20 px).
-- Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre 4 bant: köklü toprak (yeraltı) → kaya → taş duvar → harabe. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo).
+- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, 512 px, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.11, yeni görsel): `assets/cimen.png` toprağın tüm açık üst kenarlarına şapka gibi döşenir; görselin tek tekrarı bir kare genişliğinde (`CONFIG.cimenGenislik` = 32 px, yükseklik orantılı ≈ 29 px), üst %30'u toprak çizgisinin üstünde, kalanı toprağın üstüne sarkar (`CONFIG.cimenUstOran`); toprağın bittiği yerde biter. Yan kenarlar (v0.11): `assets/kenar.png` dikey yosun şeridi, toprağın sol ve sağ açık kenarlarına kenar çizgisine ortalanarak döşenir, bir tekrarı bir kare yüksekliğinde (`level1.js` → `kenarlar`).
+- Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre 4 bant: köklü toprak (yeraltı) → kaya → taş duvar → harabe. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo; en alt karo da normal şelale karosu).
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
 
 ## Kontroller
+- Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu
 - ← → (A/D): yürü
 - ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
 - ↓ (S) basılı tut: **POGO** — baston çıkar; düşmanlara ve dikenlere zıplar, yerde de seker.

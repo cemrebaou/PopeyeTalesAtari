@@ -143,12 +143,19 @@ class GameScene extends Phaser.Scene {
       this.add.tileSprite(x, y, w, h, 'toprak').setOrigin(0, 0).setDepth(1)
         .setTileScale(tk, tk).setTilePosition(x / tk, y / tk);
     });
-    // Çimen şapkası: toprağın üst çizgisi çimen görselinin yarısına denk gelir
+    // Toprak yan kenarları: dikey yosun şeridi, bir tekrarı bir kare yüksekliğinde, kenar çizgisine ortalı
+    const ks = L.karo / this.textures.get('kenar').getSourceImage().height;
+    const kw = this.textures.get('kenar').getSourceImage().width * ks;
+    (L.kenarlar || []).forEach(([x, y0, y1]) => {
+      this.add.tileSprite(x - kw / 2, y0, kw, y1 - y0, 'kenar').setOrigin(0, 0).setDepth(1.1)
+        .setTileScale(ks, ks).setTilePosition(0, y0 / ks);
+    });
+    // Çimen şapkası: bir tekrarı bir kare genişliğinde; görselin üst %30'u toprak çizgisinin üstünde, kalanı toprağın üstüne sarkar
     const cs = CONFIG.cimenGenislik / this.textures.get('cimen').getSourceImage().width;
     const ch = this.textures.get('cimen').getSourceImage().height * cs;
     (L.cimen || []).forEach(([x0, x1, y]) => {
       const a = x0, w = x1 - x0;   // tam toprak genişliği: duvara ya da boşluğa taşmaz
-      this.add.tileSprite(a, y - ch / 2, w, ch, 'cimen').setOrigin(0, 0).setDepth(1.2)
+      this.add.tileSprite(a, y - ch * CONFIG.cimenUstOran, w, ch, 'cimen').setOrigin(0, 0).setDepth(1.2)
         .setTileScale(cs, cs).setTilePosition(a / cs, 0);
     });
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
@@ -313,8 +320,9 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.mermiler, this.takozlar, (m) => m.destroy());
     this.physics.add.overlap(P, this.mermiler, (p, m) => {
       if (!m.active) return;
+      const kaynakX = m.x - m.body.velocity.x;   // destroy'dan önce oku (sonra body yok, oyun kilitleniyordu)
       m.destroy();
-      this.oyuncuHasar(m.x - m.body.velocity.x);
+      this.oyuncuHasar(kaynakX);
     });
 
     this.physics.add.overlap(P, this.dusmanlar, (p, d) => this.dusmanTemas(p, d));

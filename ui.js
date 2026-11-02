@@ -6,6 +6,13 @@ Object.assign(GameScene.prototype, {
     this.hudKalp = this.add.text(12, 8, '', { ...st, color: '#ff4d4d' }).setScrollFactor(0).setDepth(100);
     this.hudAlt = this.add.text(12, 34, '', st).setScrollFactor(0).setDepth(100);
     this.hudPuan = this.add.text(CONFIG.genislik - 12, 8, '', st).setOrigin(1, 0).setScrollFactor(0).setDepth(100);
+    // Tam ekran butonu (sağ üst, puanın altında) + F tuşu
+    const tam = () => this.scale.isFullscreen ? this.scale.stopFullscreen() : this.scale.startFullscreen();
+    this.add.text(CONFIG.genislik - 12, 38, '⛶ Tam ekran', {
+      fontFamily: 'monospace', fontSize: '14px', color: '#ffffff', backgroundColor: '#00000088', padding: { x: 6, y: 4 }
+    }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setInteractive({ useHandCursor: true })
+      .on('pointerup', tam);
+    this.input.keyboard.on('keydown-F', tam);
     this.add.text(8, CONFIG.yukseklik - 18, CONFIG.surum + '  ' + this.L.ad, {
       fontFamily: 'monospace', fontSize: '12px', color: '#ffffff'
     }).setScrollFactor(0).setDepth(100).setAlpha(0.7);

@@ -6,6 +6,7 @@ class BootScene extends Phaser.Scene {
     // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
     this.load.image('tileset', 'assets/tileset.png');
     this.load.image('cimen', 'assets/cimen.png');     // çimen şapkası (toprak üst kenarlarına)
+    this.load.image('kenar', 'assets/kenar.png');     // toprak sol/sağ kenar yosunu
     this.load.image('toprak', 'assets/toprak.jpg');   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
   }
