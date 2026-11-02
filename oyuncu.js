@@ -6,6 +6,7 @@ Object.assign(GameScene.prototype, {
     const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
     const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // ↑ de zıplatır
     const saldir = K.saldir.isDown || K.k.isDown || T.saldir;
+    const bomba = K.bomba.isDown || K.l.isDown || T.bomba;
     const k = {
       sol: K.sol.isDown || K.a.isDown || T.sol,
       sag: K.sag.isDown || K.d.isDown || T.sag,
@@ -14,11 +15,13 @@ Object.assign(GameScene.prototype, {
       zipla, saldir,
       ziplaBas: zipla && !this.oncekiZipla,
       ziplaBasTus: ziplaTus && !this.oncekiZiplaTus,
-      saldirBas: saldir && !this.oncekiSaldir
+      saldirBas: saldir && !this.oncekiSaldir,
+      bombaBas: bomba && !this.oncekiBomba
     };
     this.oncekiZipla = zipla;
     this.oncekiZiplaTus = ziplaTus;
     this.oncekiSaldir = saldir;
+    this.oncekiBomba = bomba;
     return k;
   },
 
@@ -66,6 +69,9 @@ Object.assign(GameScene.prototype, {
     // POGO: aşağı basılı tutunca baston çıkar; havada düşmana/dikene, yerde zemine zıplar
     this.pogoModu = k.asagi;
     if (this.pogoModu && yerde && b.velocity.y >= 0 && this.knock <= 0) this.pogoZipla();
+
+    // Bomba at (C / L)
+    if (k.bombaBas) this.bombaAt();
 
     // Baston salla (X)
     if (k.saldirBas && this.saldiriBekleme <= 0) {
@@ -124,6 +130,13 @@ Object.assign(GameScene.prototype, {
       if (!bl.active) return;
       if (Phaser.Geom.Intersects.RectangleToRectangle(r, new Phaser.Geom.Rectangle(bl.x, bl.y, 32, 32))) {
         this.blokKir(bl);
+      }
+    });
+    // Bastonla mermileri boz
+    this.mermiler.getChildren().slice().forEach(m => {
+      if (Phaser.Geom.Intersects.RectangleToRectangle(r, this.govdeRect(m.body))) {
+        this.parcala(m.x, m.y, 0xffffff);
+        m.destroy();
       }
     });
   },

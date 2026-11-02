@@ -15,7 +15,7 @@ Object.assign(GameScene.prototype, {
   hudGuncelle() {
     const S = this.durum, max = CONFIG.oyuncu.canMax;
     this.hudKalp.setText('♥'.repeat(Math.max(0, S.can)) + '♡'.repeat(Math.max(0, max - S.can)));
-    this.hudAlt.setText('◆ ' + S.elmas + '/' + S.elmasToplam + '   Can: ' + S.yasam);
+    this.hudAlt.setText('◆ ' + S.elmas + '/' + S.elmasToplam + '   Can: ' + S.yasam + '   Bomba: ' + S.bomba);
     this.hudPuan.setText('Puan: ' + S.puan);
   },
 
@@ -28,6 +28,7 @@ Object.assign(GameScene.prototype, {
       ['yukari', 125, H - 160, '▲'],
       ['zipla', W - 70, H - 70, 'ZIPLA'],
       ['saldir', W - 180, H - 70, 'VUR'],
+      ['bomba', W - 290, H - 70, 'BOMBA'],
       ['asagi', W - 125, H - 160, '▼ POGO']
     ];
     tuslar.forEach(([anahtar, x, y, yazi]) => {

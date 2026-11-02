@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.03",
+  surum: "v0.04",
   genislik: 960,
   yukseklik: 544,
   tile: 32,
@@ -24,6 +24,7 @@ const CONFIG = {
     saldiriSure: 0.2,    // sn
     saldiriBekleme: 0.35 // sn
   },
-  puan: { elmas: 100, buyuk: 1000, kalpFazla: 500, dusman: 200, patron: 5000 },
-  patron: { can: 6, arenaCol: 167, tetikCol: 170 }
+  puan: { elmas: 100, buyuk: 1000, kizil: 500, kalpFazla: 500, dusman: 200, patron: 5000 },
+  bomba: { fitil: 1.3, yaricap: 96, bekleme: 0.4 },   // fitil sn, patlama yarıçapı px
+  patron: { can: 4, uyanMesafe: 520 }
 };
