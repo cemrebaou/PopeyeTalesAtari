@@ -1,9 +1,10 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.06",
+  surum: "v0.07",
   genislik: 960,
   yukseklik: 544,
   tile: 32,
+  cimenGenislik: 300,   // çimen görselinin bir tekrarının oyundaki genişliği (px)
   toprakDoku: 320,      // toprak dokusunun bir tekrarının oyundaki boyu (px)
   fizik: {
     yercekimi: 1400,
