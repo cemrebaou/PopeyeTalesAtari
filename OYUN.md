@@ -1,11 +1,11 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.07 (`config.js` → `surum`)
+Sürüm: v0.08 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Karakter, düşman, elmas, bomba ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
-- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, 512 px, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.07): `assets/cimen.png` toprağın tüm açık üst kenarlarına şapka gibi döşenir; toprağın üst çizgisi çimen görselinin yarısına denk gelir (`level1.js` → `cimen`, genişlik `CONFIG.cimenGenislik`).
+- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, 512 px, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.07): `assets/cimen.png` toprağın tüm açık üst kenarlarına şapka gibi döşenir; toprağın üst çizgisi çimen görselinin yarısına denk gelir (`level1.js` → `cimen`, genişlik `CONFIG.cimenGenislik` = 32 px, yani bir toprak karesi; yükseklik orantılı).
 - Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre 4 bant: köklü toprak (yeraltı) → kaya → taş duvar → harabe. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo).
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
