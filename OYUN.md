@@ -1,0 +1,39 @@
+# Popeye Tales (Atari) — OYUN.md
+
+Sürüm: v0.01 (`config.js` → `surum`)
+Motor: Phaser 3.80.1 (CDN), Arcade Physics. Görseller yer tutucu (renkli şekiller), mekanik ve bölüm tasarımı odaklı.
+
+## Kontroller
+- ← → (A/D): yürü
+- SPACE / Z: zıpla (basılı tut = yüksek, bırak = kısa)
+- Havadayken ↓ (S) basılı tut: **POGO** — düşmanlara ve dikenlere zıpla, blokları kır. Pogo sırasında zıpla basılıysa daha yüksek seker.
+- X / K: baston salla (kısa menzil; düşmana vurur, blokları kırar)
+- ↑ / ↓: sarmaşıkta tırman (zıpla ile bırak)
+- R: bölümü yeniden başlat
+- Mobil: ekranda ◀ ▶ ▲ ▼POGO VUR ZIPLA tuşları
+
+## Sayılar
+- Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
+- Yürüme 200 px/sn, zıplama ≈ 3 tile, pogo sekmesi ≈ 4 tile, pogo+zıpla basılı ≈ 5 tile.
+- Puan: elmas 100, sandık 1000, düşman 200, patron 5000.
+
+## Düşmanlar
+- Pembe küp (walker): devriye yürür, 1 can
+- Turuncu yuvarlak (jumper): yürür + zıplar, 1 can
+- Mor yuvarlak (flyer): havada sinüs hareketi, 1 can
+- Kırmızı büyük küp (patron): 6 can, yürü → sarı uyarı → atılma → dinlen; 3 canın altında hızlanır. Hasar sonrası 1.1 sn dokunulmaz.
+
+## 1. Bölüm — Orman Girişi (200 sütun × 32px)
+1. 0–29: giriş, öğretici ipuçları, ilk yürüyen düşman
+2. 30–59: ilk çukur, diken (pogo öğretisi), tek yönlü platformlar
+3. 60–84: kırılabilir duvar (baston öğretisi), sarmaşık ile gizli üst bölüm + sandık
+4. 85–97: hareketli platform ile geniş çukur, uçan düşmanlar
+5. 98–123: uzun diken yatağı (pogo zinciri), platform ödülü (kalp), çukur
+6. 124–153: tırmanış basamakları (üst yol) veya diken yatağı (alt yol, sandık ödülü)
+7. 154–199: kontrol noktası, patron arenası (sütun 167'de kilitlenir), çıkış bayrağı sütun 197
+
+Kontrol noktaları: sütun 55, 100, 126, 156. Çukura düşmek = bir yaşam kaybı, son kontrol noktasında canlanma.
+
+## Dosyalar
+- `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi · `boot.js` yer tutucu görseller
+- `game.js` sahne kurulumu · `oyuncu.js` oyuncu mekanikleri · `dusman.js` düşman/patron/toplanabilirler · `ui.js` HUD ve ekranlar
