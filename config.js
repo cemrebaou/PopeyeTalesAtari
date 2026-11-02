@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.08",
+  surum: "v0.09",
   genislik: 960,
   yukseklik: 544,
   tile: 32,
