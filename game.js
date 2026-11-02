@@ -139,6 +139,11 @@ class GameScene extends Phaser.Scene {
     this.onKatman = this.karoKatmani(L.on, 1);
     // Toprak zeminler: tek kesintisiz doku, dünya koordinatına hizalı (bloklar arası dikiş olmaz)
     const tk = CONFIG.toprakDoku / this.textures.get('toprak').getSourceImage().width;
+    // Yeraltı arka planı: aynı toprak dokusu, karartılmış, dünyaya hizalı (önündeki toprakla kesintisiz devam eder)
+    if (L.yeraltiY !== undefined) {
+      this.add.tileSprite(0, L.yeraltiY, this.dunyaG, this.dunyaY - L.yeraltiY, 'toprak').setOrigin(0, 0).setDepth(-4)
+        .setTileScale(tk, tk).setTilePosition(0, L.yeraltiY / tk).setTint(CONFIG.yeraltiKarartma);
+    }
     (L.toprak || []).forEach(([x, y, w, h]) => {
       this.add.tileSprite(x, y, w, h, 'toprak').setOrigin(0, 0).setDepth(1)
         .setTileScale(tk, tk).setTilePosition(x / tk, y / tk);

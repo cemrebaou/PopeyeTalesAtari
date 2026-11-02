@@ -7,6 +7,7 @@ const LEVEL1 = {
   baslangic: [596, 3520],
   boss: [3020, 1280],
   cikis: [3430, 1280],
+  yeraltiY: 3680,   // bu yükseklikten aşağısı yeraltı: arka plan karanlık toprak dokusu
   alfabe: '!"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
   // [x, y, w, h] çarpışan zemin blokları
   bloklar: [
