@@ -2,6 +2,13 @@
 class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
+  preload() {
+    // Zemin ve platform görselleri (assets/ klasörü)
+    ['zTL', 'zTM', 'zTR', 'zFL', 'zFM', 'zFR',
+      'kutuk', 'tas', 'kopru', 'ada', 'dal', 'mantar', 'bant', 'asansor', 'yaprak', 'catlak']
+      .forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
+  }
+
   create() {
     const g = this.make.graphics({ x: 0, y: 0 }, false);
     const yap = (anahtar, w, h, ciz) => { g.clear(); ciz(g); g.generateTexture(anahtar, w, h); };

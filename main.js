@@ -4,7 +4,8 @@ const oyun = new Phaser.Game({
   height: CONFIG.yukseklik,
   parent: 'oyun',
   backgroundColor: '#5ec8f2',
-  pixelArt: true,
+  pixelArt: false,
+  antialias: true,
   physics: {
     default: 'arcade',
     arcade: { gravity: { y: CONFIG.fizik.yercekimi }, debug: false }

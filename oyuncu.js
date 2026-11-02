@@ -28,6 +28,8 @@ Object.assign(GameScene.prototype, {
 
     const k = this.girdi();
     this.k = k;
+    const bant = this.bantItme;   // konveyör bant itmesi (çarpışma adımında ayarlanır)
+    this.bantItme = 0;
 
     if (this.dokunulmaz > 0) this.dokunulmaz -= dt;
     if (this.knock > 0) this.knock -= dt;
@@ -45,7 +47,7 @@ Object.assign(GameScene.prototype, {
     // Yürüme
     const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
     if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
-    if (this.knock <= 0) b.setVelocityX(yon * F.yurume);
+    if (this.knock <= 0) b.setVelocityX(yon * F.yurume + (yerde ? bant : 0));
 
     // Zıplama (basılı tut = yüksek, bırak = kısa)
     if (this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {

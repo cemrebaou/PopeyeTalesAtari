@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.01",
+  surum: "v0.02",
   genislik: 960,
   yukseklik: 544,
   tile: 32,
@@ -11,7 +11,11 @@ const CONFIG = {
     pogo: -600,
     pogoYuksek: -690,   // pogo sırasında zıpla tuşu basılıysa
     maxDusme: 720,
-    sarmasik: 120
+    sarmasik: 120,
+    yaprak: -850,       // zıplatan yaprak (~8 tile)
+    bant: 70,           // konveyör bant itme hızı
+    catlakGecikme: 950, // çatlak taş: bastıktan sonra düşme süresi (ms)
+    catlakYenilen: 3000 // çatlak taş: geri gelme süresi (ms)
   },
   oyuncu: {
     canMax: 3,
