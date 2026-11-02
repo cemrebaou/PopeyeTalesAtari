@@ -147,7 +147,7 @@ class GameScene extends Phaser.Scene {
     const cs = CONFIG.cimenGenislik / this.textures.get('cimen').getSourceImage().width;
     const ch = this.textures.get('cimen').getSourceImage().height * cs;
     (L.cimen || []).forEach(([x0, x1, y]) => {
-      const a = x0 - 6, w = x1 - x0 + 12;
+      const a = x0, w = x1 - x0;   // tam toprak genişliği: duvara ya da boşluğa taşmaz
       this.add.tileSprite(a, y - ch / 2, w, ch, 'cimen').setOrigin(0, 0).setDepth(1.2)
         .setTileScale(cs, cs).setTilePosition(a / cs, 0);
     });
