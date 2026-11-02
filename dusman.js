@@ -292,15 +292,16 @@ Object.assign(GameScene.prototype, {
   },
 
   cikisAc(bossX, bossY) {
-    const L = this.L;
     // Ödül sandığı
-    const s = this.sandiklar.create(bossX, bossY - 16, 'sandik').setDepth(2);
-    s.odul = 'buyuk'; s.acik = false;
-    // Çıkış (helikopter yeri)
-    this.cikis = this.physics.add.staticImage(L.cikis[0], L.cikis[1], 'cikis')
-      .setOrigin(0.5, 1).setDepth(2).refreshBody();
+    this.sandikYarat(bossX, bossY, 'buyuk');
+    // Çıkış kapısı açılır
+    const k = this.kapi;
+    k.setTexture('kapiAcik').setOrigin(0.41, 1);
+    this.boyutla(k, 'kapiAcik', { h: 72 });
+    this.cikis = this.add.zone(k.x - 20, k.y - 64, 40, 64).setOrigin(0, 0);
+    this.physics.add.existing(this.cikis, true);
     this.physics.add.overlap(this.player, this.cikis, () => this.bolumBitti());
-    this.popup(this.cikis.x, this.cikis.y - 110, 'Çıkışa git →');
+    this.popup(k.x, k.y - 100, 'Kapı açıldı!');
   },
 
   elmasAl(e) {
@@ -347,6 +348,7 @@ Object.assign(GameScene.prototype, {
     if (s.acik) return;
     s.acik = true;
     s.setTexture('sandikAcik');
+    this.boyutla(s, 'sandikAcik', { w: 42 });
     if (s.odul === 'kalp') {
       this.kalpVer(s.x, s.y);
     } else {

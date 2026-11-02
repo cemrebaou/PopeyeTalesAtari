@@ -1,8 +1,14 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.04 (`config.js` → `surum`)
+Sürüm: v0.05 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
-Görseller: zemin ve platformlar `assets/` içindeki görseller; karakter, düşman, toplanabilir, diken, sarmaşık, takoz, bomba ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
+Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Karakter, düşman, elmas, bomba ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
+
+## Görsel sistemi
+- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Alt katlar toprak-çimen, üst katlar (Unity y > 16) yosunlu taş.
+- Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre 4 bant: köklü toprak (yeraltı) → kaya → taş duvar → harabe. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo).
+- Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
+- Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
 
 ## Kontroller
@@ -37,16 +43,16 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Uzaktaki düşmanlar (900 px) uyur. Mermiler 2.6 sn sonra kaybolur.
 
 ## 1. Bölüm — Unity seviyesinden aktarıldı
-Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken, sarmaşık, bomba, takoz konumları). 1 Unity birimi = 48 px. Dünya 5435 × 4531 px, çok katlı:
+Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken, sarmaşık, bomba, takoz konumları). 1 Unity birimi = 48 px. Dünya 5440 × 4544 px (170 × 142 karo), çok katlı:
 - Alt kat (başlangıç, sol altta): uzun koridor, dikenli çukurlar, maymunlar, yeraltına inen merdiven
 - Orta bölge: sarmaşıklarla çıkılan bloklar ve arılar
 - Üst katlar: koridorlar, örümcekler, mızraklı köpekler
 - En üst: patron (kırmızı takozlarla kapalı alanlar), patron ölünce sandık ve çıkış (helikopter yeri)
 
-`level1.js` otomatik üretilmiştir (zemin: 8 px ızgaradan birleştirilmiş bloklar). Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
+`level1.js` otomatik üretilmiştir: `on` (zemin karoları) ve `arka` (arka plan karoları) satırları + çarpışma blokları. Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
 
-Kullanılmayan ama kodda duran: tek yönlü platformlar (kütük, taş, köprü, ada, dal, mantar), hareketli platform, asansör, çatlak taş, konveyör bant, zıplatan yaprak, kırılabilir blok (`level1.js` içinde `platformlar`, `hareketli`, `asansorlar` vb. alanları eklenirse çalışır).
+Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]` (piksel; n = orta parça sayısı).
 
 ## Dosyalar
-- `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` görsel boyutları (otomatik üretildi) · `assets/` görseller
+- `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` karo numaraları ve obje boyutları (otomatik üretildi) · `assets/` görseller
 - `boot.js` görsel yükleme + yer tutucu görseller · `game.js` sahne ve bölüm kurulumu · `oyuncu.js` oyuncu mekanikleri · `dusman.js` düşmanlar, patron, bomba, toplanabilirler · `ui.js` HUD ve ekranlar

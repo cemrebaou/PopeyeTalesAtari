@@ -1,12 +1,11 @@
-// Basit renkli şekillerle yer tutucu görseller üretir
+// Görselleri yükler; karakter, düşman ve toplanabilirler için yer tutucu görseller üretir
 class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   preload() {
-    // Zemin ve platform görselleri (assets/ klasörü)
-    ['zTL', 'zTM', 'zTR', 'zFL', 'zFM', 'zFR',
-      'kutuk', 'tas', 'kopru', 'ada', 'dal', 'mantar', 'bant', 'asansor', 'yaprak', 'catlak']
-      .forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
+    // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
+    this.load.image('tileset', 'assets/tileset.png');
+    Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
   }
 
   create() {
@@ -110,13 +109,6 @@ class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff, 0.8).fillCircle(7, 9, 2);
       g.fillStyle(0xff7a1a, 1).fillRect(11, 1, 2, 5);
     });
-    // Kırmızı takoz (sadece bomba kırar)
-    yap('takoz', 38, 38, g => {
-      g.fillStyle(0xd62828, 1).fillRect(0, 0, 38, 38);
-      g.lineStyle(3, 0x7a1010, 1).strokeRect(1.5, 1.5, 35, 35);
-      g.lineBetween(4, 4, 34, 34).lineBetween(34, 4, 4, 34);
-    });
-
     // Toplanabilirler
     yap('kizilelmas', 24, 24, g => {
       g.fillStyle(0xff3b3b, 1).fillCircle(12, 12, 11);
@@ -134,69 +126,11 @@ class BootScene extends Phaser.Scene {
       g.fillStyle(0xff3b3b, 1).fillCircle(6, 7, 5).fillCircle(14, 7, 5).fillTriangle(1, 9, 19, 9, 10, 19);
     });
 
-    // Zemin / platformlar
-    yap('zemin', 32, 32, g => {
-      g.fillStyle(0x8b5a2b, 1).fillRect(0, 0, 32, 32);
-      g.fillStyle(0x6e4520, 1).fillRect(0, 0, 32, 3).fillRect(0, 0, 2, 32);
-      g.fillStyle(0x7a4c24, 1).fillRect(8, 12, 6, 4).fillRect(20, 22, 6, 4);
-    });
-    yap('platform', 32, 16, g => {
-      g.fillStyle(0xc99a5b, 1).fillRect(0, 0, 32, 16);
-      g.fillStyle(0x8b5a2b, 1).fillRect(0, 0, 32, 5);
-    });
-    yap('platformKoyu', 32, 16, g => {
-      g.fillStyle(0x6b6b80, 1).fillRect(0, 0, 32, 16);
-      g.fillStyle(0x3c3c4d, 1).fillRect(0, 0, 32, 5);
-    });
-    yap('kirilir', 32, 32, g => {
-      g.fillStyle(0xd9a05b, 1).fillRect(0, 0, 32, 32);
-      g.lineStyle(2, 0x7a4f22, 1).strokeRect(1, 1, 30, 30);
-      g.lineBetween(1, 1, 31, 31).lineBetween(31, 1, 1, 31);
-    });
-    yap('diken', 32, 32, g => {
-      g.fillStyle(0xd0d4da, 1);
-      for (let i = 0; i < 4; i++) g.fillTriangle(i * 8, 32, i * 8 + 4, 14, i * 8 + 8, 32);
-    });
-    yap('sarmasik', 32, 32, g => {
-      g.fillStyle(0x2e8b2e, 1).fillRect(13, 0, 6, 32);
-      g.fillStyle(0x3fbf3f, 1).fillRect(7, 6, 6, 4).fillRect(19, 16, 6, 4).fillRect(7, 24, 6, 4);
-    });
-
-    // Sandık
-    yap('sandik', 32, 32, g => {
-      g.fillStyle(0xc58b3a, 1).fillRect(2, 8, 28, 22);
-      g.fillStyle(0x9a6a25, 1).fillRect(2, 8, 28, 6);
-      g.fillStyle(0xffd23f, 1).fillRect(2, 16, 28, 4);
-      g.fillStyle(0x5a3a12, 1).fillRect(14, 14, 4, 8);
-    });
-    yap('sandikAcik', 32, 32, g => {
-      g.fillStyle(0xc58b3a, 1).fillRect(2, 14, 28, 16);
-      g.fillStyle(0x3b2410, 1).fillRect(4, 14, 24, 6);
-      g.fillStyle(0x9a6a25, 1).fillRect(2, 2, 28, 6);
-    });
-
-    // Bayraklar
-    const bayrak = (renk) => g => {
-      g.fillStyle(0xcccccc, 1).fillRect(2, 0, 3, 48);
-      g.fillStyle(renk, 1).fillRect(5, 2, 18, 12);
-    };
-    yap('bayrak0', 24, 48, bayrak(0xaaaaaa));
-    yap('bayrak1', 24, 48, bayrak(0x2ecc40));
-    yap('cikis', 32, 96, g => {
-      g.fillStyle(0xffd23f, 1).fillRect(4, 0, 4, 96).fillRect(0, 88, 16, 8);
-      g.fillStyle(0x2ecc40, 1).fillRect(8, 4, 22, 16);
-    });
-
-    // Baston, bulut
+    // Baston
     yap('baston', 4, 24, g => {
       g.fillStyle(0xffd23f, 1).fillRect(0, 0, 4, 5);
       g.fillStyle(0x6b3f1d, 1).fillRect(0, 5, 4, 19);
     });
-    yap('bulut', 120, 44, g => {
-      g.fillStyle(0xffffff, 0.85);
-      g.fillEllipse(30, 28, 56, 28).fillEllipse(60, 20, 64, 34).fillEllipse(90, 28, 56, 28);
-    });
-
     g.destroy();
     this.scene.start('Game');
   }

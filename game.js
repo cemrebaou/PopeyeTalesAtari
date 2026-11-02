@@ -1,5 +1,12 @@
 // Ana oyun sahnesi: kurulum ve seviye inşası.
 // Oyuncu mantığı -> oyuncu.js, düşmanlar/bomba -> dusman.js, arayüz -> ui.js
+
+// Platform parçaları: s = ölçek (kaynak px -> oyun px), yz = basılan yüzeyin görsel üstten uzaklığı (oyun px)
+const PLATFORM = {
+  kutuk: { s: 0.5, yz: 6 }, tas: { s: 0.5, yz: 4 }, kopru: { s: 0.5, yz: 6 }, ada: { s: 0.45, yz: 10 },
+  dal: { s: 0.45, yz: 12 }, izgara: { s: 0.5, yz: 4 }, bant: { s: 0.5, yz: 4 }, hover: { s: 0.45, yz: 5 }
+};
+
 class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
 
@@ -27,13 +34,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, this.dunyaG, this.dunyaY + 300);
     this.physics.world.setBoundsCollision(true, true, false, false);
     this.cameras.main.setBounds(0, 0, this.dunyaG, this.dunyaY);
-    this.cameras.main.setBackgroundColor(0x5ec8f2);
-
-    // Arka plan bulutları (yavaş kayar, sadece yatay)
-    for (let i = 0; i < 16; i++) {
-      this.add.image(i * 190 + (i % 3) * 40, 40 + (i % 4) * 45, 'bulut')
-        .setScrollFactor(0.3, 0).setDepth(-10);
-    }
+    this.cameras.main.setBackgroundColor(0x141c26);
 
     this.buildLevel();
     this.createPlayer();
@@ -43,71 +44,75 @@ class GameScene extends Phaser.Scene {
     this.createTouch();
   }
 
-  // Zemin bloğu: görünmez çarpışma gövdesi + toprak dolgusu (görsel üst şeritler ayrıca çizilir)
+  // Karo katmanı: level verisindeki karakter satırlarını tilemap'e çevirir (64px kaynak, 32px gösterim)
+  karoKatmani(satirlar, derinlik) {
+    const A = ASSETLER.tileset, L = this.L;
+    if (!this.alfabeNo) {
+      this.alfabeNo = {};
+      for (let i = 0; i < L.alfabe.length; i++) this.alfabeNo[L.alfabe[i]] = i - 1;
+    }
+    const veri = satirlar.map(r => Array.from(r, ch => this.alfabeNo[ch]));
+    const map = this.make.tilemap({ data: veri, tileWidth: A.boyut, tileHeight: A.boyut });
+    const ts = map.addTilesetImage('tileset', 'tileset', A.boyut, A.boyut, A.extrude, A.extrude * 2);
+    return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
+  }
+
+  // Görsel boyutunu kaynak orana göre ayarlar (yükseklik veya genişlik verilir)
+  boyutla(img, anahtar, { w, h }) {
+    const O = ASSETLER.obje[anahtar];
+    if (w) img.setDisplaySize(w, w * O.h / O.w);
+    else img.setDisplaySize(h * O.w / O.h, h);
+    return img;
+  }
+
+  // Görünmez çarpışma gövdesi (görseller karo katmanında)
   blokCiz(x, y, w, h) {
-    const A = ASSETLER;
     const z = this.add.zone(x, y, w, h).setOrigin(0, 0);
     this.physics.add.existing(z, true);
     this.solids.add(z);
-
-    this.add.rectangle(x, y, w, h, A.zFM.renk).setOrigin(0, 0).setDepth(0.5);
-    // Çimenin altındaki toprak dokusu (büyük bloklarda döşenir)
-    const ys = 36;
-    if (h > ys + 6 && w > 8) {
-      const tex = this.textures.get('zFM').getSourceImage();
-      const ts = this.add.tileSprite(x, y + ys, w, h - ys, 'zFM').setOrigin(0, 0).setDepth(0.8);
-      ts.setTileScale(A.zFM.w / tex.width, A.zFM.h / tex.height);
-    }
   }
 
-  // Çimenli üst kenar şeridi: [x0, x1, y(yüzey), solAcik, sagAcik]
-  ustCiz(x0, x1, Y, solAcik, sagAcik) {
-    const A = ASSETLER, OV = 1.2;
-    const gor = (ad, x, y) => this.add.image(x, y, ad).setOrigin(0, 0)
-      .setDisplaySize(A[ad].w, A[ad].h).setDepth(1);
-    const sw = (ad) => A[ad].xr - A[ad].xl;
-    const yUst = Y - A.zTM.yuzey;
-    let xs = x0, xe = x1;
-    if (solAcik && x1 - x0 >= sw('zTL') + sw('zTR')) {
-      gor('zTL', x0 - A.zTL.xl, Y - A.zTL.yuzey);
-      xs = x0 + sw('zTL') - OV;
-    }
-    if (sagAcik && x1 - x0 >= sw('zTL') + sw('zTR')) {
-      gor('zTR', x1 - A.zTR.xr, Y - A.zTR.yuzey);
-      xe = x1 - sw('zTR') + OV;
-    }
-    this.serit('zTM', xs, xe, yUst, OV);
-  }
-
-  // Bir parçayı xs..xe arasında, toprak kenarları birbirine bindirilerek yan yana döşer
-  serit(ad, xs, xe, y, ov) {
-    const A = ASSETLER[ad];
-    const tex = this.textures.get(ad).getSourceImage();
-    const sx = A.w / tex.width, sy = A.h / tex.height;
-    const sw = A.xr - A.xl;
-    for (let x = xs; x < xe - 0.3; x += sw - ov) {
-      const gorunen = Math.min(sw, xe - x);
-      const im = this.add.image(x - A.xl, y, ad).setOrigin(0, 0).setScale(sx, sy).setDepth(1);
-      if (gorunen < sw - 0.1) im.setCrop(0, 0, (A.xl + gorunen) / sx, tex.height);
-    }
-  }
-
-  // Tek yönlü platform: görsel + ince, görünmez, sadece üstten çarpışan gövde
-  tekYonluYarat(ad, x, yuzeyY, dinamik) {
-    const A = ASSETLER[ad];
-    const img = this.add.image(x, yuzeyY - A.yuzey, ad).setOrigin(0, 0)
-      .setDisplaySize(A.w, A.h).setDepth(3);
-    const z = this.add.zone(x + A.cx0, yuzeyY, A.cx1 - A.cx0, 12).setOrigin(0, 0);
+  // Tek yönlü gövde: sadece üstten çarpışır
+  tekYonluGovde(x, yuzeyY, w, dinamik) {
+    const z = this.add.zone(x, yuzeyY, w, 12).setOrigin(0, 0);
     this.physics.add.existing(z, !dinamik);
     z.body.checkCollision.down = false;
     z.body.checkCollision.left = false;
     z.body.checkCollision.right = false;
-    z.img = img; z.ox = A.cx0; z.oy = A.yuzey;
+    z.imgs = [];
+    return z;
+  }
+
+  // Parçalı platform: sol uç + n orta parça + sağ uç. x = sol kenar, yuzeyY = basılan yüzey
+  platformYarat(tip, x, yuzeyY, n, dinamik) {
+    const P = PLATFORM[tip], O = ASSETLER.obje;
+    const parcalar = [tip + 'L'];
+    for (let i = 0; i < n; i++) parcalar.push(tip + 'M' + (i % 3));
+    parcalar.push(tip + 'R');
+    let cx = x;
+    const imgs = parcalar.map(ad => {
+      const im = this.add.image(cx, yuzeyY - P.yz, ad).setOrigin(0, 0)
+        .setDisplaySize(O[ad].w * P.s, O[ad].h * P.s).setDepth(3);
+      cx += O[ad].w * P.s - 1;
+      return im;
+    });
+    const z = this.tekYonluGovde(x + 2, yuzeyY, cx - x - 4, dinamik);
+    imgs.forEach(im => { im.ox = im.x - z.x; im.oy = im.y - z.y; z.imgs.push(im); });
+    z.img = imgs[0];
+    return z;
+  }
+
+  // Tek görselli tek yönlü obje (asansör, çatlak taş, mantar). yz = yüzeyin görsel üstten uzaklığı
+  tekGorselYarat(ad, x, yuzeyY, genislik, yz, dinamik) {
+    const im = this.boyutla(this.add.image(x, yuzeyY - yz, ad).setOrigin(0, 0).setDepth(3), ad, { w: genislik });
+    const z = this.tekYonluGovde(x + 3, yuzeyY, genislik - 6, dinamik);
+    im.ox = im.x - z.x; im.oy = im.y - z.y;
+    z.imgs.push(im); z.img = im;
     return z;
   }
 
   buildLevel() {
-    const L = this.L;
+    const L = this.L, T = L.karo;
 
     this.solids = this.physics.add.staticGroup();
     this.platforms = this.physics.add.staticGroup();
@@ -129,67 +134,94 @@ class GameScene extends Phaser.Scene {
     this.vineRects = [];
     this.checkpoints = [];
 
-    // Zemin blokları ve çimenli üst kenarlar
+    // Karo katmanları: arka duvarlar + şelaleler (çarpışmasız) ve zemin
+    this.arkaKatman = this.karoKatmani(L.arka, -5);
+    this.onKatman = this.karoKatmani(L.on, 1);
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
-    L.ustler.forEach(([x0, x1, y, sa, sg]) => this.ustCiz(x0, x1, y, sa, sg));
 
-    // (İsteğe bağlı) tek yönlü platformlar ve özel platformlar — bu bölümde boş
-    (L.platformlar || []).forEach(p => {
-      this.platforms.add(this.tekYonluYarat(p.tip, p.x, p.y, false));
-    });
+    // Tek yönlü platformlar: { tip, x, y, n }  (bu bölümde yok, istenirse eklenir)
+    (L.platformlar || []).forEach(p => this.platforms.add(this.platformYarat(p.tip, p.x, p.y, p.n || 1, false)));
+    // Yatay hareketli (uçan) platformlar: { tip:'hover', y, min, max, n, hiz }
     (L.hareketli || []).forEach(h => {
-      const A = ASSETLER[h.tip];
-      const z = this.tekYonluYarat(h.tip, h.min, h.y, true);
+      const z = this.platformYarat(h.tip || 'hover', h.min, h.y, h.n || 1, true);
       this.movers.add(z);
       z.body.setAllowGravity(false).setImmovable(true);
-      z.minX = h.min + A.cx0; z.maxX = h.max - A.w + A.cx0; z.hiz = h.hiz;
-      z.body.setVelocityX(h.hiz);
+      z.minX = h.min; z.maxX = h.max - z.body.width; z.hiz = h.hiz || 70;
+      z.body.setVelocityX(z.hiz);
     });
+    // Asansörler (dikey uçan platform): { x, alt, ust, hiz }
     (L.asansorlar || []).forEach(e => {
-      const z = this.tekYonluYarat('asansor', e.x, e.alt, true);
+      const z = this.tekGorselYarat('asansor', e.x, e.alt, 56, 4, true);
       this.movers.add(z);
       z.body.setAllowGravity(false).setImmovable(true);
-      z.dikey = true; z.minY = e.ust; z.maxY = e.alt; z.yon = -1; z.bekle = 0.8; z.hiz = e.hiz;
+      z.dikey = true; z.minY = e.ust; z.maxY = e.alt; z.yon = -1; z.bekle = 0.8; z.hiz = e.hiz || 60;
+    });
+    // Konveyör bantlar: { x, y, n, yon }
+    (L.bantlar || []).forEach(b => {
+      const z = this.platformYarat('bant', b.x, b.y, b.n || 2, false);
+      this.bantlar.add(z);
+      z.itme = b.yon * CONFIG.fizik.bant;
+    });
+    // Çatlak taşlar: { x, y }
+    (L.catlaklar || []).forEach(c => {
+      const z = this.tekGorselYarat('catlak0', c.x, c.y, 40, 3, false);
+      this.catlaklar.add(z);
+      z.durum = 'hazir'; z.x0 = z.img.x; z.y0 = z.img.y;
+    });
+    // Zıplatan yapraklar (zeminde durur): { x, y }
+    (L.yapraklar || []).forEach(y => {
+      const z = this.tekGorselYarat('yaprak0', y.x, y.y - 22, 50, 4, false);
+      this.yapraklar.add(z);
+    });
+    // Kırılabilir kasalar: [x, y, w, h] (karo cinsinden genişlik/yükseklik)
+    (L.kirilir || []).forEach(([x, y, w, h]) => {
+      for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) {
+        const bl = this.breakables.create(x + i * T, y + j * T, 'kasa').setOrigin(0, 0).setDisplaySize(T, T).setDepth(2);
+        bl.refreshBody();
+      }
     });
 
     // Kırmızı takozlar: sadece bomba kırar
     L.takozlar.forEach(([x, y]) => {
-      const t = this.takozlar.create(x, y, 'takoz').setDepth(2);
-      t.refreshBody();
+      this.takozlar.create(x, y, 'takoz').setDisplaySize(T, T).setDepth(2).refreshBody();
     });
 
-    // Dikenler (çarpışma dikdörtgenleri elle kontrol edilir)
+    // Dikenler: [x, zemin y, w]
     L.dikenler.forEach(([x, y, w]) => {
-      const n = Math.ceil(w / 32);
-      for (let i = 0; i < n; i++) this.add.image(x + i * 32, y - 24, 'diken').setOrigin(0, 0).setDepth(1.5);
-      this.spikeRects.push(new Phaser.Geom.Rectangle(x + 4, y - 20, w - 8, 26));
+      const n = Math.max(1, Math.round(w / 48)), pw = w / n;
+      const O = ASSETLER.obje.diken, ph = pw * O.h / O.w;
+      for (let i = 0; i < n; i++) {
+        this.add.image(x + i * pw, y + 3, 'diken').setOrigin(0, 1).setDisplaySize(pw + 1, ph).setDepth(1.5);
+      }
+      this.spikeRects.push(new Phaser.Geom.Rectangle(x + 4, y - ph * 0.8, w - 8, ph * 0.8));
     });
 
-    // Sarmaşıklar (üstten 12px uzatılır, platformun üstünden de tutunulabilsin)
-    L.sarmasiklar.forEach(([x, y, h]) => {
-      const n = Math.ceil(h / 32);
-      for (let i = 0; i < n; i++) this.add.image(x - 16, y + i * 32, 'sarmasik').setOrigin(0, 0).setDepth(1.5);
+    // Sarmaşıklar: [x, y(üst), h] — dikey döşenen sarmaşık
+    L.sarmasiklar.forEach(([x, y, h], i) => {
+      const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], gen = 30;
+      this.add.tileSprite(x, y, gen, h, ad).setOrigin(0.5, 0).setDepth(1.5)
+        .setTileScale(gen / O.w, gen / O.w);
       this.vineRects.push(new Phaser.Geom.Rectangle(x - 9, y - 12, 18, h + 12));
     });
 
-    // Kontrol noktaları
+    // Kontrol noktaları (bayrak direği)
     L.kontrol.forEach(([x, y]) => {
-      const spr = this.add.image(x, y, 'bayrak0').setOrigin(0.5, 1).setDepth(1.6);
+      const spr = this.boyutla(this.add.image(x, y + 2, 'bayrak0').setOrigin(0.5, 1).setDepth(1.6), 'bayrak0', { h: 64 });
       this.checkpoints.push({ x, y, spr, aktif: false });
     });
 
     // Toplanabilirler
     L.elmaslar.forEach(([x, y]) => this.elmaslar.create(x, y, 'elmas'));
     this.durum.elmasToplam = L.elmaslar.length;
-    L.sandiklar.forEach(([x, y, odul]) => {
-      const s = this.sandiklar.create(x, y, 'sandik').setDepth(2);
-      s.odul = odul; s.acik = false;
-    });
+    L.sandiklar.forEach(([x, y, odul]) => this.sandikYarat(x, y, odul));
     const ozelTex = { buyuk: 'buyukelmas', kizil: 'kizilelmas', bomba: 'bombaItem' };
     L.ozeller.forEach(([tip, x, y]) => {
       const o = this.ozeller.create(x, y, ozelTex[tip]).setDepth(2);
       o.tip = tip;
     });
+
+    // Çıkış kapısı (patron ölünce açılır)
+    this.kapi = this.boyutla(this.add.image(L.cikis[0], L.cikis[1] + 2, 'kapi').setOrigin(0.5, 1).setDepth(1.6), 'kapi', { h: 72 });
 
     // İpuçları
     L.ipuclari.forEach(([x, y, text]) => {
@@ -202,6 +234,15 @@ class GameScene extends Phaser.Scene {
     // Düşmanlar ve patron
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
     this.dusmanYarat({ tip: 'boss', x: L.boss[0], y: L.boss[1] });
+  }
+
+  // Sandık: x, zemin y (alt kenar), ödül
+  sandikYarat(x, y, odul) {
+    const s = this.sandiklar.create(x, y + 2, 'sandik').setOrigin(0.5, 1).setDepth(2);
+    this.boyutla(s, 'sandik', { w: 40 });
+    s.refreshBody();
+    s.odul = odul; s.acik = false;
+    return s;
   }
 
   createPlayer() {
@@ -310,22 +351,24 @@ class GameScene extends Phaser.Scene {
       } else if (m.x >= m.maxX) {
         m.body.setVelocityX(-m.hiz);
       }
-      m.img.setPosition(m.x - m.ox, m.y - m.oy);
+      m.imgs.forEach(im => im.setPosition(m.x + im.ox, m.y + im.oy));
     });
   }
 
-  // Çatlak taş: sallanır, düşer, bir süre sonra geri gelir
+  // Çatlak taş: sallanır, kırılır, düşer, bir süre sonra geri gelir
   catlakBasla(z) {
     z.durum = 'sallan';
     const F = CONFIG.fizik;
+    z.img.setTexture('catlak1');
     this.tweens.add({ targets: z.img, x: z.x0 + 2, duration: 50, yoyo: true, repeat: Math.floor(F.catlakGecikme / 100) - 1 });
     this.time.delayedCall(F.catlakGecikme, () => {
       z.durum = 'dusuyor';
       z.body.enable = false;
-      this.parcala(z.x + 40, z.y, 0x9a9a8c);
+      z.img.setTexture('catlak2');
+      this.parcala(z.x + 20, z.y, 0x9a9a8c);
       this.tweens.add({ targets: z.img, y: z.y0 + 180, alpha: 0, duration: 450, ease: 'Quad.easeIn' });
       this.time.delayedCall(F.catlakYenilen, () => {
-        z.img.setPosition(z.x0, z.y0).setAlpha(1);
+        z.img.setTexture('catlak0').setPosition(z.x0, z.y0).setAlpha(1);
         z.body.enable = true;
         z.durum = 'hazir';
       });
@@ -337,7 +380,8 @@ class GameScene extends Phaser.Scene {
     this.player.body.setVelocityY(CONFIG.fizik.yaprak);
     this.ziplarken = false;
     this.coyote = 0;
-    this.tweens.add({ targets: z.img, scaleY: z.img.scaleY * 0.75, duration: 80, yoyo: true });
+    z.img.setTexture('yaprak1');
+    this.time.delayedCall(140, () => z.img.setTexture('yaprak0'));
   }
 
   updateCheckpoints() {
@@ -345,9 +389,10 @@ class GameScene extends Phaser.Scene {
     this.checkpoints.forEach(c => {
       if (!c.aktif && Math.abs(p.x - c.x) < 50 && Math.abs(p.y - c.y) < 120) {
         c.aktif = true;
-        c.spr.setTexture('bayrak1');
+        c.spr.setTexture('bayrak1').setOrigin(0.32, 1);
+        this.boyutla(c.spr, 'bayrak1', { h: 64 });
         this.spawn = { x: c.x, y: c.y - 2 };
-        this.popup(c.x, c.y - 70, 'Kontrol noktası!');
+        this.popup(c.x, c.y - 80, 'Kontrol noktası!');
       }
     });
   }
