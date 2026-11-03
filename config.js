@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.25",
+  surum: "v0.26",
   tile: 32,
   kamera: {
     gorunurY: 360,      // ekranda görünen dünya yüksekliği (px) — küçük = daha yakın kamera
@@ -27,7 +27,8 @@ const CONFIG = {
     kare: { w: 176, h: 141, ayakY: 125, ayakBoy: 117 },  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
     ayakGomme: 2,        // ayaklar zemin çizgisinin bu kadar altına çizilir (px) — çimene basmış görünür
     govdeG: 18,          // çarpışma gövdesi genişliği (px)
-    govdeY: 30,          // çarpışma gövdesi yüksekliği (px) — 1 karelik (32 px) tünellere sığar
+    govdeY: 42,          // çarpışma gövdesi yüksekliği (px) — ayaktayken 1 karelik (32 px) aralığa sığmaz
+    govdeEgik: 26,       // eğikken gövde yüksekliği — 1 karelik aralıktan eğilerek geçilir
     // animasyona göre görsel ölçek: tırmanma %30 büyük, çekme %16 büyük (v0.25: %30'dan %11 küçültüldü), eğilerek yürüme %16 küçük, pogo %20 büyük, baston vuruşu %10 büyük
     animOlcek: { tirman: 1.3, uzat: 1.16, cek: 1.16, egil: 0.84, pogoHava: 1.2, pogoSek: 1.2, vur: 1.1 },
     dokunulmaz: 1.5,     // sn

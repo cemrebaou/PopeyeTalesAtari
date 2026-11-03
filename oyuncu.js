@@ -56,7 +56,7 @@ Object.assign(GameScene.prototype, {
     if (this.tirmaniyor) {
       this.pogoModu = false; this.pogoAktif = false;
       this.cekBirak();
-      this.egik = false;
+      this.egik = false; this.tavan = false;
       this.animasyon(yerde);
       return;
     }
@@ -64,20 +64,21 @@ Object.assign(GameScene.prototype, {
     // Sandık çekme (C basılı): baston uzanır, sandığa takılır, geri yürüyerek sandık çekilir
     this.cekGuncelle(k, yerde, dt);
     const cekiyor = this.cekDurum !== null;
-    if (cekiyor) this.egik = false;
+    if (cekiyor) { this.egik = false; this.tavan = false; }
 
     // Yürüme (çekerken kendi hareketi cekGuncelle'de)
     if (!cekiyor) {
       const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
       if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
-      // Eğilme: yerdeyken ↓ basılı (pogo değil) → eğilerek yavaş yürür
-      this.egik = yerde && k.asagi && !this.pogoModu;
+      // Eğilme: yerdeyken ↓ basılı (pogo değil) → eğilerek yavaş yürür. Üstü kapalıysa (1 karelik aralık) kalkamaz.
+      this.tavan = this.egik && this.tavanVar();
+      this.egik = (yerde && k.asagi && !this.pogoModu) || this.tavan;
       const hiz = this.egik ? F.egilYurume : F.yurume;
       if (this.knock <= 0) b.setVelocityX(yon * hiz + (yerde ? bant : 0));
     }
 
     // Zıplama (basılı tut = yüksek, bırak = kısa)
-    if (!cekiyor && this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {
+    if (!cekiyor && !this.tavan && this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {
       b.setVelocityY(F.ziplama);
       this.ziplaTampon = 0; this.coyote = 0; this.ziplarken = true;
     }
@@ -198,7 +199,7 @@ Object.assign(GameScene.prototype, {
     else if (this.cekDurum === 'cek') { a = 'cek'; durdur = b.velocity.x === 0; }
     else if (this.saldiriZaman > 0) a = 'vur';
     else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
-    else if (!yerde) a = b.velocity.y < 0 ? 'zipla' : 'dus';
+    else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
     else if (this.egik) { a = 'egil'; durdur = Math.abs(b.velocity.x) <= 10; }
     else if (this.inisZaman > 0) a = 'in';
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';

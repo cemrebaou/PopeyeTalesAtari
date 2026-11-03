@@ -1,7 +1,7 @@
 // Bölüm erişilebilirlik kontrolü — kullanım (repo klasöründe):
 //   node araclar/erisim.js          → rahat zıplamayla (havada tam hızın %65'i, pogo yok) ulaşılamayan önemli yerleri listeler
 //   node araclar/erisim.js --coz    → ulaşılamayan yer kalmayana kadar ara kaya önerir (level1.js → kayalar'a eklenir)
-// Model: gövde 18x30 px, Arcade benzeri 60 Hz adımlar, ızgara çarpışması, zıplama 625, yerçekimi 1400, sarmaşığa tutunma.
+// Model: gövde 18x30 px (eğik geçişleri de kapsasın diye; ayakta gövde 42 px, 1 karelik aralıklardan eğilerek geçilir), Arcade benzeri 60 Hz adımlar, ızgara çarpışması, zıplama 625, yerçekimi 1400, sarmaşığa tutunma.
 // Kayalar, taşlar, bloklar ve basamaklar dahil edilir (takozlar kırılabildiği için geçilebilir sayılır). Önemli yerler: patron, çıkış, kontrol noktaları, sandıklar, elmaslar, özel eşyalar.
 const fs=require('fs'),path=require('path');
 const L=new Function(fs.readFileSync(path.join(__dirname,'..','level1.js'),'utf8')+';return LEVEL1;')();const T=32,W=L.genislik/T,H=L.yukseklik/T;

@@ -321,13 +321,23 @@ class GameScene extends Phaser.Scene {
   }
 
   // Oyuncu görsel ölçeği (1 = normal). Gövde boyu ve ayak çizgisi değişmez, görsel ayaklardan büyür.
+  // Eğikken gövde alçalır (CONFIG.oyuncu.govdeEgik) → 1 karelik aralıklardan sadece eğilerek geçilir.
   gorselOlcek(f) {
-    if (this.gorselCarpan === f) return;
-    this.gorselCarpan = f;
+    const egik = !!this.egik, anahtar = f + (egik ? 'e' : '');
+    if (this.gorselCarpan === anahtar) return;
+    this.gorselCarpan = anahtar;
     const O = CONFIG.oyuncu, KR = O.kare, p = this.player;
-    const s = O.boy / KR.ayakBoy * f, gomme = O.ayakGomme / s, gw = O.govdeG / s, gh = O.govdeY / s;
+    const s = O.boy / KR.ayakBoy * f, gomme = O.ayakGomme / s, gw = O.govdeG / s, gh = (egik ? O.govdeEgik : O.govdeY) / s;
     p.setScale(s).setOrigin(0.5, (KR.ayakY - gomme) / KR.h);
     p.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);
+  }
+
+  // Ayağa kalkacak yer var mı? (eğik gövdenin üstünde, ayakta gövde boyu kadar alan zemin/takoz ile dolu mu)
+  tavanVar() {
+    const b = this.player.body, O = CONFIG.oyuncu;
+    const ek = O.govdeY - O.govdeEgik;
+    return this.physics.overlapRect(b.x + 1, b.bottom - O.govdeY, b.width - 2, ek, false, true)
+      .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
   }
 
   createPlayer() {

@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.25 (`config.js` → `surum`)
+Sürüm: v0.26 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24): kullanıcı görseli. Elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -28,7 +28,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 
 ## Ana karakter sprite'ı (v0.14)
 `assets/oyuncu.png`: 53 kare, 10 sütun, hücre 176×141 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı; kareler tek tek tespit edilip kesildi, kirli hale temizlendi. Her karede ayak çizgisi y=125, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz).
-**v0.19: bütün kareler tek ve sabit ölçekte (%100)** — satır bazlı büyütme/küçültme yok (v0.15'teki zıplama %10 / tırmanma %30 büyütmesi iptal). Asıl sorun eski bekleme ve koşma karelerinin büyük çizilmesiydi: 0–9 kullanıcının gönderdiği yeni bekleme (4) ve koşma (6) görselleriyle değiştirildi (kenardaki kırmızı hale temizlendi). 49–52 ayrı gönderilen pogo görselinden. Oyunda bekleme karesinde ayakta boy 48 px (`CONFIG.oyuncu.boy`), çarpışma gövdesi 18×30 px (1 karelik tünellere sığar).
+**v0.19: bütün kareler tek ve sabit ölçekte (%100)** — satır bazlı büyütme/küçültme yok (v0.15'teki zıplama %10 / tırmanma %30 büyütmesi iptal). Asıl sorun eski bekleme ve koşma karelerinin büyük çizilmesiydi: 0–9 kullanıcının gönderdiği yeni bekleme (4) ve koşma (6) görselleriyle değiştirildi (kenardaki kırmızı hale temizlendi). 49–52 ayrı gönderilen pogo görselinden. Oyunda bekleme karesinde ayakta boy 48 px (`CONFIG.oyuncu.boy`). Çarpışma gövdesi (v0.26) ayakta 18×42 px → 1 karelik (32 px) aralıklara sığmaz; eğikken 18×26 px (`govdeEgik`) → eğilerek geçilir. Üstü kapalı yerde ↓ bırakılsa da eğik kalır ve zıplanamaz; açık yere çıkınca kalkar.
 | Animasyon | Kareler | Ne zaman |
 |---|---|---|
 | dur | 0–3 | yerde dururken |
@@ -55,7 +55,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu (telefonda yataya kilitler)
 - ← → (A/D): yürü
 - ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
-- ↓ (S) yerde: eğilerek yürü (v0.21)
+- ↓ (S) yerde: eğilerek yürü (v0.21); 1 karelik aralıklardan sadece eğilerek geçilir (v0.26)
 - ↓ (S): **POGO** — sadece havadayken açılır: önce zıpla, havada ↓ basılı tut. Açılınca ↓ basılı kaldıkça zemine, düşmana, dikene, sandığa seker. Yerde dururken ↓ basmak pogo açmaz.
 - X / K: baston vuruşu (yerde ve havada; düşmana vurur, mermi bozar, kasa/takoz kırar, sandık açar)
 - C / L basılı tut: baston kancası — sandığı çek (geri yürü)
