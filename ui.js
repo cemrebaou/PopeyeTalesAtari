@@ -12,8 +12,11 @@ function tamEkranDegistir() {
   }
   const iste = el.requestFullscreen || el.webkitRequestFullscreen;
   if (!iste) return;
+  // Yatay kilit (Android Chrome; iPhone Safari desteklemez). İlk deneme olmazsa kısa süre sonra bir kez daha.
   const kilitle = () => {
-    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+    const o = screen.orientation;
+    if (o && o.lock) o.lock('landscape').catch(() => setTimeout(() => o.lock('landscape').catch(() => {}), 400));
+    else if (screen.lockOrientation) screen.lockOrientation('landscape');
   };
   const sonuc = iste.call(el, { navigationUI: 'hide' });
   if (sonuc && sonuc.then) sonuc.then(kilitle).catch(() => {});

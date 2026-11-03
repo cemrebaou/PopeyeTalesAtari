@@ -5,9 +5,7 @@ class BootScene extends Phaser.Scene {
   preload() {
     // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
     this.load.image('tileset', 'assets/tileset.png');
-    this.load.image('selaleUst', 'assets/selaleUst.png');    // şelale başı (taş ağız)
-    this.load.image('selaleOrta', 'assets/selaleOrta.png');  // şelale gövdesi (dikey tekrar)
-    this.load.image('selaleDip', 'assets/selaleDip.png');    // şelale dibi (köpük)
+    this.load.image('selaleOrta', 'assets/selaleOrta.png');  // şelale gövdesi (dikeyde kesintisiz, aşağı akar)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
     // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;

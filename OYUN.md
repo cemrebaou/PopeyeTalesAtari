@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.29 (`config.js` → `surum`)
+Sürüm: v0.30 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -13,7 +13,7 @@ Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/t
 - v0.21 taş bloklar: ara kayalar, basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). Kırılışı `tasKirik.png` hazır.
 - Engel kuralı (v0.21): kırılması gereken zayıf şeyler → tahta kasa (`kirilir`), kolay kırılmayanlar → taş blok (`taslar`, ileride güçlenince kırılacak), kırmızı takoz sadece patron odası girişinde (`takozlar`, kapı aralığına alındı: x 3344). Eski 4 takoz taş bloğa çevrildi (hiçbiri geçiş için gerekli değildi — `erisim.js` ile kontrol).
 - Sarmaşıklar (v0.21): %30 ince (30 → 21 px), tam parça sayısıyla döşenir (son yaprak yarım kesilmez).
-- Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): üst parça `assets/selaleUst.png` + dikey tekrar eden gövde `selaleOrta.png` + köpüklü dip `selaleDip.png`.
+- Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): v0.30'dan beri baştan sona sadece gövde dokusu `assets/selaleOrta.png` (üst/dip parçaları kaldırıldı). Doku dikeyde kesintisiz yapıldı (alt üçte biri üst kısma yumuşak geçişle karıştırıldı → kesim yeri görünmez) ve aşağı doğru akar (`CONFIG.selaleHiz` 140 px/sn).
 - Su (3 yüzey, derin, sol/sağ taş duvarlı) ve sis karoları sette hazır, bölümde henüz kullanılmıyor.
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
@@ -24,7 +24,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Tuval cihaz piksel oranında (en fazla 2x) çizilir → telefon/retina ekranda keskin görüntü.
 - Kamera yakınlığı ekrana göre: her zaman ≈ 360 px dünya yüksekliği görünür (`CONFIG.kamera.gorunurY`, eskisi 544 → ~1.5x yakın); dar/dikey ekranda en az 560 px genişlik (`minGorunurX`).
 - Arayüz (HUD, dokunmatik tuşlar, tam ekran tuşu, bitiş ekranı) ayrı `UI` sahnesinde: kamera yakınlaştırmasından etkilenmez, ekran boyutuna göre ölçeklenir.
-- Tam ekran tuşu: tam ekrana geçer ve telefonu **yatay kilitler** (`screen.orientation.lock('landscape')`; Android Chrome'da çalışır, iPhone Safari kilit desteklemez). Telefon dikey tutulursa üstte "Telefonu yan çevirin" uyarısı çıkar.
+- Tam ekran tuşu: tam ekrana geçer ve telefonu **yatay kilitler** (`screen.orientation.lock('landscape')`; Android Chrome'da çalışır, iPhone Safari kilit desteklemez). v0.30: "Telefonu yan çevirin" uyarısı kaldırıldı; yatay çevirmeyi tam ekran tuşu yapar (kilit ilk denemede olmazsa bir kez daha dener).
 
 ## Ana karakter sprite'ı (v0.14)
 `assets/oyuncu.png`: 53 kare, 10 sütun, hücre 176×141 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı; kareler tek tek tespit edilip kesildi, kirli hale temizlendi. Her karede ayak çizgisi y=125, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz).

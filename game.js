@@ -71,15 +71,13 @@ class GameScene extends Phaser.Scene {
     return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
   }
 
-  // Şelaleler: üst parça (taş ağız) + tekrar eden orta gövde + köpüklü dip. L.selaleler: [x, w, ustY, altY]
+  // Şelaleler: baştan sona tek, dikeyde kesintisiz gövde dokusu (assets/selaleOrta.png), aşağı doğru akar.
+  // L.selaleler: [x, w, ustY, altY]
   selaleCiz() {
-    const ust = this.textures.get('selaleUst').getSourceImage();
-    (this.L.selaleler || []).forEach(([x, w, y0, y1]) => {
-      const s = w / ust.width, h = ust.height * s;
-      this.add.tileSprite(x, y0 + h * 0.5, w, Math.max(0, y1 - y0 - h), 'selaleOrta').setOrigin(0, 0)
-        .setTileScale(s, s).setDepth(-4.9);
-      this.add.image(x, y0, 'selaleUst').setOrigin(0, 0).setScale(s).setDepth(-4.8);
-      this.add.image(x, y1, 'selaleDip').setOrigin(0, 1).setScale(s).setDepth(-4.8);
+    const tex = this.textures.get('selaleOrta').getSourceImage();
+    this.selaleler = (this.L.selaleler || []).map(([x, w, y0, y1]) => {
+      const s = w / tex.width;
+      return this.add.tileSprite(x, y0, w, y1 - y0, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(-4.9);
     });
   }
 
@@ -436,6 +434,8 @@ class GameScene extends Phaser.Scene {
     if (this.durum.bitti || this.durum.oyunBitti) return;
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
+    // Şelale akışı (doku koordinatında; ölçekten bağımsız aynı hız)
+    this.selaleler.forEach(sp => { sp.tilePositionY -= CONFIG.selaleHiz * dt / sp.tileScaleY; });
     this.updateMermiler(dt);
     this.updateHareketli(dt);
     this.updateCheckpoints();
