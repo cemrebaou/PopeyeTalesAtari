@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.33 (`config.js` → `surum`)
+Sürüm: v0.34 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -45,7 +45,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
 
 ## Yeni hareketler (v0.33)
-- Ek kareler `assets/oyuncu2.png` (`python3 araclar/oyuncuEk.py`; kaynak `assets/kaynak/oyuncu_ek.png` + `oyuncu_asiliHasar.png`): 10 sütun, hücre 176×220, ayak çizgisi y=200, ana sayfayla aynı ölçek (şapka genişliği eşitlendi). `CONFIG.oyuncu.kare2`.
+- Ek kareler `assets/oyuncu2.png` (`python3 araclar/oyuncuEk.py`; kaynak `assets/kaynak/oyuncu_ek.png` + `oyuncu_asiliHasar.png`): 10 sütun, hücre 176×220, ayak çizgisi y=200, ana sayfayla aynı ölçek (şapka genişliği eşitlendi). `CONFIG.oyuncu.kare2`. v0.34: oyunda hepsi %30 küçük çizilir (`animOlcek` 0.7).
 - **Bastonla duvara asılma** (`asili`, kare 0–5): havada aşağı düşerken duvara doğru basılıysa bastonla duvara takılır (yerçekimi kapalı). Zıpla → duvardan uzağa sıçrar (`CONFIG.fizik.asiliZipla` 160, tam zıplama, 0.15 sn yatay kilit); ters yön, ↓ veya duvar biterse bırakır (0.25 sn tekrar takılmaz).
 - **İtme** (`it`, kare 6–11): yerde, önünde aynı zeminde bitişik sandık varsa yürüyerek yavaşça iter (`CONFIG.fizik.itme` 90 px/sn). Çekilebilen her şey itilebilir.
 - **Duruma göre darbe karesi**: tırmanırken 12, eğikken 13, havada 14, çekerken 15, iterken 16, asılıyken 17. Yerde ayaktayken eski `sersem` (15–17 ana sayfa).
