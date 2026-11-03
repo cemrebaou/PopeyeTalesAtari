@@ -403,9 +403,9 @@ Object.assign(GameScene.prototype, {
     b.checkCollision.none = true;
     b.setVelocity(0, -420);
     if (this.asili) this.asiliBirak();
-    p.setTint(0x666666).setAlpha(1);
-    p.play('sersem');
-    this.gorselOlcek(1);
+    p.setAlpha(1);
+    p.play('olum');   // ölüm animasyonu bir kez, son karesi sabit kalarak aşağı düşer
+    this.gorselOlcek(CONFIG.oyuncu.animOlcek.olum || 1);
     this.time.delayedCall(1200, () => {
       if (S.yasam <= 0) this.oyunBitti();
       else this.canlan();

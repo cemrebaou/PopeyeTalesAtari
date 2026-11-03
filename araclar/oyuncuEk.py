@@ -3,7 +3,7 @@
 # Çıktı: assets/oyuncu2.png — 10 sütun, hücre 176×220, ayak çizgisi y=200, şapka ortası x=88,
 # ölçek ana sayfayla aynı (şapka genişliği eşitlendi). Kareler:
 #  0–5 asili (bastonla duvara takılı), 6–11 it, 12 tırmanırken darbe, 13 eğikken darbe,
-#  14 havada darbe, 15 çekerken darbe, 16 iterken darbe, 17 asılıyken darbe
+#  14 havada darbe, 15 çekerken darbe, 16 iterken darbe, 17 asılıyken darbe, 18–23 ölüm (oyuncu_olum.png)
 import numpy as np
 from PIL import Image
 KOK = __file__.rsplit('/araclar/', 1)[0]
@@ -28,7 +28,12 @@ for (x0, x1), alt in zip([(36, 234), (294, 493), (540, 755), (820, 1114), (1140,
 ek = yukle('oyuncu_asiliHasar.png'); ek = kes(ek, 0, ek.shape[0], 0, ek.shape[1])
 asiliBoy = kareler[0][0].shape[0]
 kareler.append((ek, 0, asiliBoy / ek.shape[0]))
-out = Image.new('RGBA', (W * 10, H * 2), (0, 0, 0, 0))
+# v0.37 ölüm kareleri (önden, yatayda kutu ortası hizalı)
+ol = yukle('oyuncu_olum.png'); OA = ol[:, :, 3] > 150
+for x0, x1 in [(18, 236), (245, 466), (472, 698), (708, 936), (944, 1175), (1182, 1423)]:
+    kareler.append((kes(ol, 0, ol.shape[0], x0, x1), 0))
+ORTALI = set(range(18, 24))
+out = Image.new('RGBA', (W * 10, H * 3), (0, 0, 0, 0))
 # v0.36: asılma kareleri (0–5, 17) bastona göre hizalanır → baston her karede aynı yerde sabit, gövde sallanır.
 # Hedef: en uzun asılma karesinin ayağı ayak çizgisinde, baston sağ ucu x=KANCA_X.
 def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
@@ -45,6 +50,7 @@ for n, k in enumerate(kareler):
     hx = np.where(b[t:t + 30].any(0))[0]; hc = (hx[0] + hx[-1]) / 2   # şapka/baş üstü ortası
     f = f.resize((max(1, round(f.width * o)), max(1, round(f.height * o))), Image.LANCZOS)
     x = int(round(88 - hc * o)); y = AY + alt - f.height
+    if n in ORTALI: x = (W - f.width) // 2
     if n in ASILI:
         t, xr = baston(arr)
         x = int(round(KANCA_X - xr * o)); y = int(round(AY - ASILI_BOY - t * o))

@@ -56,7 +56,8 @@ class BootScene extends Phaser.Scene {
     an2('h_hava',   [14], 1, 0);   // havada darbe
     an2('h_cek',    [15], 1, 0);   // çekerken darbe
     an2('h_it',     [16], 1, 0);   // iterken darbe
-    an2('h_asili',  [17], 1, 0);   // asılıyken darbe  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
+    an2('h_asili',  [17], 1, 0);   // asılıyken darbe
+    an2('olum',     aralik(18, 23), 9, 0);   // ölüm: bir kez oynar, son karede kalır (düşerken)  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
     // Toplanabilir dönme animasyonları: t_<ad>
     ASSETLER.toplanan.sira.forEach((ad, r) =>
       A.create({ key: 't_' + ad, frames: A.generateFrameNumbers('toplanan', { start: r * 6, end: r * 6 + 5 }), frameRate: 10, repeat: -1 }));
