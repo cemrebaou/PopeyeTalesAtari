@@ -1,8 +1,8 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.23 (`config.js` → `surum`)
+Sürüm: v0.24 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
-Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
+Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24): kullanıcı görseli. Elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
 - **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
@@ -74,6 +74,17 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, düşman 200, patron 5000.
 
 ## Düşmanlar
+Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/dusmanKes.py` → her düşman `assets/d_<ad>.png` şeridi, mermiler `atesTopu.png` / `mizrak.png`, ölçüler `assetlar.js` → `ASSETLER.dusman` (hücre, ayak çizgisi, oyundaki görünür boy `boy`, animasyon kareleri). Kenardaki renkli hale temizlenir. Görseller sağa bakar, sola giderken çevrilir. Ölünce gövde kapanır, parçalanma animasyonu oynar, solup kaybolur (patronda bitince kapı açılır).
+| Düşman | Animasyonlar (kare) | Boy (px) |
+|---|---|---|
+| gul (gül) | yuru 6, ol 4 | 36 |
+| yilan | yuru 6, ol 4 | 22 |
+| yuvarlak | yuru 6, ol 4 | 32 |
+| ari | uc 4, ol 4 | 30 |
+| orumcek | bekle 2, ol 4 | 34 |
+| maymun | dur 1, at 4 (0.4 sn hazırlık), ol 4 + ateş topu | 38 |
+| kopek | yuru 6, at 4, ol 5 + mızrak | 40 |
+| boss | yuru 6, hazir 2 → atil 1 → dinlen 1, ol 4 | 84 |
 - Gül (pembe küp): devriye yürür, 1 can
 - Yılan (yeşil, alçak): yavaş devriye, 1 can
 - Yuvarlak (pembe top): hızlı devriye, 1 can
@@ -96,6 +107,7 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)
 - `araclar/zeminDose.py` zemin karo ızgarasını bloklardan yeniden döşer
 - `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)
 - `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)

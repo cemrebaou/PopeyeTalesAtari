@@ -3,39 +3,45 @@ Object.assign(GameScene.prototype, {
 
   // Düşman yaratma. x, y = ayak noktası (piksel). Uçanlarda y = merkez.
   dusmanYarat(e) {
-    const mk = (tex, w, h, ox, oy) => {
-      const d = this.dusmanlar.create(e.x, e.y, tex).setOrigin(0.5, 1);
-      d.body.setSize(w, h).setOffset(ox, oy);
+    // Görsel: ASSETLER.dusman[ad] şeridi; ölçek görünür boya göre. Gövde (bw×bh oyun px) ayak çizgisinde, ortalı.
+    // ucan: y = merkez (arı, örümcek), diğerleri y = ayak noktası
+    const mk = (ad, bw, bh, ucan, y) => {
+      const D = ASSETLER.dusman[ad], s = D.boy / (D.ayak - D.ust);
+      const oy = ucan ? (D.ust + D.ayak) / 2 : D.ayak;
+      const d = this.dusmanlar.create(e.x, y, 'd_' + ad, 0).setOrigin(0.5, oy / D.h).setScale(s);
+      d.body.setSize(bw / s, bh / s, false).setOffset((D.w - bw / s) / 2, ucan ? oy - bh / s / 2 : D.ayak - bh / s);
+      d.ad = ad;
       return d;
     };
     let d;
     switch (e.tip) {
       case 'boss':
-        d = mk('boss', 56, 60, 4, 4);
+        d = mk('boss', 56, 60, false, e.y);
         d.hp = CONFIG.patron.can;
         d.aktif = false;
         d.durum = 'yuru'; d.durumZaman = 2; d.dokunulmaz = 0; d.yon = -1;
+        d.setFlipX(true);
         break;
       case 'gul':
-        d = mk('walker', 24, 26, 2, 2); d.hp = 1; d.hiz = 55; break;
+        d = mk('gul', 24, 26, false, e.y); d.hp = 1; d.hiz = 55; break;
       case 'yilan':
-        d = mk('yilan', 30, 14, 1, 2); d.hp = 1; d.hiz = 45; break;
+        d = mk('yilan', 30, 14, false, e.y); d.hp = 1; d.hiz = 45; break;
       case 'yuvarlak':
-        d = mk('yuvarlak', 26, 26, 2, 2); d.hp = 1; d.hiz = 120; break;
+        d = mk('yuvarlak', 26, 26, false, e.y); d.hp = 1; d.hiz = 120; break;
       case 'maymun':
-        d = mk('maymun', 24, 26, 2, 2); d.hp = 1; d.hiz = 40;
+        d = mk('maymun', 24, 28, false, e.y); d.hp = 1; d.hiz = 40;
         d.atesBekle = 1 + Math.random(); d.hazir = 0; break;
       case 'kopek':
-        d = mk('kopek', 26, 28, 2, 2); d.hp = 2; d.hiz = 40;
+        d = mk('kopek', 26, 30, false, e.y); d.hp = 2; d.hiz = 40;
         d.atesBekle = 1 + Math.random(); d.hazir = 0; break;
       case 'ari':
-        d = this.dusmanlar.create(e.x, e.y, 'ari').setOrigin(0.5, 0.5);
-        d.body.setSize(20, 20).setOffset(2, 2).setAllowGravity(false);
+        d = mk('ari', 20, 20, true, e.y);
+        d.body.setAllowGravity(false);
         d.hp = 1; d.baslangicX = e.x; d.baslangicY = e.y; d.faz = Math.random() * 6; d.kovala = false;
         break;
       case 'orumcek':
-        d = this.dusmanlar.create(e.x, e.tavan + 20, 'orumcek').setOrigin(0.5, 0.5);
-        d.body.setSize(22, 22).setOffset(2, 2).setAllowGravity(false);
+        d = mk('orumcek', 22, 22, true, e.tavan + 20);
+        d.body.setAllowGravity(false);
         d.hp = 1; d.tavan = e.tavan; d.ustY = e.tavan + 24; d.altY = Math.max(e.alt, e.tavan + 60);
         d.faz = Math.random() * 6;
         break;
@@ -48,7 +54,16 @@ Object.assign(GameScene.prototype, {
     d.minX = e.min !== undefined ? e.min : e.x - 80;
     d.maxX = e.max !== undefined ? e.max : e.x + 80;
     d.setDepth(6);
+    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', orumcek: 'bekle', maymun: 'dur' }[e.tip] || 'yuru');
+    if (e.tip === 'boss') d.anims.pause();
     return d;
+  },
+
+  // Düşman animasyonu oynat (aynısı oynuyorsa dokunma)
+  dusmanAnim(d, k) {
+    const key = 'd_' + d.ad + '_' + k;
+    if (!d.anims.currentAnim || d.anims.currentAnim.key !== key) d.play(key);
+    else if (d.anims.isPaused) d.anims.resume();
   },
 
   updateDusmanlar(time, dt) {
@@ -87,7 +102,7 @@ Object.assign(GameScene.prototype, {
         case 'orumcek': {
           const t = (Math.sin(time * 0.0014 + d.faz) + 1) / 2;
           d.y = d.ustY + (d.altY - d.ustY) * t;
-          this.ipGrafik.lineStyle(2, 0xeeeeee, 0.9).lineBetween(d.x, d.tavan, d.x, d.y - 10);
+          this.ipGrafik.lineStyle(1.5, 0xeeeeee, 0.9).lineBetween(d.x, d.tavan, d.x, d.y - ASSETLER.dusman.orumcek.boy * 0.45);
           break;
         }
         case 'boss':
@@ -115,8 +130,7 @@ Object.assign(GameScene.prototype, {
       d.hazir -= dt;
       b.setVelocityX(0);
       if (d.hazir <= 0) {
-        d.clearTint();
-        this.mermiAt(d, Math.sign(dx) || 1);
+        this.mermiAt(d, d.yon);
         d.atesBekle = d.tip === 'kopek' ? 1.8 : 2.4;
       }
       return;
@@ -126,16 +140,21 @@ Object.assign(GameScene.prototype, {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
       b.setVelocityX(0);
-      if (d.atesBekle <= 0) { d.hazir = 0.4; d.setTint(0xffff66); }
+      if (d.atesBekle <= 0) { d.hazir = 0.4; d.play('d_' + d.ad + '_at'); }   // atış hazırlığı (4 kare, 0.4 sn)
+      else this.dusmanAnim(d, d.tip === 'kopek' ? 'yuru' : 'dur');
+      if (d.tip === 'kopek' && d.hazir <= 0 && d.atesBekle > 0) { d.anims.pause(); }
     } else {
       this.devriye(d);
+      this.dusmanAnim(d, d.tip === 'kopek' ? 'yuru' : 'dur');
     }
   },
 
   mermiAt(d, yon) {
-    const kopek = d.tip === 'kopek';
-    const m = this.mermiler.create(d.x + yon * 18, d.y - 16, kopek ? 'mizrak' : 'atesTopu').setDepth(7);
+    const kopek = d.tip === 'kopek', ad = kopek ? 'mizrak' : 'atesTopu', M = ASSETLER.dusman[ad];
+    const m = this.mermiler.create(d.x + yon * 18, d.y - (kopek ? 18 : 20), ad).setDepth(7);
+    m.setDisplaySize(M.gen, M.gen * M.h / M.w);
     m.body.setAllowGravity(false);
+    m.body.setSize(M.w * 0.7, M.h * 0.6, true);
     m.setVelocityX(yon * (kopek ? 280 : 210));
     m.setFlipX(yon < 0);
     m.omur = 2.6;
@@ -155,7 +174,7 @@ Object.assign(GameScene.prototype, {
       if (Math.abs(p.x - d.x) < CONFIG.patron.uyanMesafe && Math.abs(p.y - d.y) < 300 && !this.durum.olu) {
         d.aktif = true;
         this.popup(d.x, d.y - 90, 'PATRON!');
-      } else { b.setVelocityX(0); return; }
+      } else { b.setVelocityX(0); d.anims.pause(); return; }
     }
     if (d.dokunulmaz > 0) {
       d.dokunulmaz -= dt;
@@ -169,7 +188,8 @@ Object.assign(GameScene.prototype, {
         const yon = Math.sign(p.x - d.x) || 1;
         b.setVelocityX(yon * (hizli ? 110 : 80));
         d.setFlipX(yon < 0);
-        if (d.durumZaman <= 0) { d.durum = 'hazir'; d.durumZaman = 0.6; b.setVelocityX(0); d.setTint(0xffff66); }
+        this.dusmanAnim(d, 'yuru');
+        if (d.durumZaman <= 0) { d.durum = 'hazir'; d.durumZaman = 0.6; b.setVelocityX(0); d.setTint(0xffff66); d.play('d_boss_hazir'); }
         break;
       }
       case 'hazir':
@@ -178,13 +198,14 @@ Object.assign(GameScene.prototype, {
           d.yon = Math.sign(p.x - d.x) || 1;
           d.setFlipX(d.yon < 0);
           d.clearTint();
+          d.play('d_boss_atil');
           if (hizli && b.blocked.down) b.setVelocityY(-420);   // yarı canda zıplayarak atılır
         }
         break;
       case 'saldir':
         b.setVelocityX(d.yon * (hizli ? 330 : 280));
         if (d.durumZaman <= 0 || b.blocked.left || b.blocked.right) {
-          d.durum = 'dinlen'; d.durumZaman = 1.0; b.setVelocityX(0);
+          d.durum = 'dinlen'; d.durumZaman = 1.0; b.setVelocityX(0); d.play('d_boss_dinlen');
         }
         break;
       case 'dinlen':
@@ -219,10 +240,8 @@ Object.assign(GameScene.prototype, {
     d.hp -= n;
     if (d.hp <= 0) {
       d.oldu = true;
-      const renk = { gul: 0xff6fb5, yilan: 0x3fbf3f, yuvarlak: 0xff5fa0, maymun: 0x8b5a2b, kopek: 0xc9a46b, ari: 0xffd400, orumcek: 0x7a3fbf }[d.tip] || 0xffffff;
-      this.parcala(d.x, d.y - 14, renk);
       this.puanEkle(CONFIG.puan.dusman, d.x, d.y - 34);
-      d.disableBody(true, true);
+      this.dusmanOlum(d);
     } else {
       d.setTint(0xffffff);
       this.time.delayedCall(120, () => d.active && d.clearTint());
@@ -230,16 +249,25 @@ Object.assign(GameScene.prototype, {
     return true;
   },
 
+  // Ölüm: gövde kapanır, parçalanma animasyonu oynar, sonra solup kaybolur
+  dusmanOlum(d, bitince) {
+    d.clearTint();
+    d.body.setVelocity(0, 0);
+    d.body.enable = false;
+    d.play('d_' + d.ad + '_ol');
+    d.once('animationcomplete', () => {
+      this.tweens.add({ targets: d, alpha: 0, duration: 300, onComplete: () => { d.destroy(); if (bitince) bitince(); } });
+    });
+  },
+
   bossYen(d) {
     d.oldu = true;
     d.aktif = false;
     d.clearTint();
-    d.body.setVelocity(0, 0);
-    d.body.checkCollision.none = true;
+    d.setAlpha(1);
     this.puanEkle(CONFIG.puan.patron, d.x, d.y - 80);
-    for (let i = 0; i < 4; i++) this.parcala(d.x + (i - 2) * 16, d.y - 30, 0xd62828);
-    this.tweens.add({ targets: d, alpha: 0, scale: 1.4, duration: 900, onComplete: () => d.destroy() });
-    this.time.delayedCall(900, () => this.cikisAc(d.x, d.y));
+    const x = d.x, y = d.y;
+    this.dusmanOlum(d, () => this.cikisAc(x, y));
   },
 
   cikisAc(bossX, bossY) {

@@ -12,90 +12,17 @@ class BootScene extends Phaser.Scene {
     // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
+    // Düşmanlar (v0.24, araclar/dusmanKes.py): her düşman kendi yatay şeridinde, mermiler ayrı görsel
+    Object.entries(ASSETLER.dusman).forEach(([ad, D]) => {
+      if (D.anim) this.load.spritesheet('d_' + ad, 'assets/d_' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
+      else this.load.image(ad, 'assets/' + ad + '.png');
+    });
   }
 
   create() {
     const g = this.make.graphics({ x: 0, y: 0 }, false);
     const yap = (anahtar, w, h, ciz) => { g.clear(); ciz(g); g.generateTexture(anahtar, w, h); };
 
-    // Yürüyen düşman: pembe küp
-    yap('walker', 28, 28, g => {
-      g.fillStyle(0xff6fb5, 1).fillRect(0, 0, 28, 28);
-      g.fillStyle(0xc9407f, 1).fillRect(0, 22, 28, 6);
-      g.fillStyle(0xffffff, 1).fillRect(15, 6, 8, 8);
-      g.fillStyle(0x000000, 1).fillRect(19, 8, 4, 5);
-    });
-    // Zıplayan düşman: turuncu yuvarlak
-    yap('jumper', 28, 28, g => {
-      g.fillStyle(0xff9a1f, 1).fillCircle(14, 14, 14);
-      g.fillStyle(0xffffff, 1).fillCircle(19, 10, 4);
-      g.fillStyle(0x000000, 1).fillCircle(20, 10, 2);
-    });
-    // Uçan düşman: mor yuvarlak
-    yap('flyer', 26, 26, g => {
-      g.fillStyle(0x9b4dff, 1).fillCircle(13, 13, 13);
-      g.fillStyle(0xffffff, 1).fillCircle(17, 10, 4);
-      g.fillStyle(0x000000, 1).fillCircle(18, 10, 2);
-    });
-    // Patron: büyük kırmızı küp
-    yap('boss', 64, 64, g => {
-      g.fillStyle(0xd62828, 1).fillRect(0, 0, 64, 64);
-      g.fillStyle(0x8f1717, 1).fillRect(0, 52, 64, 12);
-      g.fillStyle(0xffffff, 1).fillRect(12, 16, 16, 16).fillRect(36, 16, 16, 16);
-      g.fillStyle(0x000000, 1).fillRect(20, 20, 8, 10).fillRect(44, 20, 8, 10);
-      g.fillStyle(0x000000, 1).fillRect(10, 10, 20, 4).fillRect(34, 10, 20, 4);
-    });
-
-    // Yılan: yeşil uzun şekil
-    yap('yilan', 32, 16, g => {
-      g.fillStyle(0x3fbf3f, 1).fillRect(0, 4, 32, 12);
-      g.fillStyle(0x2a8a2a, 1).fillRect(0, 12, 32, 4);
-      g.fillStyle(0xffffff, 1).fillRect(22, 5, 5, 5);
-      g.fillStyle(0x000000, 1).fillRect(25, 6, 2, 3);
-    });
-    // Yuvarlak: büyük pembe top
-    yap('yuvarlak', 30, 30, g => {
-      g.fillStyle(0xff5fa0, 1).fillCircle(15, 15, 15);
-      g.fillStyle(0xc03c78, 1).fillCircle(15, 21, 8);
-      g.fillStyle(0xffffff, 1).fillCircle(20, 11, 4);
-      g.fillStyle(0x000000, 1).fillCircle(21, 11, 2);
-    });
-    // Maymun: kahverengi küp
-    yap('maymun', 28, 28, g => {
-      g.fillStyle(0x8b5a2b, 1).fillRect(0, 0, 28, 28);
-      g.fillStyle(0xd9b38c, 1).fillRect(12, 10, 14, 12);
-      g.fillStyle(0x000000, 1).fillRect(18, 12, 4, 4);
-    });
-    // Mızraklı köpek: açık kahve küp, sarı şerit
-    yap('kopek', 30, 30, g => {
-      g.fillStyle(0xc9a46b, 1).fillRect(0, 0, 30, 30);
-      g.fillStyle(0x7a5a2b, 1).fillRect(0, 24, 30, 6);
-      g.fillStyle(0xffffff, 1).fillRect(16, 7, 8, 8);
-      g.fillStyle(0x000000, 1).fillRect(20, 9, 4, 5);
-    });
-    // Arı: sarı yuvarlak, siyah şerit
-    yap('ari', 24, 24, g => {
-      g.fillStyle(0xffd400, 1).fillCircle(12, 12, 11);
-      g.fillStyle(0x000000, 1).fillRect(7, 3, 3, 18).fillRect(14, 3, 3, 18);
-      g.fillStyle(0xffffff, 0.8).fillEllipse(9, 3, 10, 6).fillEllipse(15, 3, 10, 6);
-    });
-    // Örümcek: mor yuvarlak
-    yap('orumcek', 26, 26, g => {
-      g.fillStyle(0x7a3fbf, 1).fillCircle(13, 13, 11);
-      g.lineStyle(2, 0x4d2480, 1);
-      g.lineBetween(2, 8, 0, 18).lineBetween(24, 8, 26, 18).lineBetween(3, 17, 1, 25).lineBetween(23, 17, 25, 25);
-      g.fillStyle(0xffffff, 1).fillCircle(9, 12, 3).fillCircle(17, 12, 3);
-      g.fillStyle(0xff0000, 1).fillCircle(9, 12, 1.5).fillCircle(17, 12, 1.5);
-    });
-    // Mermiler
-    yap('mizrak', 24, 6, g => {
-      g.fillStyle(0x6b3f1d, 1).fillRect(0, 2, 18, 2);
-      g.fillStyle(0xd0d4da, 1).fillTriangle(24, 3, 17, 0, 17, 6);
-    });
-    yap('atesTopu', 12, 12, g => {
-      g.fillStyle(0xff7a1a, 1).fillCircle(6, 6, 6);
-      g.fillStyle(0xffe14d, 1).fillCircle(6, 6, 3);
-    });
     // Toplanabilirler
     yap('kizilelmas', 24, 24, g => {
       g.fillStyle(0xff3b3b, 1).fillCircle(12, 12, 11);
@@ -133,6 +60,21 @@ class BootScene extends Phaser.Scene {
     an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
     an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
     an('egil',    aralik(53, 57), 10, -1);  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
+    // Düşman animasyonları: d_<ad>_<anim>
+    const HIZ = { yuru: 10, uc: 16, bekle: 4, dur: 1, at: 10, ol: 12 };
+    const DONGU = { yuru: true, uc: true, bekle: true, dur: true };
+    Object.entries(ASSETLER.dusman).forEach(([ad, D]) => {
+      if (!D.anim) return;
+      const ekle = (k, kareler, fps, tekrar) =>
+        A.create({ key: 'd_' + ad + '_' + k, frames: kareler.map(frame => ({ key: 'd_' + ad, frame })), frameRate: fps, repeat: tekrar ? -1 : 0 });
+      Object.entries(D.anim).forEach(([k, kareler]) => {
+        if (ad === 'boss' && k === 'saldir') {   // patron: çömel+atıl hazırlık, koşu, duruş
+          ekle('hazir', kareler.slice(0, 2), 4, false);
+          ekle('atil', [kareler[2]], 1, false);
+          ekle('dinlen', [kareler[3]], 1, false);
+        } else ekle(k, kareler, HIZ[k] || 10, DONGU[k]);
+      });
+    });
     this.scene.start('Game');
   }
 }
