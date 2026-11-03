@@ -204,8 +204,8 @@ Object.assign(GameScene.prototype, {
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else a = 'dur';
     if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
-    // Tırmanma ve sandık çekme kareleri %30 büyük çizilir
-    this.gorselOlcek(a === 'tirman' || a === 'uzat' || a === 'cek' ? CONFIG.oyuncu.buyukOlcek : 1);
+    // Animasyona göre görsel ölçek (CONFIG.oyuncu.animOlcek; yoksa 1)
+    this.gorselOlcek(CONFIG.oyuncu.animOlcek[a] || 1);
     if (durdur) { if (!p.anims.isPaused) p.anims.pause(); }
     else if (p.anims.isPaused) p.anims.resume();
   },

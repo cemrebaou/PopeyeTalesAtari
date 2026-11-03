@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.21 (`config.js` → `surum`)
+Sürüm: v0.22 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -37,12 +37,12 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 | sersem | 15–17 | hasar alınca (yıldızlar), ölünce |
 | (yürüme döngüsü) | 18–23 | şimdilik kullanılmıyor |
 | vur | 24–28 | baston vuruşu |
-| tirman | 29–32 | sarmaşıkta (durunca durur; v0.21: %30 büyük çizilir, `CONFIG.oyuncu.buyukOlcek`) |
-| pogoHava | 49 | pogo açıkken havada (bastonun üstünde) |
+| tirman | 29–32 | sarmaşıkta (durunca durur; v0.21: %30 büyük çizilir, `CONFIG.oyuncu.animOlcek`) |
+| pogoHava | 49 | pogo açıkken havada (bastonun üstünde; v0.22: pogo kareleri %20 büyük) |
 | pogoSek | 50 → 51 → 52 | değme anı: 50 sarı kıvılcım sadece o an, sonra 51, 52 (sekme); havada tekrar 49 |
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.21: %30 büyük çizilir) |
-| egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek) |
+| egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
 
 ## Sandık çekme (v0.14, bombanın yerine)
 - Bomba tamamen kaldırıldı (eşyalar, tuş, HUD).
