@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.27 (`config.js` → `surum`)
+Sürüm: v0.28 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24): kullanıcı görseli. Elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -46,7 +46,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 
 ## Sandık çekme (v0.14, bombanın yerine)
 - Bomba tamamen kaldırıldı (eşyalar, tuş, HUD).
-- Sandıklar artık ağırlıklı kutu: yerçekimiyle düşer, üstüne çıkılır (yüksek yerlere basamak), yürüyerek itilemez.
+- Sandıklar (v0.28: %20 küçük, 32 px) ağırlıklı kutu: yerçekimiyle düşer, üstüne çıkılır (yüksek yerlere basamak), yürüyerek itilemez.
 - C / L basılı tut: baston kanca gibi uzanır (0.2 sn). Önünde (bakılan yönde, aynı zeminde, ~30 px menzilde) sandık varsa takılır; sonra **geri yürüyerek** sandık peşinden çekilir (110 px/sn). Bırakınca, zıplayınca, hasar alınca veya sandık kenardan düşünce kanca bırakır.
 - Sandığı açmak: baston vuruşu (X) ya da pogo ile üstüne inmek. Açık sandık da kutu olarak kalır (çekilebilir, üstüne çıkılır).
 - Kırmızı takoz: artık bastonla (X) kırılır (eskiden sadece bomba kırıyordu).
@@ -89,7 +89,7 @@ Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/
 - Yılan (yeşil, alçak): yavaş devriye, 1 can
 - Yuvarlak (pembe top): hızlı devriye, 1 can
 - Arı (sarı top): havada bekler; 360 px yaklaşınca oyuncuyu kovalar (95 px/sn), 520 px uzaklaşınca bırakır
-- Maymun (kahve küp): menzile (420 px, aynı kat) girince 0.4 sn hazırlanıp ateş topu fırlatır (210 px/sn, 2.4 sn aralık)
+- Maymun: oyuncu **aynı zemine basınca** (yerde, ayak hizası aynı; v0.28) ve 420 px içindeyse dönüp 0.4 sn hazırlanıp ateş topu fırlatır (210 px/sn, 2.4 sn aralık)
 - Mızraklı köpek: aynı şekilde mızrak fırlatır (280 px/sn, 1.8 sn aralık), 2 can
 - Örümcek (mor): tavandan ipiyle inip çıkar, 1 can
 - Patron (kırmızı büyük küp): 4 can; yürü → sarı uyarı → atılma → dinlen; 2 canın altında hızlanır ve zıplayarak atılır. Hasar sonrası 1.1 sn dokunulmaz. 520 px yaklaşınca uyanır.

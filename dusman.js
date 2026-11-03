@@ -125,7 +125,9 @@ Object.assign(GameScene.prototype, {
   atesEden(d, dt) {
     const p = this.player, b = d.body;
     const dx = p.x - d.x, dy = p.y - d.y;
-    const menzilde = Math.abs(dx) < 420 && Math.abs(dy) < 110 && !this.durum.olu;
+    // Maymun: sadece oyuncu aynı zemine basınca (yerde, ayak hizası aynı) döner ve atar. Köpek: dikey 110 px içinde.
+    const ayniZemin = (p.body.blocked.down || p.body.touching.down) && Math.abs(p.body.bottom - b.bottom) < 8;
+    const menzilde = Math.abs(dx) < 420 && (d.tip === 'maymun' ? ayniZemin : Math.abs(dy) < 110) && !this.durum.olu;
     if (d.hazir > 0) {
       d.hazir -= dt;
       b.setVelocityX(0);
@@ -324,7 +326,7 @@ Object.assign(GameScene.prototype, {
     if (s.acik) return;
     s.acik = true;
     s.setTexture('sandikAcik');
-    this.boyutla(s, 'sandikAcik', { w: 42 });
+    this.boyutla(s, 'sandikAcik', { w: 34 });
     this.sandikGovde(s);   // açık sandık da aynı kutu: üstüne çıkılır, çekilebilir
     if (s.odul === 'kalp') {
       this.kalpVer(s.x, s.y);

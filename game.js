@@ -302,9 +302,9 @@ class GameScene extends Phaser.Scene {
   // Sandık: x, zemin y (alt kenar), ödül. Ağırlıklı kutu: üstüne çıkılır, bastonla çekilir, vurunca açılır
   sandikYarat(x, y, odul) {
     const s = this.sandiklar.create(x, y - 1, 'sandik').setOrigin(0.5, 1).setDepth(2);
-    this.boyutla(s, 'sandik', { w: 40 });
+    this.boyutla(s, 'sandik', { w: 32 });   // v0.28: %20 küçük
     s.odul = odul; s.acik = false;
-    s.govdeW = 38; s.govdeH = s.displayHeight - 2;
+    s.govdeW = 30; s.govdeH = s.displayHeight - 2;
     this.sandikGovde(s);
     s.body.pushable = false;            // oyuncu yürüyerek itemez, sadece bastonla çekilir (zemine yine çarpar)
     s.body.setDragX(900);
