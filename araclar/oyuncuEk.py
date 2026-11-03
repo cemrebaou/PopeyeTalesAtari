@@ -41,7 +41,7 @@ def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
     return t, np.where(b[t:t + 14].any(0))[0][-1]
 ASILI = [0, 1, 2, 3, 4, 5, 17]
 ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
-KANCA_X = 88 + 30
+KANCA_X = 88 + 62   # v0.38: baston ucu gövdenin ~10 px önünde → kanca taşın içine girer
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
     o = OLCEK * (k[2] if len(k) > 2 else 1)

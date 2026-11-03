@@ -334,7 +334,7 @@ class GameScene extends Phaser.Scene {
     const x = yon > 0 ? b.right : b.left - 2;
     if (y0 === undefined) { y0 = b.y + 4; h = b.height - 8; }
     return this.physics.overlapRect(x, y0, 2, h, false, true)
-      .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
+      .find(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject))) || null;
   }
 
   // Asılma kancası (baston) önündeki taşa değiyor mu: kanca ayakların CONFIG.oyuncu.kancaY px üstünde

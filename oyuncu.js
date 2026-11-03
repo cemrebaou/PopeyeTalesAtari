@@ -82,7 +82,11 @@ Object.assign(GameScene.prototype, {
       }
     } else if (!yerde && this.asiliBekle <= 0 && b.velocity.y > 0 && this.knock <= 0 && !this.pogoModu) {
       const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
-      if (y && this.kancaDuvar(y)) {
+      const duvar = y ? this.kancaDuvar(y) : null;
+      if (duvar) {
+        // Gövdeyi taşa yasla (arada boşluk kalmasın); kanca görselde taşın içine girer
+        const dx = y > 0 ? duvar.left - b.right : duvar.right - b.left;
+        p.x += dx; b.position.x += dx;
         this.asili = y; this.asiliSon = y; this.bakis = y; p.setFlipX(y < 0);
         b.setAllowGravity(false); b.setVelocity(0, 0);
         this.pogoModu = false; this.pogoAktif = false; this.saldiriZaman = 0;
