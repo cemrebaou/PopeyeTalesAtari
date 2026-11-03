@@ -12,7 +12,7 @@ class BootScene extends Phaser.Scene {
     this.load.image('selaleBas', 'assets/selaleBas.png');   // şelalenin başladığı yer (taş ağız)
     this.load.image('selaleSon', 'assets/selaleSon.png');   // şelalenin bittiği yer (köpük)   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
-    // Ana karakter: 53 kare, her hücre 182x171, ayak çizgisi y=153, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
+    // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
   }
@@ -123,8 +123,8 @@ class BootScene extends Phaser.Scene {
     const an = (key, kareler, frameRate, repeat) =>
       A.create({ key, frames: kareler.map(frame => ({ key: 'oyuncu', frame })), frameRate, repeat });
     const aralik = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
-    an('dur',     aralik(0, 3),   5,  -1);  // bekleme (nefes)
-    an('kos',     aralik(4, 9),   12, -1);  // koşma
+    an('dur',     aralik(0, 3),   5,  -1);  // bekleme (nefes) — v0.19 yeni görsel
+    an('kos',     aralik(4, 9),   12, -1);  // koşma — v0.19 yeni görsel
     an('zipla',   [10, 11, 12],   14, 0);   // zıplama: çömel → kalk → tepe
     an('dus',     [13],           1,  0);   // düşüş
     an('in',      [14],           1,  0);   // yere iniş (toz)
