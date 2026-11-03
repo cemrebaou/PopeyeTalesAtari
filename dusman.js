@@ -141,11 +141,11 @@ Object.assign(GameScene.prototype, {
       d.setFlipX(d.yon < 0);
       b.setVelocityX(0);
       if (d.atesBekle <= 0) { d.hazir = 0.4; d.play('d_' + d.ad + '_at'); }   // atış hazırlığı (4 kare, 0.4 sn)
-      else this.dusmanAnim(d, d.tip === 'kopek' ? 'yuru' : 'dur');
-      if (d.tip === 'kopek' && d.hazir <= 0 && d.atesBekle > 0) { d.anims.pause(); }
+      else if (d.tip === 'kopek') { this.dusmanAnim(d, 'yuru'); d.anims.pause(); }   // menzilde bekler
+      else this.dusmanAnim(d, 'dur');
     } else {
       this.devriye(d);
-      this.dusmanAnim(d, d.tip === 'kopek' ? 'yuru' : 'dur');
+      this.dusmanAnim(d, 'yuru');
     }
   },
 

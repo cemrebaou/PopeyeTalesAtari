@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.26 (`config.js` → `surum`)
+Sürüm: v0.27 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24): kullanıcı görseli. Elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -82,7 +82,7 @@ Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/
 | yuvarlak | yuru 6, ol 4 | 32 |
 | ari | uc 4, ol 4 | 30 |
 | orumcek | bekle 2, ol 4 | 34 |
-| maymun | dur 1, at 4 (0.4 sn hazırlık), ol 4 + ateş topu | 38 |
+| maymun | yuru 6 (v0.27, ayrı görsel `assets/kaynak/maymun_yuru.png`, şeridin sonuna eklendi), dur 1, at 4 (0.4 sn hazırlık), ol 4 + ateş topu | 38 |
 | kopek | yuru 6, at 4, ol 5 + mızrak | 40 |
 | boss | yuru 6, hazir 2 → atil 1 → dinlen 1, ol 4 | 84 |
 - Gül (pembe küp): devriye yürür, 1 can

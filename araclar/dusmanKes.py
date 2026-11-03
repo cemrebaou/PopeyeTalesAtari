@@ -52,6 +52,8 @@ DUS = {
   'kopek':    (698, 781, 16, (7,), {'yuru': [0,1,2,3,4,5], 'at': [6,7,8,9], 'ol': [10,11,12,13,14]}, 15, 40),
   'boss':     (797, 933, 14, (), {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8,9], 'ol': [10,11,12,13]}, None, 84),
 }
+# Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
+EK = {'maymun': ('maymun_yuru.png', 'yuru', 6)}   # v0.27: maymun yürüme
 MERMI = {'maymun': ('atesTopu', 22), 'kopek': ('mizrak', 44)}   # oyundaki genişlik px
 meta = {}
 for ad, (y0, y1, n, bol, an, mi, boy) in DUS.items():
@@ -74,10 +76,31 @@ for ad, (y0, y1, n, bol, an, mi, boy) in DUS.items():
         x0, x1 = seg[i]
         parca = Image.fromarray(im[y0:y1, x0:x1])
         serit.paste(parca, (k * W + (W - (x1 - x0)) // 2, 0))
-    serit.save(KOK + '/assets/d_' + ad + '.png', optimize=True)
     yeniNo = {i: k for k, i in enumerate(kareler)}
+    ekNo = []
+    if ad in EK:
+        dosya, ekAnim, ekSay = EK[ad]
+        e = np.array(Image.open(KOK + '/assets/kaynak/' + dosya).convert('RGBA'))
+        ea = e[:, :, 3] > 60; col = ea.sum(0); es, inr = [], False
+        for x, v in enumerate(col > 0):
+            if v and not inr: s0, inr = x, True
+            if not v and inr: es.append((s0, x)); inr = False
+        if inr: es.append((s0, len(col)))
+        es = [q for q in es if ea[:, q[0]:q[1]].sum() > 40][:ekSay]
+        ilkBoy = alt - ust
+        hs = [np.where(ea[:, x0:x1].any(1))[0] for x0, x1 in es]
+        ekOlcek = ilkBoy / max(h[-1] - h[0] + 1 for h in hs)
+        yeni = Image.new('RGBA', (serit.width + W * len(es), H), (0, 0, 0, 0)); yeni.paste(serit, (0, 0)); serit = yeni
+        for k, ((x0, x1), h) in enumerate(zip(es, hs)):
+            f = Image.fromarray(e[h[0]:h[-1] + 1, x0:x1])
+            f = f.resize((max(1, round(f.width * ekOlcek)), max(1, round(f.height * ekOlcek))), Image.LANCZOS)
+            no = len(kareler) + k
+            serit.paste(f, (no * W + (W - f.width) // 2, alt - f.height), f)
+            ekNo.append(no)
+    serit.save(KOK + '/assets/d_' + ad + '.png', optimize=True)
     meta[ad] = {'w': W, 'h': H, 'ayak': int(alt), 'ust': int(ust), 'boy': boy,
                 'anim': {k: [yeniNo[i] for i in v] for k, v in an.items()}}
+    if ekNo: meta[ad]['anim'][EK[ad][1]] = ekNo
     if mi is not None:
         x0, x1 = seg[mi]; sub = im[y0:y1, x0:x1]
         ys = np.where(sub[:, :, 3].any(1))[0]
