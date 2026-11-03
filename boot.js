@@ -10,8 +10,9 @@ class BootScene extends Phaser.Scene {
     this.load.image('kenar', 'assets/kenar_k.png');   // toprak sol/sağ kenar yosunu
     this.load.image('toprak', 'assets/toprak.jpg');   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
-    // Ana karakter: 49 kare, her hücre 182x148, ayak çizgisi y=130, kafa hücrenin yatay ortasında
-    this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: 182, frameHeight: 148 });
+    // Ana karakter: 53 kare, her hücre 182x171, ayak çizgisi y=153, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
+    const KR = CONFIG.oyuncu.kare;
+    this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
   }
 
   create() {
@@ -128,9 +129,8 @@ class BootScene extends Phaser.Scene {
     an('sersem',  aralik(15, 17), 10, -1);  // hasar / sersemleme (yıldızlar)
     an('vur',     aralik(24, 28), 22, 0);   // baston vuruşu
     an('tirman',  aralik(29, 32), 8,  -1);  // sarmaşığa tırmanma
-    an('pogoYuk', [35],           1,  0);   // pogo: yükselirken
-    an('pogoDus', [36, 37],       8,  0);   // pogo: düşerken baston aşağıda
-    an('pogoVur', [34],           1,  0);   // pogo: yere/düşmana vuruş (kıvılcım)
+    an('pogoHava', [49],          1,  0);   // pogo: havada bastonun üstünde
+    an('pogoSek', [50, 51, 52],   14, 0);   // pogo: değme anı (sarı kıvılcım) → sekme → sekme; sonra tekrar pogoHava
     an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
     an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
     this.scene.start('Game');

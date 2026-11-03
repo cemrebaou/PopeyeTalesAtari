@@ -12,6 +12,7 @@ const oyun = new Phaser.Game({
   backgroundColor: '#141c26',
   pixelArt: false,
   antialias: true,
+  mipmapFilter: 'LINEAR_MIPMAP_LINEAR',   // 2'nin kuvveti boyutlu dokular (toprak 1024) uzaktan da pürüzsüz
   physics: {
     default: 'arcade',
     arcade: { gravity: { y: CONFIG.fizik.yercekimi }, debug: false }

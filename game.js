@@ -24,7 +24,7 @@ class GameScene extends Phaser.Scene {
     this.dokunulmaz = 0; this.knock = 0;
     this.saldiriZaman = 0; this.saldiriBekleme = 0; this.vurulan = new Set();
     this.cekDurum = null; this.cekSandik = null; this.cekZaman = 0;   // sandık çekme: null | 'uzat' | 'cek'
-    this.pogoModu = false; this.pogoAktif = false; this.pogoVurZaman = 0;
+    this.pogoModu = false; this.pogoAktif = false; this.pogoSekZaman = 0;
     this.inisZaman = 0; this.havadaydi = false; this.sersemZaman = 0; this.cekMesafe = 0;
     this.tirmaniyor = false; this.bakis = 1;
     this.coyote = 0; this.ziplaTampon = 0; this.ziplarken = false;
@@ -168,14 +168,14 @@ class GameScene extends Phaser.Scene {
       this.add.tileSprite(x - kw / 2, y0, kw, y1 - y0, 'kenar').setOrigin(0, 0).setDepth(1.1)
         .setTileScale(ks, ks).setTilePosition(0, y0 / ks);
     });
-    // Çimen: toprağın üst kenarından başlar ve toprağın üstüne boyanmış gibi aşağı sarkar (zeminin üstüne taşmaz).
-    // Doku dünyaya hizalı; görsel önceden kaliteli küçültüldü (assets/cimen_k.png)
+    // Çimen: dolu kısmı toprak çizgisinin üstüne taşar (toprak kenarı görünmez), karakterin önünde çizilir
+    // (ayakkabının alt kısmı çimenin içinde kalır). Doku dünyaya hizalı; görsel kaliteli küçültüldü (assets/cimen_k.png)
     const cimenTex = this.textures.get('cimen').getSourceImage();
     const cs = CONFIG.cimenGenislik / cimenTex.width;
     const ch = cimenTex.height * cs;
     (L.cimen || []).forEach(([x0, x1, y]) => {
       const w = x1 - x0, ust = y - ch * CONFIG.cimenUstOran;
-      this.add.tileSprite(x0, ust, w, ch, 'cimen').setOrigin(0, 0).setDepth(1.2)
+      this.add.tileSprite(x0, ust, w, ch, 'cimen').setOrigin(0, 0).setDepth(CONFIG.cimenDerinlik)
         .setTileScale(cs, cs).setTilePosition(x0 / cs, 0);
     });
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
@@ -309,12 +309,13 @@ class GameScene extends Phaser.Scene {
   createPlayer() {
     const O = CONFIG.oyuncu;
     this.spawn = { x: this.L.baslangic[0], y: this.L.baslangic[1] - 2 };
-    // Kare 182x148; ayak çizgisi y=130, kafa yatay ortada. Ayakta boy ≈ 128 px → oyunda O.boy px
-    const olcek = O.boy / 128;
+    // Hücrede ayak çizgisi KR.ayakY, kafa yatay ortada. Ayakta boy KR.ayakBoy px → oyunda O.boy px.
+    // Ayaklar gövdenin O.ayakGomme px altına çizilir (çimene basmış görünür)
+    const KR = O.kare, olcek = O.boy / KR.ayakBoy, gomme = O.ayakGomme / olcek;
     this.player = this.physics.add.sprite(this.spawn.x, this.spawn.y, 'oyuncu', 0)
-      .setOrigin(0.5, 130 / 148).setDepth(10).setScale(olcek);
+      .setOrigin(0.5, (KR.ayakY - gomme) / KR.h).setDepth(10).setScale(olcek);
     const gw = O.govdeG / olcek, gh = O.govdeY / olcek;
-    this.player.body.setSize(gw, gh, false).setOffset(91 - gw / 2, 130 - gh);
+    this.player.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);
     this.player.setCollideWorldBounds(true);
     this.player.setMaxVelocity(1000, CONFIG.fizik.maxDusme);
     this.player.play('dur');

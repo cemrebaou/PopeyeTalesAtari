@@ -40,7 +40,7 @@ Object.assign(GameScene.prototype, {
     if (this.dokunulmaz > 0) this.dokunulmaz -= dt;
     if (this.knock > 0) this.knock -= dt;
     if (this.saldiriBekleme > 0) this.saldiriBekleme -= dt;
-    if (this.pogoVurZaman > 0) this.pogoVurZaman -= dt;
+    if (this.pogoSekZaman > 0) this.pogoSekZaman -= dt;
     if (this.inisZaman > 0) this.inisZaman -= dt;
     if (this.sersemZaman > 0) this.sersemZaman -= dt;
     p.setAlpha(this.dokunulmaz > 0 && Math.floor(time / 90) % 2 ? 0.35 : 1);
@@ -192,7 +192,7 @@ Object.assign(GameScene.prototype, {
     else if (this.cekDurum === 'uzat') a = 'uzat';
     else if (this.cekDurum === 'cek') { a = 'cek'; durdur = b.velocity.x === 0; }
     else if (this.saldiriZaman > 0) a = 'vur';
-    else if (this.pogoModu && !yerde) a = this.pogoVurZaman > 0 ? 'pogoVur' : (b.velocity.y < 0 ? 'pogoYuk' : 'pogoDus');
+    else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
     else if (!yerde) a = b.velocity.y < 0 ? 'zipla' : 'dus';
     else if (this.inisZaman > 0) a = 'in';
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
@@ -207,7 +207,9 @@ Object.assign(GameScene.prototype, {
     this.player.body.setVelocityY(this.k && this.k.zipla ? F.pogoYuksek : F.pogo);
     this.ziplarken = false;
     this.coyote = 0;
-    this.pogoVurZaman = 0.09;
+    // Değme anı: sarı kıvılcımlı kare → sekme kareleri → (havada) tekrar bastonlu kare
+    this.pogoSekZaman = 3 / 14;
+    this.player.play('pogoSek');
   },
 
   govdeRect(body) {

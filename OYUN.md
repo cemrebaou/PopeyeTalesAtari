@@ -1,11 +1,11 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.14 (`config.js` → `surum`)
+Sürüm: v0.15 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
-- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, 512 px, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.14): toprağın tüm açık üst kenarlarına döşenir; toprak çizgisinden başlar ve toprağın üstüne boyanmış gibi aşağı sarkar, zeminin üstüne taşmaz (`CONFIG.cimenUstOran` = 0). Bir tekrarı bir kare genişliğinde (`CONFIG.cimenGenislik` = 32 px, yükseklik ≈ 29 px). Oyunda `assets/cimen_k.png` kullanılır (orijinal 500 px `cimen.png`'nin kaliteli küçültülmüş 128 px sürümü — GPU'nun 500→32 px ezmesi kırık/pikselli görüntü yapıyordu). Yan kenarlar (v0.11): `assets/kenar_k.png` (orijinal `kenar.png`'den küçültüldü) dikey yosun şeridi, toprağın sol ve sağ açık kenarlarına kenar çizgisine ortalanarak döşenir, bir tekrarı bir kare yüksekliğinde (`level1.js` → `kenarlar`).
+- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, v0.15'te yeni 1024 px görsel, mipmap'li → her yakınlıkta keskin, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.15): toprağın tüm açık üst kenarlarına döşenir; görselin %35'i toprak çizgisinin üstüne taşar (`CONFIG.cimenUstOran`), dolu kısmı çizgiyi örter → toprağın üst kenarı görünmez. Çimen karakterin önünde çizilir (`CONFIG.cimenDerinlik` 10.5) → ayakkabının alt kısmı çimenin içinde kalır; ayrıca ayaklar gövdenin 2 px altına çizilir (`CONFIG.oyuncu.ayakGomme`). Bir tekrarı bir kare genişliğinde (`CONFIG.cimenGenislik` = 32 px, yükseklik ≈ 29 px). Oyunda `assets/cimen_k.png` kullanılır (orijinal 500 px `cimen.png`'nin kaliteli küçültülmüş 128 px sürümü — GPU'nun 500→32 px ezmesi kırık/pikselli görüntü yapıyordu). Yan kenarlar (v0.11): `assets/kenar_k.png` (orijinal `kenar.png`'den küçültüldü) dikey yosun şeridi, toprağın sol ve sağ açık kenarlarına kenar çizgisine ortalanarak döşenir, bir tekrarı bir kare yüksekliğinde (`level1.js` → `kenarlar`).
 - Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre bantlar: yeraltı → kaya → taş duvar → harabe. Yeraltı (v0.12, `level1.js` → `yeraltiY` altı): ön plandaki toprakla aynı doku, karartılmış (`CONFIG.yeraltiKarartma`), dünyaya hizalı olduğu için önündeki toprakla kesintisiz devam eder; karanlık kısım arka plan (çarpışmasız), açık renkli toprak basılan zemin. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo; en alt karo da normal şelale karosu).
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
@@ -19,7 +19,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Tam ekran tuşu: tam ekrana geçer ve telefonu **yatay kilitler** (`screen.orientation.lock('landscape')`; Android Chrome'da çalışır, iPhone Safari kilit desteklemez). Telefon dikey tutulursa üstte "Telefonu yan çevirin" uyarısı çıkar.
 
 ## Ana karakter sprite'ı (v0.14)
-`assets/oyuncu.png`: 49 kare, 10 sütun, hücre 182×148 px. Kaynak görsel düzensiz ızgaralıydı (satırlarda 10/8/11/12/8 kare); kareler tek tek tespit edilip kesildi, kirli kahverengi hale temizlendi, satırlar arası boy farkı (şapka genişliğine göre) eşitlendi. Her karede ayak çizgisi y=130, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz). Oyunda ayakta boy 48 px (`CONFIG.oyuncu.boy`), çarpışma gövdesi 18×38 px.
+`assets/oyuncu.png`: 53 kare, 10 sütun, hücre 182×171 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı (satırlarda 10/8/11/12/8 kare); kareler tek tek tespit edilip kesildi, kirli kahverengi hale temizlendi, satırlar arası boy farkı (şapka genişliğine göre) eşitlendi. Her karede ayak çizgisi y=153, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz). v0.15: zıplama kareleri (10–13) %10, tırmanma kareleri (29–32) %30 daha büyük — küçük hali büyütülmedi, orijinal büyük görselden tek adımda ölçeklendi (pikselleşme yok). 49–52: kullanıcının gönderdiği yeni pogo görselinden kesildi (aynı ölçek ve gövde hizası). Oyunda ayakta boy 48 px (`CONFIG.oyuncu.boy`), çarpışma gövdesi 18×38 px.
 | Animasyon | Kareler | Ne zaman |
 |---|---|---|
 | dur | 0–3 | yerde dururken |
@@ -29,7 +29,9 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 | (yürüme döngüsü) | 18–23 | şimdilik kullanılmıyor |
 | vur | 24–28 | baston vuruşu |
 | tirman | 29–32 | sarmaşıkta (durunca durur) |
-| pogoVur / pogoYuk / pogoDus | 34 / 35 / 36–37 | pogo sekmesi (33, 38–40 kullanılmıyor) |
+| pogoHava | 49 | pogo açıkken havada (bastonun üstünde) |
+| pogoSek | 50 → 51 → 52 | değme anı: 50 sarı kıvılcım sadece o an, sonra 51, 52 (sekme); havada tekrar 49 |
+| (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme |
 
 ## Sandık çekme (v0.14, bombanın yerine)
