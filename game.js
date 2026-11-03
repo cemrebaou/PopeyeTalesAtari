@@ -206,8 +206,8 @@ class GameScene extends Phaser.Scene {
       this.add.tileSprite(x - kw / 2, y0, kw, y1 - y0, 'kenar').setOrigin(0, 0).setDepth(1.1)
         .setTileScale(ks, ks).setTilePosition(0, y0 / ks);
     });
-    // Çimen: dolu kısmı toprak çizgisinin üstüne taşar (toprak kenarı görünmez), karakterin önünde çizilir
-    // (ayakkabının alt kısmı çimenin içinde kalır). Doku dünyaya hizalı; görsel kaliteli küçültüldü (assets/cimen_k.png)
+    // Çimen: dolu kısmı toprak çizgisinin biraz üstüne taşar (toprak kenarı görünmez), zemin katmanında karakterin arkasında.
+    // Doku dünyaya hizalı; görsel kaliteli küçültüldü (assets/cimen_k.png)
     const cimenTex = this.textures.get('cimen').getSourceImage();
     const cs = CONFIG.cimenGenislik / cimenTex.width;
     const ch = cimenTex.height * cs;
