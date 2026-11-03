@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.39",
+  surum: "v0.40",
   tile: 32,
   bayrakBoy: 57.6,      // kontrol noktası bayrağı (v0.33: %10 küçük, 64 → 57.6)
   dusmanOlcek: 0.9,     // v0.32: tüm düşmanlar %10 küçük (görsel + gövde)
@@ -31,7 +31,7 @@ const CONFIG = {
     yasam: 3,
     boy: 52.8,           // v0.32: %10 büyük (48 → 52.8); animOlcek oranları bunun üstüne çarpılır, gövde aynı             // karakterin ekrandaki boyu (dünya px, ayakta)
     kare: { w: 176, h: 141, ayakY: 125, ayakBoy: 117 },
-    kare2: { w: 176, h: 220, ayakY: 200 },   // assets/oyuncu2.png (asılma, itme, darbe kareleri) — aynı ölçek  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
+    kare2: { w: 240, h: 220, ayakY: 200 },   // assets/oyuncu2.png (asılma, itme, darbe kareleri) — aynı ölçek  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
     kancaY: 52,          // asılma karesinde bastonun ayaklardan yüksekliği (px); kanca bu hizada taşa değince asılır
     ayakGomme: 2,        // ayaklar zemin çizgisinin bu kadar altına çizilir (px) — çimene basmış görünür
     govdeG: 18,          // çarpışma gövdesi genişliği (px)
