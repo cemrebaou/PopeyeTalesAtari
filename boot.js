@@ -12,6 +12,9 @@ class BootScene extends Phaser.Scene {
     // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
+    // Toplanabilirler (v0.28, araclar/toplananKes.py): 6 satır × 6 karelik dönme
+    const TP = ASSETLER.toplanan;
+    this.load.spritesheet('toplanan', 'assets/toplanan.png', { frameWidth: TP.w, frameHeight: TP.h });
     // Düşmanlar (v0.24, araclar/dusmanKes.py): her düşman kendi yatay şeridinde, mermiler ayrı görsel
     Object.entries(ASSETLER.dusman).forEach(([ad, D]) => {
       if (D.anim) this.load.spritesheet('d_' + ad, 'assets/d_' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
@@ -22,23 +25,6 @@ class BootScene extends Phaser.Scene {
   create() {
     const g = this.make.graphics({ x: 0, y: 0 }, false);
     const yap = (anahtar, w, h, ciz) => { g.clear(); ciz(g); g.generateTexture(anahtar, w, h); };
-
-    // Toplanabilirler
-    yap('kizilelmas', 24, 24, g => {
-      g.fillStyle(0xff3b3b, 1).fillCircle(12, 12, 11);
-      g.lineStyle(2, 0x8f1717, 1).strokeCircle(12, 12, 11);
-    });
-    yap('elmas', 16, 16, g => {
-      g.fillStyle(0xffe14d, 1).fillCircle(8, 8, 7);
-      g.lineStyle(2, 0xb8860b, 1).strokeCircle(8, 8, 7);
-    });
-    yap('buyukelmas', 24, 24, g => {
-      g.fillStyle(0x3df0ff, 1).fillCircle(12, 12, 11);
-      g.lineStyle(2, 0x0a8fa0, 1).strokeCircle(12, 12, 11);
-    });
-    yap('kalp', 20, 20, g => {
-      g.fillStyle(0xff3b3b, 1).fillCircle(6, 7, 5).fillCircle(14, 7, 5).fillTriangle(1, 9, 19, 9, 10, 19);
-    });
 
     g.destroy();
 
@@ -60,6 +46,9 @@ class BootScene extends Phaser.Scene {
     an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
     an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
     an('egil',    aralik(53, 57), 10, -1);  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
+    // Toplanabilir dönme animasyonları: t_<ad>
+    ASSETLER.toplanan.sira.forEach((ad, r) =>
+      A.create({ key: 't_' + ad, frames: A.generateFrameNumbers('toplanan', { start: r * 6, end: r * 6 + 5 }), frameRate: 10, repeat: -1 }));
     // Düşman animasyonları: d_<ad>_<anim>
     const HIZ = { yuru: 10, uc: 16, bekle: 4, dur: 1, at: 10, ol: 12 };
     const DONGU = { yuru: true, uc: true, bekle: true, dur: true };

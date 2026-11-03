@@ -273,13 +273,13 @@ class GameScene extends Phaser.Scene {
     });
 
     // Toplanabilirler
-    L.elmaslar.forEach(([x, y]) => this.elmaslar.create(x, y, 'elmas'));
+    L.elmaslar.forEach(([x, y]) => this.toplananYarat(this.elmaslar, 'elmas', x, y));
     this.durum.elmasToplam = L.elmaslar.length;
     L.sandiklar.forEach(([x, y, odul]) => this.sandikYarat(x, y, odul));
-    const ozelTex = { buyuk: 'buyukelmas', kizil: 'kizilelmas' };
+    const ozelTex = { buyuk: 'buyukelmas', kizil: 'kizilelmas', yasam: 'yasam', altin: 'altin' };
     L.ozeller.forEach(([tip, x, y]) => {
       if (!ozelTex[tip]) return;
-      const o = this.ozeller.create(x, y, ozelTex[tip]).setDepth(2);
+      const o = this.toplananYarat(this.ozeller, ozelTex[tip], x, y);
       o.tip = tip;
     });
 
@@ -300,6 +300,16 @@ class GameScene extends Phaser.Scene {
   }
 
   // Sandık: x, zemin y (alt kenar), ödül. Ağırlıklı kutu: üstüne çıkılır, bastonla çekilir, vurunca açılır
+  // Toplanabilir: dönen görsel (ASSETLER.toplanan), oyundaki boy CONFIG.toplanBoy[ad]
+  toplananYarat(grup, ad, x, y) {
+    const TP = ASSETLER.toplanan, r = TP.sira.indexOf(ad);
+    const o = grup ? grup.create(x, y, 'toplanan', r * 6) : this.add.sprite(x, y, 'toplanan', r * 6);
+    o.setScale(CONFIG.toplanBoy[ad] / (TP.h - 8)).setDepth(2);
+    o.play({ key: 't_' + ad, startFrame: Phaser.Math.Between(0, 5) });
+    if (grup) o.refreshBody();
+    return o;
+  }
+
   sandikYarat(x, y, odul) {
     const s = this.sandiklar.create(x, y - 1, 'sandik').setOrigin(0.5, 1).setDepth(2);
     this.boyutla(s, 'sandik', { w: 32 });   // v0.28: %20 küçük

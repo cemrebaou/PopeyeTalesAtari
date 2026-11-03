@@ -1,8 +1,8 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.28 (`config.js` → `surum`)
+Sürüm: v0.29 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
-Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24): kullanıcı görseli. Elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
+Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
 - **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
@@ -71,7 +71,17 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - **Rahat zıplama kuralı**: bir atlayış, havada tam hızın **%65'iyle** yapılabiliyorsa rahat sayılır (telefonda kusursuz zamanlama gerekmesin). Pogo hesaba katılmaz. Örn. 3 kare yukarı + 3 kare boşluk (100. sütun şelalesi yanı) tam menzilde ancak bloğun ucuna 9 px'le iniliyordu → arasına kaya kondu.
 - **Ara kayalar** (v0.18, `level1.js` → `kayalar`, 8 adet): tek yosunlu taş karosu (`sK`), çarpışmalı. Rahat zıplamayla ulaşılamayan yerler simülasyonla bulundu, her kaya tek tek denenerek en az kayayla çözüldü. Kontrol: patron, çıkış, 5 kontrol noktası, tüm sandıklar, elmaslar ve özel eşyalar pogo kullanmadan rahat zıplamayla ulaşılabilir.
 - **Kontrol aracı**: `node araclar/erisim.js` → ulaşılamayan önemli yerleri listeler; `node araclar/erisim.js --coz` → çözüm için kaya önerir. Bölüme yeni platform/tepe/eşya eklenince çalıştır.
-- Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, düşman 200, patron 5000.
+- Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, altın para 50, düşman 200, patron 5000.
+- **Toplanabilirler (v0.29)**: kaynak `assets/kaynak/toplanan_seti.png` → `python3 araclar/toplananKes.py` → `assets/toplanan.png` (6 satır × 6 karelik dönme; renkli hale silinir). Hepsi dönerek durur; oyundaki boylar `CONFIG.toplanBoy`.
+  | Görsel | Ne | Etki |
+  |---|---|---|
+  | küçük altın taş (`elmas`) | elmaslar | +100 |
+  | mavi elmas (`buyukelmas`) | özel eşya `buyuk`, sandık ödülü | +1000 |
+  | kızıl yakut (`kizilelmas`) | özel eşya `kizil` | +500 |
+  | kalp (`kalp`) | sandık ödülü `kalp` | +1 can kalbi (dolu ise +500) |
+  | çapalı jeton (`yasam`) | özel eşya `yasam`, sandık ödülü `yasam` | +1 yaşam |
+  | altın para (`altin`) | özel eşya `altin` (bölümde henüz yok) | +50 |
+- Sandık açılınca ödülün görseli yukarı süzülür. 1 sandık (x 3734) çapalı jeton (+1 yaşam) verir.
 
 ## Düşmanlar
 Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/dusmanKes.py` → her düşman `assets/d_<ad>.png` şeridi, mermiler `atesTopu.png` / `mizrak.png`, ölçüler `assetlar.js` → `ASSETLER.dusman` (hücre, ayak çizgisi, oyundaki görünür boy `boy`, animasyon kareleri). Kenardaki renkli hale temizlenir. Görseller sağa bakar, sola giderken çevrilir. Ölünce gövde kapanır, parçalanma animasyonu oynar, solup kaybolur (patronda bitince kapı açılır).

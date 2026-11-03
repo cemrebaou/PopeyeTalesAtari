@@ -316,7 +316,7 @@ const LEVEL1 = {
     [1770,3392,"buyuk"],
     [1056,3584,"kalp"],
     [3540,3008,"buyuk"],
-    [3734,3008,"buyuk"]
+    [3734,3008,"yasam"]
   ],
   // [x, y merkez]
   elmaslar: [

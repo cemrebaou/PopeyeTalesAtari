@@ -298,10 +298,27 @@ Object.assign(GameScene.prototype, {
     o.disableBody(true, true);
     if (o.tip === 'kizil') {
       this.puanEkle(CONFIG.puan.kizil, o.x, o.y - 20);
+    } else if (o.tip === 'yasam') {
+      this.yasamVer(o.x, o.y);
+    } else if (o.tip === 'altin') {
+      this.puanEkle(CONFIG.puan.altin, o.x, o.y - 20);
     } else {
       this.puanEkle(CONFIG.puan.buyuk, o.x, o.y - 20);
     }
     this.hudGuncelle();
+  },
+
+  // Çapa jetonu: +1 yaşam
+  yasamVer(x, y) {
+    this.durum.yasam++;
+    this.popup(x, y - 20, '+1 Can');
+    this.hudGuncelle();
+  },
+
+  // Sandıktan çıkan ödülün görseli yukarı süzülüp kaybolur
+  odulGoster(ad, x, y) {
+    const el = this.toplananYarat(null, ad, x, y - 10).setDepth(20);
+    this.tweens.add({ targets: el, y: y - 60, alpha: 0, duration: 800, onComplete: () => el.destroy() });
   },
 
   kalpAl(h) {
@@ -330,11 +347,14 @@ Object.assign(GameScene.prototype, {
     this.sandikGovde(s);   // açık sandık da aynı kutu: üstüne çıkılır, çekilebilir
     if (s.odul === 'kalp') {
       this.kalpVer(s.x, s.y);
+      this.odulGoster('kalp', s.x, s.y);
+    } else if (s.odul === 'yasam') {
+      this.yasamVer(s.x, s.y);
+      this.odulGoster('yasam', s.x, s.y);
     } else {
       this.durum.puan += CONFIG.puan.buyuk;
       this.popup(s.x, s.y - 20, '+' + CONFIG.puan.buyuk);
-      const el = this.add.image(s.x, s.y - 10, 'buyukelmas').setDepth(20);
-      this.tweens.add({ targets: el, y: s.y - 60, alpha: 0, duration: 800, onComplete: () => el.destroy() });
+      this.odulGoster('buyukelmas', s.x, s.y);
     }
     this.hudGuncelle();
   }
