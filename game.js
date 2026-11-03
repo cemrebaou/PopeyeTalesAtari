@@ -58,7 +58,7 @@ class GameScene extends Phaser.Scene {
     cam.setZoom(Math.min(h / K.gorunurY, w / K.minGorunurX));
   }
 
-  // Karo katmanı: level verisindeki karakter satırlarını tilemap'e çevirir (64px kaynak, 32px gösterim)
+  // Karo katmanı: level verisindeki karakter satırlarını tilemap'e çevirir (128 px kaynak, 32 px gösterim)
   karoKatmani(satirlar, derinlik) {
     const A = ASSETLER.tileset, L = this.L;
     if (!this.alfabeNo) {
@@ -71,40 +71,15 @@ class GameScene extends Phaser.Scene {
     return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
   }
 
-  // Şelalelerin başına taş ağızlı başlangıç, dibine köpüklü bitiş görseli koyar.
-  // Şelale sütunları arka katmandaki şelale karolarından bulunur (her şelale 2 kare genişliğinde).
-  selaleUclari() {
-    const A = ASSETLER.tile, L = this.L, T = L.karo;
-    const su = new Set([A.wselaleU, A.wselale0, A.wselale1, A.wselaleA]);
-    const sutunlar = {};   // "üst,alt" → sütun listesi
-    for (let x = 0; x < L.arka[0].length; x++) {
-      let ust = -1;
-      for (let y = 0; y <= L.arka.length; y++) {
-        const var_ = y < L.arka.length && su.has(this.alfabeNo[L.arka[y][x]]);
-        if (var_ && ust < 0) ust = y;
-        if (!var_ && ust >= 0) { (sutunlar[ust + ',' + (y - 1)] = sutunlar[ust + ',' + (y - 1)] || []).push(x); ust = -1; }
-      }
-    }
-    const bas = this.textures.get('selaleBas').getSourceImage(), son = this.textures.get('selaleSon').getSourceImage();
-    Object.entries(sutunlar).forEach(([anahtar, xs]) => {
-      const [ust, alt] = anahtar.split(',').map(Number);
-      xs.sort((a, b) => a - b);
-      // yan yana sütunları tek şelale olarak grupla
-      const gruplar = [];
-      xs.forEach(x => {
-        const g = gruplar[gruplar.length - 1];
-        if (g && x === g[g.length - 1] + 1) g.push(x); else gruplar.push([x]);
-      });
-      gruplar.forEach(g => {
-        const x = g[0] * T, w = g.length * T;
-        // Başlangıç: suyun genişliğine ölçekli, şelalenin en üstüne
-        const sb = w / bas.width;
-        this.add.image(x, ust * T, 'selaleBas').setOrigin(0, 0).setScale(sb).setDepth(-4.9);
-        // Bitiş: su gövdesi (görselde 19..153 px) şelale genişliğine oturur, köpük yanlara taşar;
-        // dibi zemin çizgisinin biraz üstünde → köpük çimenin üstünde görünür, alt kenarını çimen örter
-        const ss = w / 134;
-        this.add.image(x - 19 * ss, (alt + 1) * T - 5, 'selaleSon').setOrigin(0, 1).setScale(ss).setDepth(-4.9);
-      });
+  // Şelaleler: üst parça (taş ağız) + tekrar eden orta gövde + köpüklü dip. L.selaleler: [x, w, ustY, altY]
+  selaleCiz() {
+    const ust = this.textures.get('selaleUst').getSourceImage();
+    (this.L.selaleler || []).forEach(([x, w, y0, y1]) => {
+      const s = w / ust.width, h = ust.height * s;
+      this.add.tileSprite(x, y0 + h * 0.5, w, Math.max(0, y1 - y0 - h), 'selaleOrta').setOrigin(0, 0)
+        .setTileScale(s, s).setDepth(-4.9);
+      this.add.image(x, y0, 'selaleUst').setOrigin(0, 0).setScale(s).setDepth(-4.8);
+      this.add.image(x, y1, 'selaleDip').setOrigin(0, 1).setScale(s).setDepth(-4.8);
     });
   }
 
@@ -187,48 +162,11 @@ class GameScene extends Phaser.Scene {
     // Karo katmanları: arka duvarlar + şelaleler (çarpışmasız) ve zemin
     this.arkaKatman = this.karoKatmani(L.arka, -5);
     this.onKatman = this.karoKatmani(L.on, 1);
-    this.selaleUclari();
-    // Toprak zeminler: tek kesintisiz doku, dünya koordinatına hizalı (bloklar arası dikiş olmaz)
-    const tk = CONFIG.toprakDoku / this.textures.get('toprak').getSourceImage().width;
-    // Yeraltı arka planı: aynı toprak dokusu, karartılmış, dünyaya hizalı (önündeki toprakla kesintisiz devam eder)
-    if (L.yeraltiY !== undefined) {
-      this.add.tileSprite(0, L.yeraltiY, this.dunyaG, this.dunyaY - L.yeraltiY, 'toprak').setOrigin(0, 0).setDepth(-4)
-        .setTileScale(tk, tk).setTilePosition(0, L.yeraltiY / tk).setTint(CONFIG.yeraltiKarartma);
-    }
-    (L.toprak || []).forEach(([x, y, w, h]) => {
-      this.add.tileSprite(x, y, w, h, 'toprak').setOrigin(0, 0).setDepth(1)
-        .setTileScale(tk, tk).setTilePosition(x / tk, y / tk);
-    });
-    // Toprak yan kenarları: dikey yosun şeridi, bir tekrarı bir kare yüksekliğinde, kenar çizgisine ortalı
-    const ks = L.karo / this.textures.get('kenar').getSourceImage().height;
-    const kw = this.textures.get('kenar').getSourceImage().width * ks;
-    (L.kenarlar || []).forEach(([x, y0, y1]) => {
-      this.add.tileSprite(x - kw / 2, y0, kw, y1 - y0, 'kenar').setOrigin(0, 0).setDepth(1.1)
-        .setTileScale(ks, ks).setTilePosition(0, y0 / ks);
-    });
-    // Çimen: dolu kısmı toprak çizgisinin biraz üstüne taşar (toprak kenarı görünmez), zemin katmanında karakterin arkasında.
-    // Doku dünyaya hizalı; görsel kaliteli küçültüldü (assets/cimen_k.png)
-    const cimenTex = this.textures.get('cimen').getSourceImage();
-    const cs = CONFIG.cimenGenislik / cimenTex.width;
-    const ch = cimenTex.height * cs;
-    (L.cimen || []).forEach(([x0, x1, y]) => {
-      const w = x1 - x0, ust = y - ch * CONFIG.cimenUstOran;
-      this.add.tileSprite(x0, ust, w, ch, 'cimen').setOrigin(0, 0).setDepth(CONFIG.cimenDerinlik)
-        .setTileScale(cs, cs).setTilePosition(x0 / cs, 0);
-    });
+    this.selaleCiz();
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
-    // Ara kayalar: zemin karo setindeki tek yosunlu taş karosu, çarpışmalı
-    (L.kayalar || []).forEach(([x, y]) => {
-      this.onKatman.putTileAt(ASSETLER.tile.sK, x / T, y / T);
-      this.blokCiz(x, y, T, T);
-    });
-    // Ara taş basamaklar (yüksek duvarlara çıkış için)
-    (L.basamaklar || []).forEach(([x, y, w, h]) => {
-      for (let i = 0; i < w; i += T) for (let j = 0; j < h; j += T) {
-        this.add.image(x + i, y + j, 'tasBlok').setOrigin(0, 0).setDisplaySize(T, T).setDepth(1.3);
-      }
-      this.blokCiz(x, y, w, h);
-    });
+    // Ara kayalar ve basamaklar: görselleri zemin karo katmanında (otomatik döşendi), burada sadece çarpışma
+    (L.kayalar || []).forEach(([x, y]) => this.blokCiz(x, y, T, T));
+    (L.basamaklar || []).forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
 
     // Tek yönlü platformlar: { tip, x, y, n }  (bu bölümde yok, istenirse eklenir)
     (L.platformlar || []).forEach(p => this.platforms.add(this.platformYarat(p.tip, p.x, p.y, p.n || 1, false)));

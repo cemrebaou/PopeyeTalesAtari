@@ -1,12 +1,16 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.19 (`config.js` → `surum`)
+Sürüm: v0.20 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
-- Zemin: 32 px ızgara, otomatik döşeme (üst sol/orta/sağ, sol/sağ duvar, iç dolgu, alt kenarlar, tek genişlikte sütun, tek blok). Üst katlar (Unity y > 16) yosunlu taş karolar. Alt katlardaki tüm toprak zeminler (v0.06) tek bir kesintisiz toprak dokusu (`assets/toprak.jpg`, v0.15'te yeni 1024 px görsel, mipmap'li → her yakınlıkta keskin, oyunda bir tekrar = `CONFIG.toprakDoku` 320 px) ile çizilir; doku dünya koordinatına hizalı olduğu için bloklar arasında dikiş olmaz. Çimen (v0.15): toprağın tüm açık üst kenarlarına döşenir; görselin %18'i (≈5 px) toprak çizgisinin üstüne taşar (`CONFIG.cimenUstOran`; v0.17'de 5 px aşağı alındı). Çimen zemin katmanında, karakterin arkasında çizilir (`CONFIG.cimenDerinlik` 1.2; v0.15'teki önde çizim yanlış anlaşılmaydı, geri alındı). Ayaklar gövdenin 2 px altına çizilir (`CONFIG.oyuncu.ayakGomme`) → çimene basmış görünür. Bir tekrarı bir kare genişliğinde (`CONFIG.cimenGenislik` = 32 px, yükseklik ≈ 29 px). Oyunda `assets/cimen_k.png` kullanılır (orijinal 500 px `cimen.png`'nin kaliteli küçültülmüş 128 px sürümü — GPU'nun 500→32 px ezmesi kırık/pikselli görüntü yapıyordu). Yan kenarlar (v0.11): `assets/kenar_k.png` (orijinal `kenar.png`'den küçültüldü) dikey yosun şeridi, toprağın sol ve sağ açık kenarlarına kenar çizgisine ortalanarak döşenir, bir tekrarı bir kare yüksekliğinde (`level1.js` → `kenarlar`).
-- Arka plan: çarpışmasız, kare kare döşenen duvarlar; yükseğe göre bantlar: yeraltı → kaya → taş duvar → harabe. Yeraltı (v0.12, `level1.js` → `yeraltiY` altı): ön plandaki toprakla aynı doku, karartılmış (`CONFIG.yeraltiKarartma`), dünyaya hizalı olduğu için önündeki toprakla kesintisiz devam eder; karanlık kısım arka plan (çarpışmasız), açık renkli toprak basılan zemin. Taş/harabe bandında rastgele pencere, delik, meşale yeri, sarmaşık ve sütun süsleri. Uzun boş dikey alanlarda 4 şelale (karo karo, 2 kare genişliğinde). v0.16: şelalelerin en üstüne taş ağızlı başlangıç (`assets/selaleBas.png`), dibine köpüklü bitiş görseli (`assets/selaleSon.png`) konur; şelale sütunları arka katmandan otomatik bulunur (`game.js` → `selaleUclari`). Bitişin su gövdesi şelale genişliğine oturur, köpük yanlara taşar ve çimenin üstünde görünür.
+- **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
+- Karo setinde 5 malzeme, her biri 4 dolgu (F0–F3) + üst kenar parçaları (TL0/TL1 sol köşe, TM0/TM1 orta, TR0/TR1 sağ köşe): `k` kaya, `s` yosunlu parke taş, `h` tapınak tuğlası (sarmaşıklı), `w` tahta, `t` topraklı kök. Arka plan sürümleri aynı karoların %50 karartılmışı (`a` önekli, örn. `ahF0`).
+- Zemin (çarpışan): çarpışma bloklarından otomatik döşenir. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. Eski toprak bölgeleri → topraklı kök (`t`), geri kalanı + ara kayalar + basamaklar → parke taş (`s`).
+- Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
+- Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): üst parça `assets/selaleUst.png` + dikey tekrar eden gövde `selaleOrta.png` + köpüklü dip `selaleDip.png`.
+- Su (3 yüzey, derin, sol/sağ taş duvarlı) ve sis karoları sette hazır, bölümde henüz kullanılmıyor.
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
@@ -81,11 +85,12 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 - Üst katlar: koridorlar, örümcekler, mızraklı köpekler
 - En üst: patron (kırmızı takozlarla kapalı alanlar), patron ölünce sandık ve çıkış (helikopter yeri)
 
-`level1.js` otomatik üretilmiştir: `on` (taş zemin karoları), `toprak` (toprak dokulu bölgeler) ve `arka` (arka plan karoları) satırları + çarpışma blokları. Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
+`level1.js`: `on` (zemin karoları) ve `arka` (arka plan karoları) satırları `araclar/karoUret.py` ile üretildi; çarpışma blokları `bloklar`. Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
 
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)
 - `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)
 - `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` karo numaraları ve obje boyutları (otomatik üretildi) · `assets/` görseller
 - `main.js` oyun ayarı, ekran boyutlama · `boot.js` görsel yükleme, karakter animasyonları, yer tutucu görseller · `game.js` sahne, bölüm kurulumu, kamera · `oyuncu.js` oyuncu mekanikleri, sandık çekme, animasyon seçimi · `dusman.js` düşmanlar, patron, toplanabilirler, sandık açma · `ui.js` UI sahnesi (HUD, tuşlar, tam ekran, bitiş ekranı)

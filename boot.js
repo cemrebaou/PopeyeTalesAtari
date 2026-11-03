@@ -5,12 +5,9 @@ class BootScene extends Phaser.Scene {
   preload() {
     // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
     this.load.image('tileset', 'assets/tileset.png');
-    // Çimen ve kenar: orijinal görsellerin kaliteli küçültülmüş sürümleri (GPU'da aşırı küçültme kırık görüntü yapıyordu)
-    this.load.image('cimen', 'assets/cimen_k.png');   // çimen (toprak üst kenarlarına yapışık)
-    this.load.image('kenar', 'assets/kenar_k.png');   // toprak sol/sağ kenar yosunu
-    this.load.image('toprak', 'assets/toprak.jpg');
-    this.load.image('selaleBas', 'assets/selaleBas.png');   // şelalenin başladığı yer (taş ağız)
-    this.load.image('selaleSon', 'assets/selaleSon.png');   // şelalenin bittiği yer (köpük)   // kesintisiz toprak dokusu (tüm toprak zeminler)
+    this.load.image('selaleUst', 'assets/selaleUst.png');    // şelale başı (taş ağız)
+    this.load.image('selaleOrta', 'assets/selaleOrta.png');  // şelale gövdesi (dikey tekrar)
+    this.load.image('selaleDip', 'assets/selaleDip.png');    // şelale dibi (köpük)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
     // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;
