@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.30 (`config.js` → `surum`)
+Sürüm: v0.31 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -9,8 +9,8 @@ Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/t
 - Karo setinde 5 malzeme, her biri 4 dolgu (F0–F3) + üst kenar parçaları (TL0/TL1 sol köşe, TM0/TM1 orta, TR0/TR1 sağ köşe): `k` kaya, `s` yosunlu parke taş, `h` tapınak tuğlası (sarmaşıklı), `w` tahta, `t` topraklı kök. Arka plan sürümleri aynı karoların %50 karartılmışı (`a` önekli, örn. `ahF0`).
 - Zemin (çarpışan): çarpışma bloklarından otomatik döşenir (`python3 araclar/zeminDose.py`, bloklar değişince çalıştır). v0.21: yeraltında (satır 115 / 3680 px altı) topraklı kök `t`, üstünde her yerde gri parke taş `s`. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. 
 - Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
-- v0.21 yüzen zeminler (`level1.js` → `yuzenler: [x, y, w, tip]`, 24 adet): yere değmeyen tek/çift sıra bloklar artık karo değil; 1–3 kare → `ada` (altı oval, üstü çimli), 4+ kare → `tas` (uzun ince taş levha, uç uca parçalar). Çarpışma 1 kare yükseklik (eski 2 karelikler inceltildi).
-- v0.21 taş bloklar: ara kayalar, basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). Kırılışı `tasKirik.png` hazır.
+- Yere değmeyen zeminler (v0.31): normal zemin karoları (v0.21–0.30 arası ada / taş levha görseli kullanılıyordu, kaldırıldı). Çarpışmaları 1 kare yükseklikte kaldı.
+- v0.21 taş bloklar: ara kayalar, basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). v0.31: ön yüz tam bir kare, 3B üst yüz (`CONFIG.tasUstYuz` %15) karenin üstüne taşar; üst üste dizilince üstteki blok alttakinin üst yüzünü örter. Kırılışı `tasKirik.png` hazır.
 - Engel kuralı (v0.21): kırılması gereken zayıf şeyler → tahta kasa (`kirilir`), kolay kırılmayanlar → taş blok (`taslar`, ileride güçlenince kırılacak), kırmızı takoz sadece patron odası girişinde (`takozlar`, kapı aralığına alındı: x 3344). Eski 4 takoz taş bloğa çevrildi (hiçbiri geçiş için gerekli değildi — `erisim.js` ile kontrol).
 - Sarmaşıklar (v0.21): %30 ince (30 → 21 px), tam parça sayısıyla döşenir (son yaprak yarım kesilmez).
 - Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): v0.30'dan beri baştan sona sadece gövde dokusu `assets/selaleOrta.png` (üst/dip parçaları kaldırıldı). Doku dikeyde kesintisiz yapıldı (alt üçte biri üst kısma yumuşak geçişle karıştırıldı → kesim yeri görünmez) ve aşağı doğru akar (`CONFIG.selaleHiz` 140 px/sn).

@@ -1,7 +1,8 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.30",
+  surum: "v0.31",
   tile: 32,
+  tasUstYuz: 0.15,      // taş blok görselinde 3B üst yüzün oranı (üst üste dizerken örtüşme)
   selaleHiz: 140,       // şelale suyunun aşağı akış hızı (dünya px/sn)
   kamera: {
     gorunurY: 360,      // ekranda görünen dünya yüksekliği (px) — küçük = daha yakın kamera
