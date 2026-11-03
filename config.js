@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.17",
+  surum: "v0.18",
   tile: 32,
   cimenGenislik: 32,    // çimen görselinin bir tekrarının oyundaki genişliği (px) = bir kare
   cimenUstOran: 0.18,   // çimen görselinin toprak çizgisinin üstüne taşan oranı (≈5 px; dolu kısım çizgiyi örter)
@@ -31,7 +31,7 @@ const CONFIG = {
     kare: { w: 182, h: 171, ayakY: 153, ayakBoy: 128 },  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
     ayakGomme: 2,        // ayaklar zemin çizgisinin bu kadar altına çizilir (px) — çimene basmış görünür
     govdeG: 18,          // çarpışma gövdesi genişliği (px)
-    govdeY: 38,          // çarpışma gövdesi yüksekliği (px)
+    govdeY: 30,          // çarpışma gövdesi yüksekliği (px) — 1 karelik (32 px) tünellere sığar
     dokunulmaz: 1.5,     // sn
     saldiriSure: 0.24,   // sn
     saldiriBekleme: 0.32 // sn

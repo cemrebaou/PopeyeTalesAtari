@@ -217,6 +217,11 @@ class GameScene extends Phaser.Scene {
         .setTileScale(cs, cs).setTilePosition(x0 / cs, 0);
     });
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
+    // Ara kayalar: zemin karo setindeki tek yosunlu taş karosu, çarpışmalı
+    (L.kayalar || []).forEach(([x, y]) => {
+      this.onKatman.putTileAt(ASSETLER.tile.sK, x / T, y / T);
+      this.blokCiz(x, y, T, T);
+    });
     // Ara taş basamaklar (yüksek duvarlara çıkış için)
     (L.basamaklar || []).forEach(([x, y, w, h]) => {
       for (let i = 0; i < w; i += T) for (let j = 0; j < h; j += T) {

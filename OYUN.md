@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.17 (`config.js` → `surum`)
+Sürüm: v0.18 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -19,7 +19,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Tam ekran tuşu: tam ekrana geçer ve telefonu **yatay kilitler** (`screen.orientation.lock('landscape')`; Android Chrome'da çalışır, iPhone Safari kilit desteklemez). Telefon dikey tutulursa üstte "Telefonu yan çevirin" uyarısı çıkar.
 
 ## Ana karakter sprite'ı (v0.14)
-`assets/oyuncu.png`: 53 kare, 10 sütun, hücre 182×171 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı (satırlarda 10/8/11/12/8 kare); kareler tek tek tespit edilip kesildi, kirli kahverengi hale temizlendi, satırlar arası boy farkı (şapka genişliğine göre) eşitlendi. Her karede ayak çizgisi y=153, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz). v0.15: zıplama kareleri (10–13) %10, tırmanma kareleri (29–32) %30 daha büyük — küçük hali büyütülmedi, orijinal büyük görselden tek adımda ölçeklendi (pikselleşme yok). 49–52: kullanıcının gönderdiği yeni pogo görselinden kesildi (aynı ölçek ve gövde hizası). Oyunda ayakta boy 48 px (`CONFIG.oyuncu.boy`), çarpışma gövdesi 18×38 px.
+`assets/oyuncu.png`: 53 kare, 10 sütun, hücre 182×171 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı (satırlarda 10/8/11/12/8 kare); kareler tek tek tespit edilip kesildi, kirli kahverengi hale temizlendi, satırlar arası boy farkı (şapka genişliğine göre) eşitlendi. Her karede ayak çizgisi y=153, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz). v0.15: zıplama kareleri (10–13) %10, tırmanma kareleri (29–32) %30 daha büyük — küçük hali büyütülmedi, orijinal büyük görselden tek adımda ölçeklendi (pikselleşme yok). 49–52: kullanıcının gönderdiği yeni pogo görselinden kesildi (aynı ölçek ve gövde hizası). Oyunda ayakta boy 48 px (`CONFIG.oyuncu.boy`), çarpışma gövdesi 18×30 px (v0.18: 38'den 30'a indi — 1 karelik (32 px) tünellere sığması için; şapka tünelde tavana biraz taşabilir).
 | Animasyon | Kareler | Ne zaman |
 |---|---|---|
 | dur | 0–3 | yerde dururken |
@@ -55,7 +55,11 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
 - Yürüme 200 px/sn.
 - **Zıplama yüksekliği** (v0.14 ölçüldü/ayarlandı): tepe = hız² / (2·yerçekimi). Eski: 520²/2800 ≈ 97 px (3 kare) — bölümde 4 karelik 27 basamak vardı, bu yüzden bazı yerlere zıplanamıyordu. Yeni: 625²/2800 ≈ **140 px ≈ 4.4 kare** → **en yüksek basamak 4 kare (128 px) olmalı**. Pogo 700 → ≈ 5.5 kare, pogo + zıpla basılı 790 → ≈ 7 kare, yaprak 950 → ≈ 10 kare.
-- Bölüm taraması: 4 kareyi aşan 5 duvarın dibine ara taş basamak eklendi (`level1.js` → `basamaklar`: 5 ve 7 karelik duvarlar). 10 karelik olanlar sarmaşıkla çıkılan kule duvarları, dokunulmadı. Yeni tepe/duvar yaparken 4 kareyi geçme (geçecekse basamak, sarmaşık ya da yaprak koy).
+- Bölüm taraması (v0.14): 4 kareyi aşan 5 duvarın dibine ara taş basamak eklendi (`level1.js` → `basamaklar`). 10 karelik olanlar sarmaşıkla çıkılan kule duvarları.
+- **Yatay zıplama menzili** (v0.18 ölçüldü; havada tam sağa basılı, zıplama basılı, 60 Hz adımlar): yükseklik farkına göre en uzak iniş — 4 kare yukarı: 110 px (3.4 kare) · 3 yukarı: 137 px (4.3) · 2 yukarı: 153 px (4.8) · 1 yukarı: 167 px (5.2) · aynı hiza: 177 px (5.5) · 1 aşağı: 187 px (5.8) · 3 aşağı: 203 px (6.3).
+- **Rahat zıplama kuralı**: bir atlayış, havada tam hızın **%65'iyle** yapılabiliyorsa rahat sayılır (telefonda kusursuz zamanlama gerekmesin). Pogo hesaba katılmaz. Örn. 3 kare yukarı + 3 kare boşluk (100. sütun şelalesi yanı) tam menzilde ancak bloğun ucuna 9 px'le iniliyordu → arasına kaya kondu.
+- **Ara kayalar** (v0.18, `level1.js` → `kayalar`, 8 adet): tek yosunlu taş karosu (`sK`), çarpışmalı. Rahat zıplamayla ulaşılamayan yerler simülasyonla bulundu, her kaya tek tek denenerek en az kayayla çözüldü. Kontrol: patron, çıkış, 5 kontrol noktası, tüm sandıklar, elmaslar ve özel eşyalar pogo kullanmadan rahat zıplamayla ulaşılabilir.
+- **Kontrol aracı**: `node araclar/erisim.js` → ulaşılamayan önemli yerleri listeler; `node araclar/erisim.js --coz` → çözüm için kaya önerir. Bölüme yeni platform/tepe/eşya eklenince çalıştır.
 - Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, düşman 200, patron 5000.
 
 ## Düşmanlar
@@ -78,8 +82,9 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 
 `level1.js` otomatik üretilmiştir: `on` (taş zemin karoları), `toprak` (toprak dokulu bölgeler) ve `arka` (arka plan karoları) satırları + çarpışma blokları. Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
 
-Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak; piksel; n = orta parça sayısı).
+Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)
 - `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` karo numaraları ve obje boyutları (otomatik üretildi) · `assets/` görseller
 - `main.js` oyun ayarı, ekran boyutlama · `boot.js` görsel yükleme, karakter animasyonları, yer tutucu görseller · `game.js` sahne, bölüm kurulumu, kamera · `oyuncu.js` oyuncu mekanikleri, sandık çekme, animasyon seçimi · `dusman.js` düşmanlar, patron, toplanabilirler, sandık açma · `ui.js` UI sahnesi (HUD, tuşlar, tam ekran, bitiş ekranı)

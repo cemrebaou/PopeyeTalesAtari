@@ -783,6 +783,17 @@ const LEVEL1 = {
     [1376,1536,32,96],
     [2176,4064,32,96]
   ],
+  // Ara kayalar [x, y] (piksel, 1 karo) — rahat zıplama menzili için (araclar/erisim.js ile hesaplandı)
+  kayalar: [
+    [2368,1536],
+    [4896,1728],
+    [4768,1760],
+    [1312,2176],
+    [3648,2400],
+    [3200,2464],
+    [2944,2592],
+    [1664,3456]
+  ],
   // [x, zemin y]
   kontrol: [
     [1981,3584],
