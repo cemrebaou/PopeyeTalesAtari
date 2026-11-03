@@ -82,8 +82,10 @@ Object.assign(GameScene.prototype, {
       }
     } else if (!yerde && this.asiliBekle <= 0 && b.velocity.y > 0 && this.knock <= 0 && !this.pogoModu) {
       const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
+      // Sadece yandan: kanca hizası, gövdenin üstü ve altı aynı yanda taşa değmeli (alttan / kenar köşesinden asılmaz)
       const duvar = y ? this.kancaDuvar(y) : null;
-      if (duvar) {
+      const yandan = duvar && this.duvarVar(y, b.y + 2, 4) && this.duvarVar(y, b.bottom - 8, 4);
+      if (yandan) {
         // Gövdeyi taşa yasla (arada boşluk kalmasın); kanca görselde taşın içine girer
         const dx = y > 0 ? duvar.left - b.right : duvar.right - b.left;
         p.x += dx; b.position.x += dx;
