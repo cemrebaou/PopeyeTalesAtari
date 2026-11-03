@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.31 (`config.js` → `surum`)
+Sürüm: v0.32 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -28,7 +28,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 
 ## Ana karakter sprite'ı (v0.14)
 `assets/oyuncu.png`: 53 kare, 10 sütun, hücre 176×141 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı; kareler tek tek tespit edilip kesildi, kirli hale temizlendi. Her karede ayak çizgisi y=125, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz).
-**v0.19: bütün kareler tek ve sabit ölçekte (%100)** — satır bazlı büyütme/küçültme yok (v0.15'teki zıplama %10 / tırmanma %30 büyütmesi iptal). Asıl sorun eski bekleme ve koşma karelerinin büyük çizilmesiydi: 0–9 kullanıcının gönderdiği yeni bekleme (4) ve koşma (6) görselleriyle değiştirildi (kenardaki kırmızı hale temizlendi). 49–52 ayrı gönderilen pogo görselinden. Oyunda bekleme karesinde ayakta boy 48 px (`CONFIG.oyuncu.boy`). Çarpışma gövdesi (v0.26) ayakta 18×42 px → 1 karelik (32 px) aralıklara sığmaz; eğikken 18×26 px (`govdeEgik`) → eğilerek geçilir. Üstü kapalı yerde ↓ bırakılsa da eğik kalır ve zıplanamaz; açık yere çıkınca kalkar.
+**v0.19: bütün kareler tek ve sabit ölçekte (%100)** — satır bazlı büyütme/küçültme yok (v0.15'teki zıplama %10 / tırmanma %30 büyütmesi iptal). Asıl sorun eski bekleme ve koşma karelerinin büyük çizilmesiydi: 0–9 kullanıcının gönderdiği yeni bekleme (4) ve koşma (6) görselleriyle değiştirildi (kenardaki kırmızı hale temizlendi). 49–52 ayrı gönderilen pogo görselinden. Oyunda bekleme karesinde ayakta boy 52.8 px (`CONFIG.oyuncu.boy`, v0.32'de 48'den %10 büyütüldü; animasyon ölçek oranları korunur). Çarpışma gövdesi (v0.26) ayakta 18×42 px → 1 karelik (32 px) aralıklara sığmaz; eğikken 18×26 px (`govdeEgik`) → eğilerek geçilir. Üstü kapalı yerde ↓ bırakılsa da eğik kalır ve zıplanamaz; açık yere çıkınca kalkar.
 | Animasyon | Kareler | Ne zaman |
 |---|---|---|
 | dur | 0–3 | yerde dururken |
@@ -85,6 +85,8 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 
 ## Düşmanlar
 Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/dusmanKes.py` → her düşman `assets/d_<ad>.png` şeridi, mermiler `atesTopu.png` / `mizrak.png`, ölçüler `assetlar.js` → `ASSETLER.dusman` (hücre, ayak çizgisi, oyundaki görünür boy `boy`, animasyon kareleri). Kenardaki renkli hale temizlenir. Görseller sağa bakar, sola giderken çevrilir. Ölünce gövde kapanır, parçalanma animasyonu oynar, solup kaybolur (patronda bitince kapı açılır).
+v0.32: tüm düşmanlar %10 küçük (`CONFIG.dusmanOlcek` 0.9, görsel ve gövde; tablodaki boylar ölçeksiz değer).
+
 | Düşman | Animasyonlar (kare) | Boy (px) |
 |---|---|---|
 | gul (gül) | yuru 6, ol 4 | 36 |

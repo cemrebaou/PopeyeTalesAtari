@@ -6,7 +6,9 @@ Object.assign(GameScene.prototype, {
     // Görsel: ASSETLER.dusman[ad] şeridi; ölçek görünür boya göre. Gövde (bw×bh oyun px) ayak çizgisinde, ortalı.
     // ucan: y = merkez (arı, örümcek), diğerleri y = ayak noktası
     const mk = (ad, bw, bh, ucan, y) => {
-      const D = ASSETLER.dusman[ad], s = D.boy / (D.ayak - D.ust);
+      const O = CONFIG.dusmanOlcek;   // tüm düşmanlar: görsel ve gövde birlikte
+      bw *= O; bh *= O;
+      const D = ASSETLER.dusman[ad], s = D.boy * O / (D.ayak - D.ust);
       const oy = ucan ? (D.ust + D.ayak) / 2 : D.ayak;
       const d = this.dusmanlar.create(e.x, y, 'd_' + ad, 0).setOrigin(0.5, oy / D.h).setScale(s);
       d.body.setSize(bw / s, bh / s, false).setOffset((D.w - bw / s) / 2, ucan ? oy - bh / s / 2 : D.ayak - bh / s);
@@ -102,7 +104,7 @@ Object.assign(GameScene.prototype, {
         case 'orumcek': {
           const t = (Math.sin(time * 0.0014 + d.faz) + 1) / 2;
           d.y = d.ustY + (d.altY - d.ustY) * t;
-          this.ipGrafik.lineStyle(1.5, 0xeeeeee, 0.9).lineBetween(d.x, d.tavan, d.x, d.y - ASSETLER.dusman.orumcek.boy * 0.45);
+          this.ipGrafik.lineStyle(1.5, 0xeeeeee, 0.9).lineBetween(d.x, d.tavan, d.x, d.y - ASSETLER.dusman.orumcek.boy * CONFIG.dusmanOlcek * 0.45);
           break;
         }
         case 'boss':
