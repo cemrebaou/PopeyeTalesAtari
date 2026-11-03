@@ -29,6 +29,14 @@ ek = yukle('oyuncu_asiliHasar.png'); ek = kes(ek, 0, ek.shape[0], 0, ek.shape[1]
 asiliBoy = kareler[0][0].shape[0]
 kareler.append((ek, 0, asiliBoy / ek.shape[0]))
 out = Image.new('RGBA', (W * 10, H * 2), (0, 0, 0, 0))
+# v0.36: asılma kareleri (0–5, 17) bastona göre hizalanır → baston her karede aynı yerde sabit, gövde sallanır.
+# Hedef: en uzun asılma karesinin ayağı ayak çizgisinde, baston sağ ucu x=KANCA_X.
+def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
+    b = arr[:, :, 3] > 150; t = np.where(b.any(1))[0][0]
+    return t, np.where(b[t:t + 14].any(0))[0][-1]
+ASILI = [0, 1, 2, 3, 4, 5, 17]
+ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
+KANCA_X = 88 + 30
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
     o = OLCEK * (k[2] if len(k) > 2 else 1)
@@ -37,6 +45,9 @@ for n, k in enumerate(kareler):
     hx = np.where(b[t:t + 30].any(0))[0]; hc = (hx[0] + hx[-1]) / 2   # şapka/baş üstü ortası
     f = f.resize((max(1, round(f.width * o)), max(1, round(f.height * o))), Image.LANCZOS)
     x = int(round(88 - hc * o)); y = AY + alt - f.height
+    if n in ASILI:
+        t, xr = baston(arr)
+        x = int(round(KANCA_X - xr * o)); y = int(round(AY - ASILI_BOY - t * o))
     x = max(0, min(W - f.width, x)); y = max(0, y)
     cell = Image.new('RGBA', (W, H), (0, 0, 0, 0)); cell.alpha_composite(f, (x, y))
     out.paste(cell, ((n % 10) * W, (n // 10) * H))
