@@ -8,10 +8,16 @@
   html, body { margin: 0; height: 100%; background: #111; overflow: hidden; touch-action: none; }
   #oyun { width: 100%; height: 100%; }
   canvas { display: block; }
+  /* Telefon dikey tutulursa uyarı (tam ekran tuşu yatay kilitler; kilitleyemeyen tarayıcılar için) */
+  #dondur { display: none; position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+    background: #000000b0; color: #fff; font: 15px monospace; padding: 8px 14px; border-radius: 8px;
+    pointer-events: none; z-index: 10; white-space: nowrap; }
+  @media (orientation: portrait) and (pointer: coarse) { #dondur { display: block; } }
 </style>
 </head>
 <body>
 <div id="oyun"></div>
+<div id="dondur">⟳ Telefonu yan çevirin</div>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script src="config.js"></script>
 <script src="level1.js"></script>

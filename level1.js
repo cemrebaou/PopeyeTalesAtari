@@ -764,7 +764,7 @@ const LEVEL1 = {
     [5076,3952],
     [3365,3504]
   ],
-  // [tip, x, y]  tip: buyuk | kizil | bomba
+  // [tip, x, y]  tip: buyuk | kizil
   ozeller: [
     ["buyuk",2370,3376],
     ["buyuk",2574,2352],
@@ -773,15 +773,15 @@ const LEVEL1 = {
     ["buyuk",4805,4080],
     ["kizil",2575,570],
     ["kizil",506,1776],
-    ["kizil",318,1776],
-    ["bomba",818,3567],
-    ["bomba",3355,1836],
-    ["bomba",3982,1836],
-    ["bomba",1848,3342],
-    ["bomba",4927,3572],
-    ["bomba",2771,4148],
-    ["bomba",1769,3344],
-    ["bomba",4807,1266]
+    ["kizil",318,1776]
+  ],
+  // Ara taş basamaklar [x, y, w, h] — zıplama yüksekliğini (4 kare) aşan duvarların dibine
+  basamaklar: [
+    [1376,2336,32,32],
+    [4224,3552,32,32],
+    [4768,4224,32,64],
+    [1376,1536,32,96],
+    [2176,4064,32,96]
   ],
   // [x, zemin y]
   kontrol: [
@@ -794,9 +794,9 @@ const LEVEL1 = {
   // [x, y, yazı]
   ipuclari: [
     [576,3290,"← →  Yürü\n↑ veya SPACE: Zıpla (basılı tut = daha yüksek)"],
-    [1016,3290,"↓ basılı tut = POGO (yerde de seker)!\nDüşmanlara ve dikenlere zıpla"],
-    [1496,3290,"X: Baston salla\nC: Bomba at (bomba topla)"],
-    [2264,4024,"Kırmızı takoz: sadece bomba kırar"]
+    [1016,3290,"Zıpla, havada ↓ basılı tut = POGO!\nDüşmanlara ve dikenlere sek"],
+    [1496,3290,"X: Baston salla (sandık açar)\nC basılı tut: Sandığı bastonla çek"],
+    [2264,4024,"Kırmızı takoz: bastonla kır (X)"]
   ],
   // tip: gul | ari | maymun | kopek | yilan | yuvarlak | orumcek
   dusmanlar: [

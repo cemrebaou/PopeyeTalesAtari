@@ -1,4 +1,4 @@
-// Düşmanlar, patron, bomba, mermiler, toplanabilirler ve sandıklar
+// Düşmanlar, patron, mermiler, toplanabilirler ve sandıklar
 Object.assign(GameScene.prototype, {
 
   // Düşman yaratma. x, y = ayak noktası (piksel). Uçanlarda y = merkez.
@@ -145,28 +145,6 @@ Object.assign(GameScene.prototype, {
     this.mermiler.getChildren().slice().forEach(m => {
       m.omur -= dt;
       if (m.omur <= 0) m.destroy();
-    });
-  },
-
-  // ---- Sandık çekme (madde 9) ----
-  // Sandık tutma/bırakma sandikTutmayaDene() oyuncu.js'de; sandığı düşmana çarpma:
-  sandikFirlat() {
-    if (!this.cekilenSandik) return;
-    const s = this.cekilenSandik;
-    this.cekilenSandik = null; this.cekiyor = false;
-    // Sandığı fırlat (ileriye doğru)
-    s.body.setImmovable(false);
-    this.physics.world.enable(s);
-    s.body.setVelocity(this.bakis * 320, -120);
-    s.body.setAllowGravity(true);
-    s.setDepth(4);
-    // 3 saniye sonra sandık eski haline döner
-    this.time.delayedCall(3000, () => {
-      if (s.active && !s.acik) {
-        s.body.reset(s.x, s.y);
-        s.body.setImmovable(true);
-        s.refreshBody();
-      }
     });
   },
 
@@ -319,6 +297,7 @@ Object.assign(GameScene.prototype, {
     s.acik = true;
     s.setTexture('sandikAcik');
     this.boyutla(s, 'sandikAcik', { w: 42 });
+    this.sandikGovde(s);   // açık sandık da aynı kutu: üstüne çıkılır, çekilebilir
     if (s.odul === 'kalp') {
       this.kalpVer(s.x, s.y);
     } else {

@@ -5,27 +5,19 @@ class BootScene extends Phaser.Scene {
   preload() {
     // Zemin + arka plan karoları (tek tileset) ve objeler (assets/ klasörü)
     this.load.image('tileset', 'assets/tileset.png');
-    this.load.image('cimen', 'assets/cimen.png');     // çimen şapkası (toprak üst kenarlarına)
-    this.load.image('kenar', 'assets/kenar.png');     // toprak sol/sağ kenar yosunu
+    // Çimen ve kenar: orijinal görsellerin kaliteli küçültülmüş sürümleri (GPU'da aşırı küçültme kırık görüntü yapıyordu)
+    this.load.image('cimen', 'assets/cimen_k.png');   // çimen (toprak üst kenarlarına yapışık)
+    this.load.image('kenar', 'assets/kenar_k.png');   // toprak sol/sağ kenar yosunu
     this.load.image('toprak', 'assets/toprak.jpg');   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
-    // Ana karakter sprite sheet: 1536x1024, 10 sütun x 5 satır, her kare 153x204 (beyaz arkaplan)
-    this.load.spritesheet('oyuncuSprite', 'assets/oyuncu_sprite.png', {
-      frameWidth: 153, frameHeight: 204
-    });
+    // Ana karakter: 49 kare, her hücre 182x148, ayak çizgisi y=130, kafa hücrenin yatay ortasında
+    this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: 182, frameHeight: 148 });
   }
 
   create() {
     const g = this.make.graphics({ x: 0, y: 0 }, false);
     const yap = (anahtar, w, h, ciz) => { g.clear(); ciz(g); g.generateTexture(anahtar, w, h); };
 
-    // Oyuncu: mavi küp
-    yap('oyuncu', 28, 28, g => {
-      g.fillStyle(0x2f6fff, 1).fillRect(0, 0, 28, 28);
-      g.fillStyle(0x1a4acc, 1).fillRect(0, 22, 28, 6);
-      g.fillStyle(0xffffff, 1).fillRect(15, 6, 8, 8);
-      g.fillStyle(0x000000, 1).fillRect(19, 8, 4, 5);
-    });
     // Yürüyen düşman: pembe küp
     yap('walker', 28, 28, g => {
       g.fillStyle(0xff6fb5, 1).fillRect(0, 0, 28, 28);
@@ -104,18 +96,6 @@ class BootScene extends Phaser.Scene {
       g.fillStyle(0xff7a1a, 1).fillCircle(6, 6, 6);
       g.fillStyle(0xffe14d, 1).fillCircle(6, 6, 3);
     });
-    // Bomba (atılan) ve bomba eşyası
-    yap('bomba', 16, 16, g => {
-      g.fillStyle(0x222222, 1).fillCircle(8, 9, 7);
-      g.fillStyle(0xffffff, 0.8).fillCircle(5, 6, 2);
-      g.fillStyle(0xff7a1a, 1).fillRect(8, 0, 2, 4);
-    });
-    yap('bombaItem', 22, 22, g => {
-      g.fillStyle(0x222222, 1).fillCircle(11, 13, 9);
-      g.lineStyle(2, 0xffe14d, 1).strokeCircle(11, 13, 9);
-      g.fillStyle(0xffffff, 0.8).fillCircle(7, 9, 2);
-      g.fillStyle(0xff7a1a, 1).fillRect(11, 1, 2, 5);
-    });
     // Toplanabilirler
     yap('kizilelmas', 24, 24, g => {
       g.fillStyle(0xff3b3b, 1).fillCircle(12, 12, 11);
@@ -133,27 +113,26 @@ class BootScene extends Phaser.Scene {
       g.fillStyle(0xff3b3b, 1).fillCircle(6, 7, 5).fillCircle(14, 7, 5).fillTriangle(1, 9, 19, 9, 10, 19);
     });
 
-    // Baston
-    yap('baston', 4, 24, g => {
-      g.fillStyle(0xffd23f, 1).fillRect(0, 0, 4, 5);
-      g.fillStyle(0x6b3f1d, 1).fillRect(0, 5, 4, 19);
-    });
     g.destroy();
 
-    // Ana karakter animasyonları (sprite sheet: 10 sütun x 5 satır = 50 kare)
+    // Ana karakter animasyonları (kare numaraları assets/oyuncu.png sırasına göre)
     const A = this.anims;
-    A.create({ key: 'idle',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 0,  end: 3  }), frameRate: 6,  repeat: -1 });
-    A.create({ key: 'run',       frames: A.generateFrameNumbers('oyuncuSprite', { start: 4,  end: 9  }), frameRate: 10, repeat: -1 });
-    A.create({ key: 'jump',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 10, end: 12 }), frameRate: 8,  repeat: 0  });
-    A.create({ key: 'land',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 13, end: 13 }), frameRate: 6,  repeat: 0  });
-    A.create({ key: 'hurt',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 14, end: 16 }), frameRate: 8,  repeat: 0  });
-    A.create({ key: 'saldir',    frames: A.generateFrameNumbers('oyuncuSprite', { start: 20, end: 23 }), frameRate: 12, repeat: 0  });
-    A.create({ key: 'havaSaldir',frames: A.generateFrameNumbers('oyuncuSprite', { start: 24, end: 26 }), frameRate: 12, repeat: 0  });
-    A.create({ key: 'pogo',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 30, end: 32 }), frameRate: 10, repeat: -1 });
-    A.create({ key: 'cek',       frames: A.generateFrameNumbers('oyuncuSprite', { start: 33, end: 35 }), frameRate: 8,  repeat: -1 });
-    A.create({ key: 'bastonilet',frames: A.generateFrameNumbers('oyuncuSprite', { start: 40, end: 44 }), frameRate: 10, repeat: 0  });
-    A.create({ key: 'it',        frames: A.generateFrameNumbers('oyuncuSprite', { start: 45, end: 49 }), frameRate: 8,  repeat: -1 });
-
+    const an = (key, kareler, frameRate, repeat) =>
+      A.create({ key, frames: kareler.map(frame => ({ key: 'oyuncu', frame })), frameRate, repeat });
+    const aralik = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+    an('dur',     aralik(0, 3),   5,  -1);  // bekleme (nefes)
+    an('kos',     aralik(4, 9),   12, -1);  // koşma
+    an('zipla',   [10, 11, 12],   14, 0);   // zıplama: çömel → kalk → tepe
+    an('dus',     [13],           1,  0);   // düşüş
+    an('in',      [14],           1,  0);   // yere iniş (toz)
+    an('sersem',  aralik(15, 17), 10, -1);  // hasar / sersemleme (yıldızlar)
+    an('vur',     aralik(24, 28), 22, 0);   // baston vuruşu
+    an('tirman',  aralik(29, 32), 8,  -1);  // sarmaşığa tırmanma
+    an('pogoYuk', [35],           1,  0);   // pogo: yükselirken
+    an('pogoDus', [36, 37],       8,  0);   // pogo: düşerken baston aşağıda
+    an('pogoVur', [34],           1,  0);   // pogo: yere/düşmana vuruş (kıvılcım)
+    an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
+    an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
     this.scene.start('Game');
   }
 }

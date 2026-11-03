@@ -1,22 +1,24 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.13",
-  genislik: 960,
-  yukseklik: 544,
+  surum: "v0.14",
   tile: 32,
   cimenGenislik: 32,    // çimen görselinin bir tekrarının oyundaki genişliği (px) = bir kare
-  cimenUstOran: 0.0,    // çimen görselinin toprak çizgisinin üstünde kalan oranı (0 = tam yapışık)
+  cimenUstOran: 0,      // 0 = çimen toprak çizgisinden başlar, zemine boyanmış gibi (üstüne taşmaz)
   toprakDoku: 320,      // toprak dokusunun bir tekrarının oyundaki boyu (px)
   yeraltiKarartma: 0x4a4a4a, // yeraltı arka plan toprağının karartma tonu (koyu = daha karanlık)
+  kamera: {
+    gorunurY: 360,      // ekranda görünen dünya yüksekliği (px) — küçük = daha yakın kamera
+    minGorunurX: 560    // dar/dikey ekranda en az bu kadar dünya genişliği görünür
+  },
   fizik: {
     yercekimi: 1400,
     yurume: 200,
-    ziplama: -520,
-    pogo: -600,
-    pogoYuksek: -690,   // pogo sırasında zıpla tuşu basılıysa
+    ziplama: -625,      // tepe ≈ 625²/(2·1400) ≈ 140 px ≈ 4.4 kare → 4 karelik basamaklar rahat aşılır
+    pogo: -700,         // ≈ 175 px ≈ 5.5 kare
+    pogoYuksek: -790,   // pogo sırasında zıpla tuşu basılıysa ≈ 223 px ≈ 7 kare
     maxDusme: 720,
     sarmasik: 120,
-    yaprak: -850,       // zıplatan yaprak (~8 tile)
+    yaprak: -950,       // zıplatan yaprak (~10 kare)
     bant: 70,           // konveyör bant itme hızı
     catlakGecikme: 950, // çatlak taş: bastıktan sonra düşme süresi (ms)
     catlakYenilen: 3000 // çatlak taş: geri gelme süresi (ms)
@@ -24,11 +26,18 @@ const CONFIG = {
   oyuncu: {
     canMax: 3,
     yasam: 3,
+    boy: 48,             // karakterin ekrandaki boyu (dünya px, ayakta)
+    govdeG: 18,          // çarpışma gövdesi genişliği (px)
+    govdeY: 38,          // çarpışma gövdesi yüksekliği (px)
     dokunulmaz: 1.5,     // sn
-    saldiriSure: 0.2,    // sn
-    saldiriBekleme: 0.35 // sn
+    saldiriSure: 0.24,   // sn
+    saldiriBekleme: 0.32 // sn
+  },
+  cek: {
+    menzil: 30,          // baston kancasının uzanabildiği mesafe (oyuncu gövdesinden sandığa, px)
+    hiz: 110,            // geri yürüyerek çekme hızı (px/sn)
+    uzatSure: 0.2        // baston uzatma süresi (sn)
   },
   puan: { elmas: 100, buyuk: 1000, kizil: 500, kalpFazla: 500, dusman: 200, patron: 5000 },
-  bomba: { fitil: 1.3, yaricap: 96, bekleme: 0.4 },   // fitil sn, patlama yarıçapı px
   patron: { can: 4, uyanMesafe: 520 }
 };

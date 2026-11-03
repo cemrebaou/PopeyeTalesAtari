@@ -1,4 +1,4 @@
-// Oyuncu mekanikleri: yürüme, zıplama, POGO, baston, sarmaşık, hasar, ölüm
+// Oyuncu mekanikleri: yürüme, zıplama, POGO, baston, sandık çekme, sarmaşık, hasar, ölüm, animasyon
 Object.assign(GameScene.prototype, {
 
   girdi() {
@@ -6,7 +6,7 @@ Object.assign(GameScene.prototype, {
     const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
     const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // ↑ de zıplatır
     const saldir = K.saldir.isDown || K.k.isDown || T.saldir;
-    const cek = K.bomba.isDown || K.l.isDown || T.bomba;   // bomba tuşu artık sandık çekme
+    const cek = K.cek.isDown || K.l.isDown || T.cek;
     const k = {
       sol: K.sol.isDown || K.a.isDown || T.sol,
       sag: K.sag.isDown || K.d.isDown || T.sag,
@@ -27,7 +27,7 @@ Object.assign(GameScene.prototype, {
 
   updatePlayer(time, dt) {
     const p = this.player, b = p.body, S = this.durum, F = CONFIG.fizik;
-    if (S.olu) { this.baston.setVisible(false); return; }
+    if (S.olu) return;
 
     // Çukura düşme
     if (p.y > this.dunyaY + 60) { this.oyuncuOl(); return; }
@@ -40,59 +40,57 @@ Object.assign(GameScene.prototype, {
     if (this.dokunulmaz > 0) this.dokunulmaz -= dt;
     if (this.knock > 0) this.knock -= dt;
     if (this.saldiriBekleme > 0) this.saldiriBekleme -= dt;
+    if (this.pogoVurZaman > 0) this.pogoVurZaman -= dt;
+    if (this.inisZaman > 0) this.inisZaman -= dt;
+    if (this.sersemZaman > 0) this.sersemZaman -= dt;
     p.setAlpha(this.dokunulmaz > 0 && Math.floor(time / 90) % 2 ? 0.35 : 1);
 
     const yerde = b.blocked.down || b.touching.down;
+    if (yerde && this.havadaydi && !this.pogoModu) this.inisZaman = 0.1;   // iniş tozu karesi
+    this.havadaydi = !yerde;
     this.coyote = yerde ? 0.09 : this.coyote - dt;
     this.ziplaTampon = k.ziplaBas ? 0.11 : this.ziplaTampon - dt;
 
     // Sarmaşık
     this.sarmasikGuncelle(k, yerde);
-    if (this.tirmaniyor) { this.baston.setVisible(false); this.pogoModu = false; return; }
+    if (this.tirmaniyor) {
+      this.pogoModu = false; this.pogoAktif = false;
+      this.cekBirak();
+      this.animasyon(yerde);
+      return;
+    }
 
-    // Yürüme
-    const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
-    if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
-    if (this.knock <= 0) b.setVelocityX(yon * F.yurume + (yerde ? bant : 0));
+    // Sandık çekme (C basılı): baston uzanır, sandığa takılır, geri yürüyerek sandık çekilir
+    this.cekGuncelle(k, yerde, dt);
+    const cekiyor = this.cekDurum !== null;
+
+    // Yürüme (çekerken kendi hareketi cekGuncelle'de)
+    if (!cekiyor) {
+      const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
+      if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
+      if (this.knock <= 0) b.setVelocityX(yon * F.yurume + (yerde ? bant : 0));
+    }
 
     // Zıplama (basılı tut = yüksek, bırak = kısa)
-    if (this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {
+    if (!cekiyor && this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {
       b.setVelocityY(F.ziplama);
       this.ziplaTampon = 0; this.coyote = 0; this.ziplarken = true;
     }
-    if (this.ziplarken && !k.zipla && b.velocity.y < -180) {
+    if (this.ziplarken && !k.zipla && b.velocity.y < -200) {
       b.setVelocityY(b.velocity.y * 0.5);
       this.ziplarken = false;
     }
     if (yerde && b.velocity.y >= 0) this.ziplarken = false;
 
-    // POGO: aşağı basılı tutunca baston çıkar; havada düşmana/dikene, yerde zemine zıplar
-    this.pogoModu = k.asagi;
+    // POGO: sadece havadayken açılır (önce zıpla, sonra ↓ basılı tut). Yerde ↓ basmak bir şey yapmaz.
+    // Açıldıktan sonra ↓ basılı kaldıkça her yere (zemin, düşman, diken, sandık) seker.
+    if (!k.asagi || cekiyor) this.pogoAktif = false;
+    else if (!yerde) this.pogoAktif = true;
+    this.pogoModu = this.pogoAktif;
     if (this.pogoModu && yerde && b.velocity.y >= 0 && this.knock <= 0) this.pogoZipla();
 
-    // Sandık çek/bırak (C / L) — madde 9
-    if (k.cekBas) {
-      if (this.cekilenSandik) {
-        // bırak
-        this.cekilenSandik = null;
-        this.cekiyor = false;
-      } else {
-        // yakındaki sandığı tut
-        this.sandikTutmayaDene();
-      }
-    }
-    if (this.cekilenSandik && !this.cekilenSandik.active) {
-      this.cekilenSandik = null; this.cekiyor = false;
-    }
-    if (this.cekilenSandik) {
-      // sandığı oyuncunun yanına taşı
-      const hedefX = p.x + this.bakis * 28;
-      this.cekilenSandik.setPosition(hedefX, this.cekilenSandik.y);
-      this.cekilenSandik.refreshBody();
-    }
-
-    // Baston salla (X) — madde 3: sadece havadayken çalışır
-    if (k.saldirBas && this.saldiriBekleme <= 0 && !yerde) {
+    // Baston vuruşu (X) — yerde ve havada
+    if (k.saldirBas && this.saldiriBekleme <= 0 && !cekiyor && !this.pogoModu) {
       this.saldiriZaman = CONFIG.oyuncu.saldiriSure;
       this.saldiriBekleme = CONFIG.oyuncu.saldiriBekleme;
       this.vurulan = new Set();
@@ -100,18 +98,6 @@ Object.assign(GameScene.prototype, {
     if (this.saldiriZaman > 0) {
       this.saldiriZaman -= dt;
       this.saldiriVur();
-    }
-
-    // Animasyon güncelleme
-    this.animasyonGuncelle(yerde, k);
-
-    // Baston görseli
-    if (this.saldiriZaman > 0) {
-      this.baston.setVisible(true).setAngle(this.bakis > 0 ? -90 : 90).setPosition(p.x, p.y - 12);
-    } else if (this.pogoModu) {
-      this.baston.setVisible(true).setAngle(0).setPosition(p.x, p.y - 4);
-    } else {
-      this.baston.setVisible(false);
     }
 
     // Dikenler (pogo ile güvenli)
@@ -124,51 +110,96 @@ Object.assign(GameScene.prototype, {
         break;
       }
     }
+
+    this.animasyon(yerde);
   },
 
-  animasyonGuncelle(yerde, k) {
-    const p = this.player;
-    const b = p.body;
-    const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
-
-    // Hurt (hasar aldı)
-    if (this.dokunulmaz > 0.8) { if (p.anims.currentAnim?.key !== 'hurt') p.play('hurt'); return; }
-
-    // Pogo
-    if (this.pogoModu && !yerde) { if (p.anims.currentAnim?.key !== 'pogo') p.play('pogo'); return; }
-
-    // Baston saldırısı (havada)
-    if (this.saldiriZaman > 0) {
-      if (yerde) { if (p.anims.currentAnim?.key !== 'saldir') p.play('saldir'); }
-      else        { if (p.anims.currentAnim?.key !== 'havaSaldir') p.play('havaSaldir'); }
+  // ---- Sandık çekme ----
+  cekGuncelle(k, yerde, dt) {
+    const C = CONFIG.cek, p = this.player, b = p.body;
+    // Bırakma koşulları
+    if (this.cekDurum && (!k.cek || !yerde || this.knock > 0 || k.ziplaBas)) this.cekBirak();
+    // Başlat: C'ye basınca baston uzanır; önünde sandık varsa takılır
+    if (!this.cekDurum && k.cekBas && yerde && this.knock <= 0 && this.saldiriZaman <= 0) {
+      this.cekDurum = 'uzat';
+      this.cekZaman = C.uzatSure;
+      this.cekSandik = this.cekHedefBul();
+    }
+    if (!this.cekDurum) return;
+    if (this.cekDurum === 'uzat') {
+      b.setVelocityX(0);
+      this.cekZaman -= dt;
+      if (this.cekZaman <= 0) {
+        if (this.cekSandik && this.cekSandik.active) {
+          this.cekDurum = 'cek';
+          this.cekMesafe = Math.max(0, this.cekBosluk(this.cekSandik));
+        } else {
+          this.cekBirak();   // boşa uzatıldı
+        }
+      }
       return;
     }
-
-    // Sandık çekme
-    if (this.cekilenSandik) { if (p.anims.currentAnim?.key !== 'cek') p.play('cek'); return; }
-
-    // Havada
-    if (!yerde) {
-      if (b.velocity.y < 0) { if (p.anims.currentAnim?.key !== 'jump') p.play('jump'); }
-      else                   { if (p.anims.currentAnim?.key !== 'land') p.play('land'); }
-      return;
-    }
-
-    // Yerde
-    if (yon !== 0) { if (p.anims.currentAnim?.key !== 'run') p.play('run'); }
-    else           { if (p.anims.currentAnim?.key !== 'idle') p.play('idle'); }
+    // 'cek': sadece geri (sandıktan uzağa) yürünebilir, sandık aynı mesafede peşinden gelir
+    const s = this.cekSandik;
+    if (!s || !s.active || !(s.body.blocked.down || s.body.touching.down)) { this.cekBirak(); return; }
+    const geri = (this.bakis > 0 ? k.sol : k.sag) ? -this.bakis : 0;
+    b.setVelocityX(geri * C.hiz);
+    const fark = this.cekBosluk(s) - this.cekMesafe;
+    if (fark > C.menzil) { this.cekBirak(); return; }
+    s.body.setVelocityX(b.velocity.x - this.bakis * fark * 10);
   },
 
-  sandikTutmayaDene() {
-    const p = this.player;
-    const mesafe = 50;
-    let enYakin = null, enYakinMes = mesafe;
+  // Oyuncu ile sandık arasındaki yatay boşluk (bakılan yönde)
+  cekBosluk(s) {
+    const b = this.player.body;
+    return this.bakis > 0 ? s.body.left - b.right : b.left - s.body.right;
+  },
+
+  // Bakılan yönde, aynı zeminde, baston menzilindeki en yakın sandık
+  cekHedefBul() {
+    const b = this.player.body;
+    let en = null, enB = Infinity;
     this.sandiklar.getChildren().forEach(s => {
-      if (!s.active || s.acik) return;
-      const d = Math.abs(s.x - p.x);
-      if (d < enYakinMes) { enYakin = s; enYakinMes = d; }
+      if (!s.active) return;
+      if (Math.abs(s.body.bottom - b.bottom) > 10) return;
+      const bosluk = this.cekBosluk(s);
+      if (bosluk < -4 || bosluk > CONFIG.cek.menzil) return;
+      if (bosluk < enB) { en = s; enB = bosluk; }
     });
-    if (enYakin) { this.cekilenSandik = enYakin; this.cekiyor = true; }
+    return en;
+  },
+
+  cekBirak() {
+    if (this.cekSandik && this.cekSandik.active) this.cekSandik.body.setVelocityX(0);
+    this.cekDurum = null;
+    this.cekSandik = null;
+  },
+
+  // Oyuncu sandığa değince: pogo ile üstüne inerse sandık açılır ve seker
+  sandikTemas(p, s) {
+    if (this.pogoModu && p.body.touching.down && s.body.touching.up) {
+      this.sandikAc(s);
+      this.pogoZipla();
+    }
+  },
+
+  // ---- Animasyon ----
+  animasyon(yerde) {
+    const p = this.player, b = p.body;
+    let a, durdur = false;
+    if (this.sersemZaman > 0 || this.knock > 0) a = 'sersem';
+    else if (this.tirmaniyor) { a = 'tirman'; durdur = b.velocity.y === 0; }
+    else if (this.cekDurum === 'uzat') a = 'uzat';
+    else if (this.cekDurum === 'cek') { a = 'cek'; durdur = b.velocity.x === 0; }
+    else if (this.saldiriZaman > 0) a = 'vur';
+    else if (this.pogoModu && !yerde) a = this.pogoVurZaman > 0 ? 'pogoVur' : (b.velocity.y < 0 ? 'pogoYuk' : 'pogoDus');
+    else if (!yerde) a = b.velocity.y < 0 ? 'zipla' : 'dus';
+    else if (this.inisZaman > 0) a = 'in';
+    else if (Math.abs(b.velocity.x) > 10) a = 'kos';
+    else a = 'dur';
+    if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
+    if (durdur) { if (!p.anims.isPaused) p.anims.pause(); }
+    else if (p.anims.isPaused) p.anims.resume();
   },
 
   pogoZipla() {
@@ -176,6 +207,7 @@ Object.assign(GameScene.prototype, {
     this.player.body.setVelocityY(this.k && this.k.zipla ? F.pogoYuksek : F.pogo);
     this.ziplarken = false;
     this.coyote = 0;
+    this.pogoVurZaman = 0.09;
   },
 
   govdeRect(body) {
@@ -183,24 +215,33 @@ Object.assign(GameScene.prototype, {
   },
 
   saldiriVur() {
-    const b = this.player.body;
-    const r = new Phaser.Geom.Rectangle(this.bakis > 0 ? b.right : b.x - 36, b.y, 36, b.height);
+    const b = this.player.body, U = 30;
+    const r = new Phaser.Geom.Rectangle(this.bakis > 0 ? b.right : b.x - U, b.y + 4, U, b.height - 4);
+    const kesisir = (g) => Phaser.Geom.Intersects.RectangleToRectangle(r, g);
     this.dusmanlar.getChildren().forEach(d => {
       if (!d.active || d.oldu || this.vurulan.has(d)) return;
-      if (Phaser.Geom.Intersects.RectangleToRectangle(r, this.govdeRect(d.body))) {
+      if (kesisir(this.govdeRect(d.body))) {
         this.vurulan.add(d);
         this.dusmanHasar(d, 1);
       }
     });
     this.breakables.getChildren().slice().forEach(bl => {
-      if (!bl.active) return;
-      if (Phaser.Geom.Intersects.RectangleToRectangle(r, new Phaser.Geom.Rectangle(bl.x, bl.y, 32, 32))) {
-        this.blokKir(bl);
+      if (bl.active && kesisir(new Phaser.Geom.Rectangle(bl.x, bl.y, 32, 32))) this.blokKir(bl);
+    });
+    // Kırmızı takozlar bastonla kırılır
+    this.takozlar.getChildren().slice().forEach(t => {
+      if (t.active && kesisir(t.getBounds())) {
+        this.parcala(t.x, t.y, 0xd62828);
+        t.destroy();
       }
+    });
+    // Sandık bastonla açılır
+    this.sandiklar.getChildren().forEach(s => {
+      if (s.active && !s.acik && kesisir(this.govdeRect(s.body))) this.sandikAc(s);
     });
     // Bastonla mermileri boz
     this.mermiler.getChildren().slice().forEach(m => {
-      if (Phaser.Geom.Intersects.RectangleToRectangle(r, this.govdeRect(m.body))) {
+      if (kesisir(this.govdeRect(m.body))) {
         this.parcala(m.x, m.y, 0xffffff);
         m.destroy();
       }
@@ -243,7 +284,9 @@ Object.assign(GameScene.prototype, {
       this.tirmaniyor = false;
       b.setAllowGravity(true);
       if (k.ziplaBasTus) {
-        b.setVelocity(((k.sag ? 1 : 0) - (k.sol ? 1 : 0)) * 140, F.ziplama * 0.8);
+        const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
+        if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
+        b.setVelocity(yon * 140, F.ziplama * 0.8);
         this.ziplaTampon = 0;
       } else if (!v && k.yukari) {
         b.setVelocityY(-260);   // sarmaşığın tepesinden platforma sıçra
@@ -260,10 +303,12 @@ Object.assign(GameScene.prototype, {
     S.can--;
     this.hudGuncelle();
     this.tirmaniyor = false;
+    this.cekBirak();
     b.setAllowGravity(true);
     if (S.can <= 0) { this.oyuncuOl(); return; }
     this.dokunulmaz = CONFIG.oyuncu.dokunulmaz;
     this.knock = 0.25;
+    this.sersemZaman = 0.5;
     b.setVelocity((p.x < kaynakX ? -1 : 1) * 180, -300);
     this.cameras.main.shake(120, 0.004);
   },
@@ -276,10 +321,13 @@ Object.assign(GameScene.prototype, {
     S.yasam--;
     this.hudGuncelle();
     this.tirmaniyor = false;
+    this.cekBirak();
+    this.pogoModu = false; this.pogoAktif = false;
     b.setAllowGravity(true);
     b.checkCollision.none = true;
     b.setVelocity(0, -420);
     p.setTint(0x666666).setAlpha(1);
+    p.play('sersem');
     this.time.delayedCall(1200, () => {
       if (S.yasam <= 0) this.oyunBitti();
       else this.canlan();
@@ -296,6 +344,8 @@ Object.assign(GameScene.prototype, {
     b.reset(this.spawn.x, this.spawn.y);
     this.dokunulmaz = 2;
     this.knock = 0;
+    this.sersemZaman = 0;
+    p.play('dur');
     this.hudGuncelle();
   }
 });
