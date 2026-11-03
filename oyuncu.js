@@ -6,22 +6,22 @@ Object.assign(GameScene.prototype, {
     const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
     const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // ↑ de zıplatır
     const saldir = K.saldir.isDown || K.k.isDown || T.saldir;
-    const bomba = K.bomba.isDown || K.l.isDown || T.bomba;
+    const cek = K.bomba.isDown || K.l.isDown || T.bomba;   // bomba tuşu artık sandık çekme
     const k = {
       sol: K.sol.isDown || K.a.isDown || T.sol,
       sag: K.sag.isDown || K.d.isDown || T.sag,
       yukari: K.yukari.isDown || K.w.isDown || T.yukari,
       asagi: K.asagi.isDown || K.s.isDown || T.asagi,
-      zipla, saldir,
+      zipla, saldir, cek,
       ziplaBas: zipla && !this.oncekiZipla,
       ziplaBasTus: ziplaTus && !this.oncekiZiplaTus,
       saldirBas: saldir && !this.oncekiSaldir,
-      bombaBas: bomba && !this.oncekiBomba
+      cekBas: cek && !this.oncekiCek
     };
     this.oncekiZipla = zipla;
     this.oncekiZiplaTus = ziplaTus;
     this.oncekiSaldir = saldir;
-    this.oncekiBomba = bomba;
+    this.oncekiCek = cek;
     return k;
   },
 
@@ -70,11 +70,29 @@ Object.assign(GameScene.prototype, {
     this.pogoModu = k.asagi;
     if (this.pogoModu && yerde && b.velocity.y >= 0 && this.knock <= 0) this.pogoZipla();
 
-    // Bomba at (C / L)
-    if (k.bombaBas) this.bombaAt();
+    // Sandık çek/bırak (C / L) — madde 9
+    if (k.cekBas) {
+      if (this.cekilenSandik) {
+        // bırak
+        this.cekilenSandik = null;
+        this.cekiyor = false;
+      } else {
+        // yakındaki sandığı tut
+        this.sandikTutmayaDene();
+      }
+    }
+    if (this.cekilenSandik && !this.cekilenSandik.active) {
+      this.cekilenSandik = null; this.cekiyor = false;
+    }
+    if (this.cekilenSandik) {
+      // sandığı oyuncunun yanına taşı
+      const hedefX = p.x + this.bakis * 28;
+      this.cekilenSandik.setPosition(hedefX, this.cekilenSandik.y);
+      this.cekilenSandik.refreshBody();
+    }
 
-    // Baston salla (X)
-    if (k.saldirBas && this.saldiriBekleme <= 0) {
+    // Baston salla (X) — madde 3: sadece havadayken çalışır
+    if (k.saldirBas && this.saldiriBekleme <= 0 && !yerde) {
       this.saldiriZaman = CONFIG.oyuncu.saldiriSure;
       this.saldiriBekleme = CONFIG.oyuncu.saldiriBekleme;
       this.vurulan = new Set();
@@ -83,6 +101,9 @@ Object.assign(GameScene.prototype, {
       this.saldiriZaman -= dt;
       this.saldiriVur();
     }
+
+    // Animasyon güncelleme
+    this.animasyonGuncelle(yerde, k);
 
     // Baston görseli
     if (this.saldiriZaman > 0) {
@@ -103,6 +124,51 @@ Object.assign(GameScene.prototype, {
         break;
       }
     }
+  },
+
+  animasyonGuncelle(yerde, k) {
+    const p = this.player;
+    const b = p.body;
+    const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
+
+    // Hurt (hasar aldı)
+    if (this.dokunulmaz > 0.8) { if (p.anims.currentAnim?.key !== 'hurt') p.play('hurt'); return; }
+
+    // Pogo
+    if (this.pogoModu && !yerde) { if (p.anims.currentAnim?.key !== 'pogo') p.play('pogo'); return; }
+
+    // Baston saldırısı (havada)
+    if (this.saldiriZaman > 0) {
+      if (yerde) { if (p.anims.currentAnim?.key !== 'saldir') p.play('saldir'); }
+      else        { if (p.anims.currentAnim?.key !== 'havaSaldir') p.play('havaSaldir'); }
+      return;
+    }
+
+    // Sandık çekme
+    if (this.cekilenSandik) { if (p.anims.currentAnim?.key !== 'cek') p.play('cek'); return; }
+
+    // Havada
+    if (!yerde) {
+      if (b.velocity.y < 0) { if (p.anims.currentAnim?.key !== 'jump') p.play('jump'); }
+      else                   { if (p.anims.currentAnim?.key !== 'land') p.play('land'); }
+      return;
+    }
+
+    // Yerde
+    if (yon !== 0) { if (p.anims.currentAnim?.key !== 'run') p.play('run'); }
+    else           { if (p.anims.currentAnim?.key !== 'idle') p.play('idle'); }
+  },
+
+  sandikTutmayaDene() {
+    const p = this.player;
+    const mesafe = 50;
+    let enYakin = null, enYakinMes = mesafe;
+    this.sandiklar.getChildren().forEach(s => {
+      if (!s.active || s.acik) return;
+      const d = Math.abs(s.x - p.x);
+      if (d < enYakinMes) { enYakin = s; enYakinMes = d; }
+    });
+    if (enYakin) { this.cekilenSandik = enYakin; this.cekiyor = true; }
   },
 
   pogoZipla() {

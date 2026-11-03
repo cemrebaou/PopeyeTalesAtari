@@ -148,52 +148,25 @@ Object.assign(GameScene.prototype, {
     });
   },
 
-  // ---- Bomba ----
-  bombaAt() {
-    const S = this.durum, p = this.player, B = CONFIG.bomba;
-    if (S.bomba <= 0 || S.olu || this.bombaBekleme > 0) return;
-    S.bomba--;
-    this.bombaBekleme = B.bekleme;
-    const b = this.bombalar.create(p.x + this.bakis * 14, p.y - 20, 'bomba').setDepth(8);
-    b.setBounce(0.35).setDragX(260);
-    b.body.setSize(14, 14).setOffset(1, 1);
-    b.setVelocity(this.bakis * 230 + p.body.velocity.x * 0.4, -260);
-    b.fitil = B.fitil;
-    this.hudGuncelle();
-  },
-
-  updateBombalar(dt) {
-    if (this.bombaBekleme > 0) this.bombaBekleme -= dt;
-    this.bombalar.getChildren().slice().forEach(b => {
-      if (!b.active) return;
-      b.fitil -= dt;
-      b.setTint(Math.floor(b.fitil * 8) % 2 ? 0xff5533 : 0xffffff);
-      if (b.fitil <= 0) this.bombaPatlat(b);
-    });
-  },
-
-  bombaPatlat(b) {
-    if (!b.active) return;
-    const R = CONFIG.bomba.yaricap, x = b.x, y = b.y;
-    b.destroy();
-    const halka = this.add.circle(x, y, 10, 0xffb020, 0.85).setDepth(30);
-    this.tweens.add({ targets: halka, radius: R, alpha: 0, duration: 320, onComplete: () => halka.destroy() });
-    this.parcala(x, y, 0xff7a1a);
-    this.cameras.main.shake(180, 0.008);
-    const yakin = (o) => Phaser.Math.Distance.Between(x, y, o.x, o.y) <= R;
-    this.dusmanlar.getChildren().slice().forEach(d => {
-      if (d.active && !d.oldu && yakin(d)) this.dusmanHasar(d, 2);
-    });
-    this.mermiler.getChildren().slice().forEach(m => { if (yakin(m)) m.destroy(); });
-    [this.takozlar, this.breakables].forEach(g => {
-      g.getChildren().slice().forEach(o => {
-        if (!o.active) return;
-        const cx = o.x + (o.displayOriginX === 0 ? 16 : 0), cy = o.y + (o.displayOriginY === 0 ? 16 : 0);
-        if (Phaser.Math.Distance.Between(x, y, cx, cy) <= R + 20) {
-          this.parcala(cx, cy, g === this.takozlar ? 0xd62828 : 0xd9a05b);
-          o.destroy();
-        }
-      });
+  // ---- Sandık çekme (madde 9) ----
+  // Sandık tutma/bırakma sandikTutmayaDene() oyuncu.js'de; sandığı düşmana çarpma:
+  sandikFirlat() {
+    if (!this.cekilenSandik) return;
+    const s = this.cekilenSandik;
+    this.cekilenSandik = null; this.cekiyor = false;
+    // Sandığı fırlat (ileriye doğru)
+    s.body.setImmovable(false);
+    this.physics.world.enable(s);
+    s.body.setVelocity(this.bakis * 320, -120);
+    s.body.setAllowGravity(true);
+    s.setDepth(4);
+    // 3 saniye sonra sandık eski haline döner
+    this.time.delayedCall(3000, () => {
+      if (s.active && !s.acik) {
+        s.body.reset(s.x, s.y);
+        s.body.setImmovable(true);
+        s.refreshBody();
+      }
     });
   },
 
@@ -315,10 +288,7 @@ Object.assign(GameScene.prototype, {
   ozelAl(o) {
     if (!o.active) return;
     o.disableBody(true, true);
-    if (o.tip === 'bomba') {
-      this.durum.bomba++;
-      this.popup(o.x, o.y - 20, '+1 bomba (C)');
-    } else if (o.tip === 'kizil') {
+    if (o.tip === 'kizil') {
       this.puanEkle(CONFIG.puan.kizil, o.x, o.y - 20);
     } else {
       this.puanEkle(CONFIG.puan.buyuk, o.x, o.y - 20);

@@ -6,14 +6,24 @@ Object.assign(GameScene.prototype, {
     this.hudKalp = this.add.text(12, 8, '', { ...st, color: '#ff4d4d' }).setScrollFactor(0).setDepth(100);
     this.hudAlt = this.add.text(12, 34, '', st).setScrollFactor(0).setDepth(100);
     this.hudPuan = this.add.text(CONFIG.genislik - 12, 8, '', st).setOrigin(1, 0).setScrollFactor(0).setDepth(100);
-    // Tam ekran butonu (sağ üst, puanın altında) + F tuşu
-    const tam = () => this.scale.isFullscreen ? this.scale.stopFullscreen() : this.scale.startFullscreen();
-    this.add.text(CONFIG.genislik - 12, 38, '⛶ Tam ekran', {
+    // Tam ekran butonu (sağ üst, puanın altında) + F tuşu — madde 1: yatay kilitle
+    const tam = () => {
+      if (this.scale.isFullscreen) {
+        this.scale.stopFullscreen();
+      } else {
+        this.scale.startFullscreen();
+        // Ekranı yataya kilitle (mobil)
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }
+    };
+    this.add.text(this.scale.width - 12, 38, '⛶ Tam ekran', {
       fontFamily: 'monospace', fontSize: '14px', color: '#ffffff', backgroundColor: '#00000088', padding: { x: 6, y: 4 }
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setInteractive({ useHandCursor: true })
       .on('pointerup', tam);
     this.input.keyboard.on('keydown-F', tam);
-    this.add.text(8, CONFIG.yukseklik - 18, CONFIG.surum + '  ' + this.L.ad, {
+    this.add.text(8, this.scale.height - 18, CONFIG.surum + '  ' + this.L.ad, {
       fontFamily: 'monospace', fontSize: '12px', color: '#ffffff'
     }).setScrollFactor(0).setDepth(100).setAlpha(0.7);
     this.hudGuncelle();
@@ -22,20 +32,20 @@ Object.assign(GameScene.prototype, {
   hudGuncelle() {
     const S = this.durum, max = CONFIG.oyuncu.canMax;
     this.hudKalp.setText('♥'.repeat(Math.max(0, S.can)) + '♡'.repeat(Math.max(0, max - S.can)));
-    this.hudAlt.setText('◆ ' + S.elmas + '/' + S.elmasToplam + '   Can: ' + S.yasam + '   Bomba: ' + S.bomba);
+    this.hudAlt.setText('◆ ' + S.elmas + '/' + S.elmasToplam + '   Can: ' + S.yasam);
     this.hudPuan.setText('Puan: ' + S.puan);
   },
 
   createTouch() {
     if (!this.sys.game.device.input.touch) return;
-    const W = CONFIG.genislik, H = CONFIG.yukseklik;
+    const W = this.scale.width, H = this.scale.height;
     const tuslar = [
       ['sol', 70, H - 70, '◀'],
       ['sag', 180, H - 70, '▶'],
       ['yukari', 125, H - 160, '▲'],
       ['zipla', W - 70, H - 70, 'ZIPLA'],
       ['saldir', W - 180, H - 70, 'VUR'],
-      ['bomba', W - 290, H - 70, 'BOMBA'],
+      ['bomba', W - 290, H - 70, 'ÇEK'],
       ['asagi', W - 125, H - 160, '▼ POGO']
     ];
     tuslar.forEach(([anahtar, x, y, yazi]) => {

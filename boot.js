@@ -9,6 +9,10 @@ class BootScene extends Phaser.Scene {
     this.load.image('kenar', 'assets/kenar.png');     // toprak sol/sağ kenar yosunu
     this.load.image('toprak', 'assets/toprak.jpg');   // kesintisiz toprak dokusu (tüm toprak zeminler)
     Object.keys(ASSETLER.obje).forEach(ad => this.load.image(ad, 'assets/' + ad + '.png'));
+    // Ana karakter sprite sheet: 1536x1024, 10 sütun x 5 satır, her kare 153x204 (beyaz arkaplan)
+    this.load.spritesheet('oyuncuSprite', 'assets/oyuncu_sprite.png', {
+      frameWidth: 153, frameHeight: 204
+    });
   }
 
   create() {
@@ -135,6 +139,21 @@ class BootScene extends Phaser.Scene {
       g.fillStyle(0x6b3f1d, 1).fillRect(0, 5, 4, 19);
     });
     g.destroy();
+
+    // Ana karakter animasyonları (sprite sheet: 10 sütun x 5 satır = 50 kare)
+    const A = this.anims;
+    A.create({ key: 'idle',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 0,  end: 3  }), frameRate: 6,  repeat: -1 });
+    A.create({ key: 'run',       frames: A.generateFrameNumbers('oyuncuSprite', { start: 4,  end: 9  }), frameRate: 10, repeat: -1 });
+    A.create({ key: 'jump',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 10, end: 12 }), frameRate: 8,  repeat: 0  });
+    A.create({ key: 'land',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 13, end: 13 }), frameRate: 6,  repeat: 0  });
+    A.create({ key: 'hurt',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 14, end: 16 }), frameRate: 8,  repeat: 0  });
+    A.create({ key: 'saldir',    frames: A.generateFrameNumbers('oyuncuSprite', { start: 20, end: 23 }), frameRate: 12, repeat: 0  });
+    A.create({ key: 'havaSaldir',frames: A.generateFrameNumbers('oyuncuSprite', { start: 24, end: 26 }), frameRate: 12, repeat: 0  });
+    A.create({ key: 'pogo',      frames: A.generateFrameNumbers('oyuncuSprite', { start: 30, end: 32 }), frameRate: 10, repeat: -1 });
+    A.create({ key: 'cek',       frames: A.generateFrameNumbers('oyuncuSprite', { start: 33, end: 35 }), frameRate: 8,  repeat: -1 });
+    A.create({ key: 'bastonilet',frames: A.generateFrameNumbers('oyuncuSprite', { start: 40, end: 44 }), frameRate: 10, repeat: 0  });
+    A.create({ key: 'it',        frames: A.generateFrameNumbers('oyuncuSprite', { start: 45, end: 49 }), frameRate: 8,  repeat: -1 });
+
     this.scene.start('Game');
   }
 }

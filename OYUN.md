@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.12 (`config.js` → `surum`)
+Sürüm: v0.13 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Karakter, düşman, elmas, bomba ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -11,26 +11,30 @@ Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/t
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
 
+## v0.13 Değişiklikleri
+- **Mobil tam ekran yatay kilit**: Tam ekran butonuna basınca `screen.orientation.lock('landscape')` ile ekran yataya döner.
+- **Dinamik viewport**: Oyun sabit 16:9 değil; açıldığı ekran boyutuna tam uyar (`Phaser.Scale.RESIZE`). HUD konumları `scale.width/height` ile hesaplanır.
+- **Baston yalnızca havada**: Baston saldırısı (X/K) artık sadece havadayken çalışır; yerde basınca hiçbir şey olmaz.
+- **Çimen zemine yapışık**: `cimenUstOran` 0.0 yapıldı; çimen ayrı nesne olarak değil direkt zemin tile'ına texture olarak uygulanır, zıplamada kayma olmaz.
+- **Görsel kalite artışı**: Çimen ve toprak dokusuna `LINEAR` filtre eklendi. Kamera zoom 1.5x yapıldı.
+- **Max zıplama yüksekliği**: 520²/(2×1400) ≈ 97 px = 3 tile. Hiçbir platform bu yüksekliği aşmamalı.
+- **Sprite karakter**: `assets/oyuncu_sprite.png` (1536×1024, 10×5 frame, 153×204 px/frame) entegre edildi. Animasyonlar: idle, run, jump, land, hurt, saldir, havaSaldir, pogo, cek, bastonilet, it.
+- **Sandık çekme mekaniği**: Bomba kaldırıldı; C/L tuşuyla yakındaki sandık tutulur/bırakılır. Sandık tutarken `cek` animasyonu oynar. Sandık fırlatma: tutarken VUR (X/K) basınca sandık öne fırlar.
+
 ## Kontroller
-- Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu
+- Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu (mobilden basınca yataya döner)
 - ← → (A/D): yürü
 - ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
 - ↓ (S) basılı tut: **POGO** — baston çıkar; düşmanlara ve dikenlere zıplar, yerde de seker.
-- X / K: baston salla (kısa menzil; düşmana vurur, mermileri bozar)
-- C / L: **bomba at** (önce bomba topla; HUD'da "Bomba: n")
+- X / K: baston salla (sadece havadayken; kısa menzil; düşmana vurur, mermileri bozar)
+- C / L: **sandık çek** — yakındaki sandığı tut/bırak; tutarken X/K ile fırlat
 - R: bölümü yeniden başlat
-- Mobil: ◀ ▶ ▲ ▼POGO VUR BOMBA ZIPLA tuşları
+- Mobil: ◀ ▶ ▲ ▼POGO VUR ÇEK ZIPLA tuşları
 
 ## Sayılar
 - Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
-- Yürüme 200 px/sn, zıplama ≈ 3 tile, pogo ≈ 4 tile, pogo+zıpla basılı ≈ 5 tile.
+- Yürüme 200 px/sn, zıplama ≈ 3 tile (97 px), pogo ≈ 4 tile, pogo+zıpla basılı ≈ 5 tile.
 - Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, düşman 200, patron 5000.
-- Bomba: fitil 1.3 sn, patlama yarıçapı 96 px, atma bekleme 0.4 sn.
-
-## Bomba / takoz
-- Bomba eşyası (siyah top) toplanınca +1 bomba. C ile atılır, yay çizer, zeminde seker, fitil bitince veya düşmana değince patlar.
-- Patlama: düşmanlara 2 hasar (patrona 2 can), kırmızı takozları ve kırılabilir blokları yok eder, mermileri siler. Oyuncuya zarar vermez.
-- Kırmızı takoz: sadece bombayla kırılır (baston/pogo kırmaz, üstünden pogo sekilebilir).
 
 ## Düşmanlar
 - Gül (pembe küp): devriye yürür, 1 can
