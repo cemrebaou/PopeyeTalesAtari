@@ -71,6 +71,43 @@ class GameScene extends Phaser.Scene {
     return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
   }
 
+  // Şelalelerin başına taş ağızlı başlangıç, dibine köpüklü bitiş görseli koyar.
+  // Şelale sütunları arka katmandaki şelale karolarından bulunur (her şelale 2 kare genişliğinde).
+  selaleUclari() {
+    const A = ASSETLER.tile, L = this.L, T = L.karo;
+    const su = new Set([A.wselaleU, A.wselale0, A.wselale1, A.wselaleA]);
+    const sutunlar = {};   // "üst,alt" → sütun listesi
+    for (let x = 0; x < L.arka[0].length; x++) {
+      let ust = -1;
+      for (let y = 0; y <= L.arka.length; y++) {
+        const var_ = y < L.arka.length && su.has(this.alfabeNo[L.arka[y][x]]);
+        if (var_ && ust < 0) ust = y;
+        if (!var_ && ust >= 0) { (sutunlar[ust + ',' + (y - 1)] = sutunlar[ust + ',' + (y - 1)] || []).push(x); ust = -1; }
+      }
+    }
+    const bas = this.textures.get('selaleBas').getSourceImage(), son = this.textures.get('selaleSon').getSourceImage();
+    Object.entries(sutunlar).forEach(([anahtar, xs]) => {
+      const [ust, alt] = anahtar.split(',').map(Number);
+      xs.sort((a, b) => a - b);
+      // yan yana sütunları tek şelale olarak grupla
+      const gruplar = [];
+      xs.forEach(x => {
+        const g = gruplar[gruplar.length - 1];
+        if (g && x === g[g.length - 1] + 1) g.push(x); else gruplar.push([x]);
+      });
+      gruplar.forEach(g => {
+        const x = g[0] * T, w = g.length * T;
+        // Başlangıç: suyun genişliğine ölçekli, şelalenin en üstüne
+        const sb = w / bas.width;
+        this.add.image(x, ust * T, 'selaleBas').setOrigin(0, 0).setScale(sb).setDepth(-4.9);
+        // Bitiş: su gövdesi (görselde 19..153 px) şelale genişliğine oturur, köpük yanlara taşar;
+        // dibi zemin çizgisinin biraz üstünde → köpük çimenin üstünde görünür, alt kenarını çimen örter
+        const ss = w / 134;
+        this.add.image(x - 19 * ss, (alt + 1) * T - 5, 'selaleSon').setOrigin(0, 1).setScale(ss).setDepth(-4.9);
+      });
+    });
+  }
+
   // Görsel boyutunu kaynak orana göre ayarlar (yükseklik veya genişlik verilir)
   boyutla(img, anahtar, { w, h }) {
     const O = ASSETLER.obje[anahtar];
@@ -150,6 +187,7 @@ class GameScene extends Phaser.Scene {
     // Karo katmanları: arka duvarlar + şelaleler (çarpışmasız) ve zemin
     this.arkaKatman = this.karoKatmani(L.arka, -5);
     this.onKatman = this.karoKatmani(L.on, 1);
+    this.selaleUclari();
     // Toprak zeminler: tek kesintisiz doku, dünya koordinatına hizalı (bloklar arası dikiş olmaz)
     const tk = CONFIG.toprakDoku / this.textures.get('toprak').getSourceImage().width;
     // Yeraltı arka planı: aynı toprak dokusu, karartılmış, dünyaya hizalı (önündeki toprakla kesintisiz devam eder)
