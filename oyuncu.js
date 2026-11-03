@@ -65,6 +65,12 @@ Object.assign(GameScene.prototype, {
     // Kanca değmiyorsa (kafa/bacak değse bile) düşmeye devam eder, kancanın taşa ilk değdiği yerde durur.
     // Zıpla → duvardan uzağa sıçrar; ters yön / ↓ / duvar biterse bırakır.
     if (this.asiliBekle > 0) this.asiliBekle -= dt;
+    // Kafa tavana çarparsa (alttan vurma): geri düşer, bir süre asılamaz (ileri basılı olsa bile)
+    if (b.blocked.up || b.touching.up) {
+      if (b.velocity.y < 60) b.setVelocityY(60);
+      this.ziplarken = false;
+      this.asiliBekle = Math.max(this.asiliBekle, 0.35);
+    }
     if (this.yatayKilit > 0) this.yatayKilit -= dt;
     if (this.asili) {
       const ters = this.asili > 0 ? k.sol : k.sag;
@@ -83,11 +89,12 @@ Object.assign(GameScene.prototype, {
     } else if (!yerde && this.asiliBekle <= 0 && b.velocity.y > 0 && this.knock <= 0 && !this.pogoModu) {
       const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
       // Sadece yandan: kanca hizası, gövdenin üstü ve altı aynı yanda taşa değmeli (alttan / kenar köşesinden asılmaz)
-      const duvar = y ? this.kancaDuvar(y) : null;
+      const kanca = y ? this.kancaDuvar(y) : null;
+      const duvar = kanca && this.duvarVar(y, b.y + b.height / 2 - 2, 4);
       const yandan = duvar && this.duvarVar(y, b.y + 2, 4) && this.duvarVar(y, b.bottom - 8, 4);
       if (yandan) {
-        // Gövdeyi taşa yasla (arada boşluk kalmasın); kanca görselde taşın içine girer
-        const dx = y > 0 ? duvar.left - b.right : duvar.right - b.left;
+        // Gövdeyi taşa yasla (arada boşluk kalmasın, en fazla 4 px); kanca görselde taşın içine girer
+        const dx = Phaser.Math.Clamp(y > 0 ? duvar.left - b.right : duvar.right - b.left, -4, 4);
         p.x += dx; b.position.x += dx;
         this.asili = y; this.asiliSon = y; this.bakis = y; p.setFlipX(y < 0);
         b.setAllowGravity(false); b.setVelocity(0, 0);
