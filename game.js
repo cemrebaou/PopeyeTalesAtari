@@ -83,6 +83,29 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  // Yüzen zemin görseli: parçalar genişliğe tam oturur, üst yüzey bloğun üst çizgisinde
+  yuzenCiz(x, y, w, tip) {
+    const O = ASSETLER.obje, T = this.L.karo;
+    let parca, h, yz;
+    if (tip === 'tas') {
+      h = 34; yz = 0.15;                                  // biraz ince taş levha
+      const s = h / O.tasM0.h, ort = O.tasM0.w * s;
+      const k = Math.max(0, Math.round((w - (O.tasL.w + O.tasR.w) * s) / ort));
+      parca = ['tasL', ...Array.from({ length: k }, (_, i) => 'tasM' + (i % 3)), 'tasR'];
+    } else {
+      h = Phaser.Math.Clamp(w * 0.42, 28, 44); yz = 0.28;  // altı oval ada
+      parca = w <= T ? ['adaM0'] : ['adaL', 'adaR'];
+    }
+    const s = h / O[parca[0]].h;
+    const top = parca.reduce((t, ad) => t + O[ad].w * s, 0), sx = w / top;
+    let cx = x;
+    parca.forEach(ad => {
+      const pw = O[ad].w * s * sx;
+      this.add.image(cx, y - h * yz, ad).setOrigin(0, 0).setDisplaySize(pw + 1, O[ad].h * s).setDepth(1.3);
+      cx += pw;
+    });
+  }
+
   // Görsel boyutunu kaynak orana göre ayarlar (yükseklik veya genişlik verilir)
   boyutla(img, anahtar, { w, h }) {
     const O = ASSETLER.obje[anahtar];
@@ -164,9 +187,18 @@ class GameScene extends Phaser.Scene {
     this.onKatman = this.karoKatmani(L.on, 1);
     this.selaleCiz();
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
-    // Ara kayalar ve basamaklar: görselleri zemin karo katmanında (otomatik döşendi), burada sadece çarpışma
-    (L.kayalar || []).forEach(([x, y]) => this.blokCiz(x, y, T, T));
-    (L.basamaklar || []).forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
+    // Ara kayalar, basamaklar ve kırılmayan taşlar: çevre objesi taş blok (tasBlok.png), çarpışmalı
+    const tasCiz = (x, y, w, h) => {
+      for (let i = 0; i < w; i += T) for (let j = 0; j < h; j += T) {
+        this.add.image(x + i, y + j, 'tasBlok').setOrigin(0, 0).setDisplaySize(T, T).setDepth(1.3);
+      }
+      this.blokCiz(x, y, w, h);
+    };
+    (L.kayalar || []).forEach(([x, y]) => tasCiz(x, y, T, T));
+    (L.basamaklar || []).forEach(([x, y, w, h]) => tasCiz(x, y, w, h));
+    (L.taslar || []).forEach(([x, y]) => tasCiz(x, y, T, T));   // ileride güçlenince kırılacak (tasKirik.png hazır)
+    // Yüzen zeminler (çarpışması bloklar'da): 'ada' altı oval üstü çimli, 'tas' uzun ince taş levha
+    (L.yuzenler || []).forEach(([x, y, w, tip]) => this.yuzenCiz(x, y, w, tip));
 
     // Tek yönlü platformlar: { tip, x, y, n }  (bu bölümde yok, istenirse eklenir)
     (L.platformlar || []).forEach(p => this.platforms.add(this.platformYarat(p.tip, p.x, p.y, p.n || 1, false)));
@@ -225,11 +257,12 @@ class GameScene extends Phaser.Scene {
       this.spikeRects.push(new Phaser.Geom.Rectangle(x + 4, y - ph * 0.8, w - 8, ph * 0.8));
     });
 
-    // Sarmaşıklar: [x, y(üst), h] — dikey döşenen sarmaşık
+    // Sarmaşıklar: [x, y(üst), h] — %30 küçültüldü (30 → 21 px). Tam parça sayısı döşenir (son yaprak yarım
+    // kesilmez); parça boyu sarmaşık boyuna tam oturacak şekilde dikeyde hafifçe ayarlanır.
     L.sarmasiklar.forEach(([x, y, h], i) => {
-      const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], gen = 30;
-      this.add.tileSprite(x, y, gen, h, ad).setOrigin(0.5, 0).setDepth(1.5)
-        .setTileScale(gen / O.w, gen / O.w);
+      const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], gen = 21, sx = gen / O.w;
+      const n = Math.max(1, Math.round(h / (O.h * sx))), sy = h / (n * O.h);
+      this.add.tileSprite(x, y, gen, h, ad).setOrigin(0.5, 0).setDepth(1.5).setTileScale(sx, sy);
       this.vineRects.push(new Phaser.Geom.Rectangle(x - 9, y - 12, 18, h + 12));
     });
 
@@ -287,6 +320,16 @@ class GameScene extends Phaser.Scene {
     s.body.setOffset((s.frame.width - w) / 2, s.frame.height - h);
   }
 
+  // Oyuncu görsel ölçeği (1 = normal). Gövde boyu ve ayak çizgisi değişmez, görsel ayaklardan büyür.
+  gorselOlcek(f) {
+    if (this.gorselCarpan === f) return;
+    this.gorselCarpan = f;
+    const O = CONFIG.oyuncu, KR = O.kare, p = this.player;
+    const s = O.boy / KR.ayakBoy * f, gomme = O.ayakGomme / s, gw = O.govdeG / s, gh = O.govdeY / s;
+    p.setScale(s).setOrigin(0.5, (KR.ayakY - gomme) / KR.h);
+    p.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);
+  }
+
   createPlayer() {
     const O = CONFIG.oyuncu;
     this.spawn = { x: this.L.baslangic[0], y: this.L.baslangic[1] - 2 };
@@ -295,8 +338,7 @@ class GameScene extends Phaser.Scene {
     const KR = O.kare, olcek = O.boy / KR.ayakBoy, gomme = O.ayakGomme / olcek;
     this.player = this.physics.add.sprite(this.spawn.x, this.spawn.y, 'oyuncu', 0)
       .setOrigin(0.5, (KR.ayakY - gomme) / KR.h).setDepth(10).setScale(olcek);
-    const gw = O.govdeG / olcek, gh = O.govdeY / olcek;
-    this.player.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);
+    this.gorselCarpan = 0; this.gorselOlcek(1);
     this.player.setCollideWorldBounds(true);
     this.player.setMaxVelocity(1000, CONFIG.fizik.maxDusme);
     this.player.play('dur');

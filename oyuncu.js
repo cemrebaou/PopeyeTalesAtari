@@ -56,6 +56,7 @@ Object.assign(GameScene.prototype, {
     if (this.tirmaniyor) {
       this.pogoModu = false; this.pogoAktif = false;
       this.cekBirak();
+      this.egik = false;
       this.animasyon(yerde);
       return;
     }
@@ -63,12 +64,16 @@ Object.assign(GameScene.prototype, {
     // Sandık çekme (C basılı): baston uzanır, sandığa takılır, geri yürüyerek sandık çekilir
     this.cekGuncelle(k, yerde, dt);
     const cekiyor = this.cekDurum !== null;
+    if (cekiyor) this.egik = false;
 
     // Yürüme (çekerken kendi hareketi cekGuncelle'de)
     if (!cekiyor) {
       const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
       if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
-      if (this.knock <= 0) b.setVelocityX(yon * F.yurume + (yerde ? bant : 0));
+      // Eğilme: yerdeyken ↓ basılı (pogo değil) → eğilerek yavaş yürür
+      this.egik = yerde && k.asagi && !this.pogoModu;
+      const hiz = this.egik ? F.egilYurume : F.yurume;
+      if (this.knock <= 0) b.setVelocityX(yon * hiz + (yerde ? bant : 0));
     }
 
     // Zıplama (basılı tut = yüksek, bırak = kısa)
@@ -194,10 +199,13 @@ Object.assign(GameScene.prototype, {
     else if (this.saldiriZaman > 0) a = 'vur';
     else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
     else if (!yerde) a = b.velocity.y < 0 ? 'zipla' : 'dus';
+    else if (this.egik) { a = 'egil'; durdur = Math.abs(b.velocity.x) <= 10; }
     else if (this.inisZaman > 0) a = 'in';
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else a = 'dur';
     if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
+    // Tırmanma ve sandık çekme kareleri %30 büyük çizilir
+    this.gorselOlcek(a === 'tirman' || a === 'uzat' || a === 'cek' ? CONFIG.oyuncu.buyukOlcek : 1);
     if (durdur) { if (!p.anims.isPaused) p.anims.pause(); }
     else if (p.anims.isPaused) p.anims.resume();
   },

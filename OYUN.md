@@ -1,14 +1,18 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.20 (`config.js` → `surum`)
+Sürüm: v0.21 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşman, elmas ve arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
 - **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
 - Karo setinde 5 malzeme, her biri 4 dolgu (F0–F3) + üst kenar parçaları (TL0/TL1 sol köşe, TM0/TM1 orta, TR0/TR1 sağ köşe): `k` kaya, `s` yosunlu parke taş, `h` tapınak tuğlası (sarmaşıklı), `w` tahta, `t` topraklı kök. Arka plan sürümleri aynı karoların %50 karartılmışı (`a` önekli, örn. `ahF0`).
-- Zemin (çarpışan): çarpışma bloklarından otomatik döşenir. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. Eski toprak bölgeleri → topraklı kök (`t`), geri kalanı + ara kayalar + basamaklar → parke taş (`s`).
+- Zemin (çarpışan): çarpışma bloklarından otomatik döşenir (`python3 araclar/zeminDose.py`, bloklar değişince çalıştır). v0.21: yeraltında (satır 115 / 3680 px altı) topraklı kök `t`, üstünde her yerde gri parke taş `s`. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. 
 - Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
+- v0.21 yüzen zeminler (`level1.js` → `yuzenler: [x, y, w, tip]`, 24 adet): yere değmeyen tek/çift sıra bloklar artık karo değil; 1–3 kare → `ada` (altı oval, üstü çimli), 4+ kare → `tas` (uzun ince taş levha, uç uca parçalar). Çarpışma 1 kare yükseklik (eski 2 karelikler inceltildi).
+- v0.21 taş bloklar: ara kayalar, basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). Kırılışı `tasKirik.png` hazır.
+- Engel kuralı (v0.21): kırılması gereken zayıf şeyler → tahta kasa (`kirilir`), kolay kırılmayanlar → taş blok (`taslar`, ileride güçlenince kırılacak), kırmızı takoz sadece patron odası girişinde (`takozlar`, kapı aralığına alındı: x 3344). Eski 4 takoz taş bloğa çevrildi (hiçbiri geçiş için gerekli değildi — `erisim.js` ile kontrol).
+- Sarmaşıklar (v0.21): %30 ince (30 → 21 px), tam parça sayısıyla döşenir (son yaprak yarım kesilmez).
 - Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): üst parça `assets/selaleUst.png` + dikey tekrar eden gövde `selaleOrta.png` + köpüklü dip `selaleDip.png`.
 - Su (3 yüzey, derin, sol/sağ taş duvarlı) ve sis karoları sette hazır, bölümde henüz kullanılmıyor.
 - Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
@@ -33,11 +37,12 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 | sersem | 15–17 | hasar alınca (yıldızlar), ölünce |
 | (yürüme döngüsü) | 18–23 | şimdilik kullanılmıyor |
 | vur | 24–28 | baston vuruşu |
-| tirman | 29–32 | sarmaşıkta (durunca durur) |
+| tirman | 29–32 | sarmaşıkta (durunca durur; v0.21: %30 büyük çizilir, `CONFIG.oyuncu.buyukOlcek`) |
 | pogoHava | 49 | pogo açıkken havada (bastonun üstünde) |
 | pogoSek | 50 → 51 → 52 | değme anı: 50 sarı kıvılcım sadece o an, sonra 51, 52 (sekme); havada tekrar 49 |
 | (eski pogo) | 33–40 | artık kullanılmıyor |
-| uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme |
+| uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.21: %30 büyük çizilir) |
+| egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek) |
 
 ## Sandık çekme (v0.14, bombanın yerine)
 - Bomba tamamen kaldırıldı (eşyalar, tuş, HUD).
@@ -50,6 +55,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu (telefonda yataya kilitler)
 - ← → (A/D): yürü
 - ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
+- ↓ (S) yerde: eğilerek yürü (v0.21)
 - ↓ (S): **POGO** — sadece havadayken açılır: önce zıpla, havada ↓ basılı tut. Açılınca ↓ basılı kaldıkça zemine, düşmana, dikene, sandığa seker. Yerde dururken ↓ basmak pogo açmaz.
 - X / K: baston vuruşu (yerde ve havada; düşmana vurur, mermi bozar, kasa/takoz kırar, sandık açar)
 - C / L basılı tut: baston kancası — sandığı çek (geri yürü)
@@ -90,6 +96,7 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/zeminDose.py` zemin karo ızgarasını bloklardan yeniden döşer
 - `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)
 - `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)
 - `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` karo numaraları ve obje boyutları (otomatik üretildi) · `assets/` görseller

@@ -132,6 +132,7 @@ class BootScene extends Phaser.Scene {
     an('pogoSek', [50, 51, 52],   14, 0);   // pogo: değme anı (sarı kıvılcım) → sekme → sekme; sonra tekrar pogoHava
     an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
     an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
+    an('egil',    aralik(53, 57), 10, -1);  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
     this.scene.start('Game');
   }
 }
