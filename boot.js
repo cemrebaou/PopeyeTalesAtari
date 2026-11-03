@@ -10,6 +10,8 @@ class BootScene extends Phaser.Scene {
     // Ana karakter: 53 kare, her hücre 176x141, ayak çizgisi y=125, kafa hücrenin yatay ortasında (CONFIG.oyuncu.kare)
     const KR = CONFIG.oyuncu.kare;
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
+    const K2 = CONFIG.oyuncu.kare2;   // v0.33 ek kareler (araclar/oyuncuEk.py)
+    this.load.spritesheet('oyuncu2', 'assets/oyuncu2.png', { frameWidth: K2.w, frameHeight: K2.h });
     // Toplanabilirler (v0.28, araclar/toplananKes.py): 6 satır × 6 karelik dönme
     const TP = ASSETLER.toplanan;
     this.load.spritesheet('toplanan', 'assets/toplanan.png', { frameWidth: TP.w, frameHeight: TP.h });
@@ -43,7 +45,18 @@ class BootScene extends Phaser.Scene {
     an('pogoSek', [50, 51, 52],   14, 0);   // pogo: değme anı (sarı kıvılcım) → sekme → sekme; sonra tekrar pogoHava
     an('uzat',    [41, 42, 43],   14, 0); // baston uzatma (kanca)
     an('cek',     aralik(44, 48), 10, -1);  // sandık çekme
-    an('egil',    aralik(53, 57), 10, -1);  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
+    an('egil',    aralik(53, 57), 10, -1);
+    // v0.33 ek kareler (assets/oyuncu2.png)
+    const an2 = (key, kareler, frameRate, repeat) =>
+      A.create({ key, frames: kareler.map(frame => ({ key: 'oyuncu2', frame })), frameRate, repeat });
+    an2('asili',    aralik(0, 5),  8,  -1);  // bastonla duvara asılı
+    an2('it',       aralik(6, 11), 10, -1);  // sandık itme
+    an2('h_tirman', [12], 1, 0);   // tırmanırken darbe
+    an2('h_egil',   [13], 1, 0);   // eğikken darbe
+    an2('h_hava',   [14], 1, 0);   // havada darbe
+    an2('h_cek',    [15], 1, 0);   // çekerken darbe
+    an2('h_it',     [16], 1, 0);   // iterken darbe
+    an2('h_asili',  [17], 1, 0);   // asılıyken darbe  // eğilerek yürüme (v0.21, ↓ basılı, yerde)
     // Toplanabilir dönme animasyonları: t_<ad>
     ASSETLER.toplanan.sira.forEach((ad, r) =>
       A.create({ key: 't_' + ad, frames: A.generateFrameNumbers('toplanan', { start: r * 6, end: r * 6 + 5 }), frameRate: 10, repeat: -1 }));

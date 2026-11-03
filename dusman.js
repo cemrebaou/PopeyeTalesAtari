@@ -127,9 +127,9 @@ Object.assign(GameScene.prototype, {
   atesEden(d, dt) {
     const p = this.player, b = d.body;
     const dx = p.x - d.x, dy = p.y - d.y;
-    // Maymun: sadece oyuncu aynı zemine basınca (yerde, ayak hizası aynı) döner ve atar. Köpek: dikey 110 px içinde.
+    // Maymun ve mızraklı köpek: sadece oyuncu aynı zemine basınca (yerde, ayak hizası aynı) döner ve atar.
     const ayniZemin = (p.body.blocked.down || p.body.touching.down) && Math.abs(p.body.bottom - b.bottom) < 8;
-    const menzilde = Math.abs(dx) < 420 && (d.tip === 'maymun' ? ayniZemin : Math.abs(dy) < 110) && !this.durum.olu;
+    const menzilde = Math.abs(dx) < 420 && ayniZemin && !this.durum.olu;
     if (d.hazir > 0) {
       d.hazir -= dt;
       b.setVelocityX(0);

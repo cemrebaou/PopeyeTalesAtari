@@ -27,6 +27,7 @@ class GameScene extends Phaser.Scene {
     this.pogoModu = false; this.pogoAktif = false; this.pogoSekZaman = 0;
     this.inisZaman = 0; this.havadaydi = false; this.sersemZaman = 0; this.cekMesafe = 0;
     this.tirmaniyor = false; this.bakis = 1;
+    this.asili = 0; this.asiliSon = 1; this.asiliBekle = 0; this.yatayKilit = 0; this.itiyor = false; this.hasarAnim = null;
     this.coyote = 0; this.ziplaTampon = 0; this.ziplarken = false;
     this.oncekiZipla = false; this.oncekiZiplaTus = false; this.oncekiSaldir = false; this.oncekiCek = false;
     this.bantItme = 0;
@@ -172,7 +173,7 @@ class GameScene extends Phaser.Scene {
       }
       this.blokCiz(x, y, w, h);
     };
-    (L.kayalar || []).forEach(([x, y]) => tasCiz(x, y, T, T));
+    (L.kayalar || []).forEach(([x, y]) => this.blokCiz(x, y, T, T));   // ara kayalar: görseli zemin karosu (zeminDose.py)
     (L.basamaklar || []).forEach(([x, y, w, h]) => tasCiz(x, y, w, h));
     (L.taslar || []).forEach(([x, y]) => tasCiz(x, y, T, T));   // ileride güçlenince kırılacak (tasKirik.png hazır)
 
@@ -244,7 +245,7 @@ class GameScene extends Phaser.Scene {
 
     // Kontrol noktaları (bayrak direği)
     L.kontrol.forEach(([x, y]) => {
-      const spr = this.boyutla(this.add.image(x, y + 2, 'bayrak0').setOrigin(0.5, 1).setDepth(1.6), 'bayrak0', { h: 64 });
+      const spr = this.boyutla(this.add.image(x, y + 2, 'bayrak0').setOrigin(0.5, 1).setDepth(1.6), 'bayrak0', { h: CONFIG.bayrakBoy });
       this.checkpoints.push({ x, y, spr, aktif: false });
     });
 
@@ -309,11 +310,12 @@ class GameScene extends Phaser.Scene {
   // Oyuncu görsel ölçeği (1 = normal). Gövde boyu ve ayak çizgisi değişmez, görsel ayaklardan büyür.
   // Eğikken gövde alçalır (CONFIG.oyuncu.govdeEgik) → 1 karelik aralıklardan sadece eğilerek geçilir.
   gorselOlcek(f) {
-    const egik = !!this.egik, anahtar = f + (egik ? 'e' : '');
+    const p = this.player, ikinci = p.texture.key === 'oyuncu2';
+    const egik = !!this.egik, anahtar = f + (egik ? 'e' : '') + (ikinci ? '2' : '');
     if (this.gorselCarpan === anahtar) return;
     this.gorselCarpan = anahtar;
-    const O = CONFIG.oyuncu, KR = O.kare, p = this.player;
-    const s = O.boy / KR.ayakBoy * f, gomme = O.ayakGomme / s, gw = O.govdeG / s, gh = (egik ? O.govdeEgik : O.govdeY) / s;
+    const O = CONFIG.oyuncu, KR = ikinci ? O.kare2 : O.kare;
+    const s = O.boy / O.kare.ayakBoy * f, gomme = O.ayakGomme / s, gw = O.govdeG / s, gh = (egik ? O.govdeEgik : O.govdeY) / s;
     p.setScale(s).setOrigin(0.5, (KR.ayakY - gomme) / KR.h);
     p.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);
   }
@@ -323,6 +325,14 @@ class GameScene extends Phaser.Scene {
     const b = this.player.body, O = CONFIG.oyuncu;
     const ek = O.govdeY - O.govdeEgik;
     return this.physics.overlapRect(b.x + 1, b.bottom - O.govdeY, b.width - 2, ek, false, true)
+      .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
+  }
+
+  // Bakılan yönde gövdeye bitişik duvar (zemin bloğu / takoz) var mı
+  duvarVar(yon) {
+    const b = this.player.body;
+    const x = yon > 0 ? b.right : b.left - 2;
+    return this.physics.overlapRect(x, b.y + 4, 2, b.height - 8, false, true)
       .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
   }
 
@@ -477,7 +487,7 @@ class GameScene extends Phaser.Scene {
       if (!c.aktif && Math.abs(p.x - c.x) < 50 && Math.abs(p.y - c.y) < 120) {
         c.aktif = true;
         c.spr.setTexture('bayrak1').setOrigin(0.32, 1);
-        this.boyutla(c.spr, 'bayrak1', { h: 64 });
+        this.boyutla(c.spr, 'bayrak1', { h: CONFIG.bayrakBoy });
         this.spawn = { x: c.x, y: c.y - 2 };
         this.popup(c.x, c.y - 80, 'Kontrol noktası!');
       }

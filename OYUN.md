@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.32 (`config.js` → `surum`)
+Sürüm: v0.33 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -10,12 +10,12 @@ Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/t
 - Zemin (çarpışan): çarpışma bloklarından otomatik döşenir (`python3 araclar/zeminDose.py`, bloklar değişince çalıştır). v0.21: yeraltında (satır 115 / 3680 px altı) topraklı kök `t`, üstünde her yerde gri parke taş `s`. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. 
 - Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
 - Yere değmeyen zeminler (v0.31): normal zemin karoları (v0.21–0.30 arası ada / taş levha görseli kullanılıyordu, kaldırıldı). Çarpışmaları 1 kare yükseklikte kaldı.
-- v0.21 taş bloklar: ara kayalar, basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). v0.31: ön yüz tam bir kare, 3B üst yüz (`CONFIG.tasUstYuz` %15) karenin üstüne taşar; üst üste dizilince üstteki blok alttakinin üst yüzünü örter. Kırılışı `tasKirik.png` hazır.
+- v0.21 taş bloklar (v0.33: ara/uçan kayalar artık normal zemin karosu; şelaleye değen kaya kaldırıldı): basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). v0.31: ön yüz tam bir kare, 3B üst yüz (`CONFIG.tasUstYuz` %15) karenin üstüne taşar; üst üste dizilince üstteki blok alttakinin üst yüzünü örter. Kırılışı `tasKirik.png` hazır.
 - Engel kuralı (v0.21): kırılması gereken zayıf şeyler → tahta kasa (`kirilir`), kolay kırılmayanlar → taş blok (`taslar`, ileride güçlenince kırılacak), kırmızı takoz sadece patron odası girişinde (`takozlar`, kapı aralığına alındı: x 3344). Eski 4 takoz taş bloğa çevrildi (hiçbiri geçiş için gerekli değildi — `erisim.js` ile kontrol).
 - Sarmaşıklar (v0.21): %30 ince (30 → 21 px), tam parça sayısıyla döşenir (son yaprak yarım kesilmez).
 - Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): v0.30'dan beri baştan sona sadece gövde dokusu `assets/selaleOrta.png` (üst/dip parçaları kaldırıldı). Doku dikeyde kesintisiz yapıldı (alt üçte biri üst kısma yumuşak geçişle karıştırıldı → kesim yeri görünmez) ve aşağı doğru akar (`CONFIG.selaleHiz` 140 px/sn).
 - Su (3 yüzey, derin, sol/sağ taş duvarlı) ve sis karoları sette hazır, bölümde henüz kullanılmıyor.
-- Kontrol noktası: bayrak direği (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
+- Kontrol noktası: bayrak direği (v0.33: %10 küçük, `CONFIG.bayrakBoy` 57.6 px) (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
 
@@ -43,6 +43,13 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## Yeni hareketler (v0.33)
+- Ek kareler `assets/oyuncu2.png` (`python3 araclar/oyuncuEk.py`; kaynak `assets/kaynak/oyuncu_ek.png` + `oyuncu_asiliHasar.png`): 10 sütun, hücre 176×220, ayak çizgisi y=200, ana sayfayla aynı ölçek (şapka genişliği eşitlendi). `CONFIG.oyuncu.kare2`.
+- **Bastonla duvara asılma** (`asili`, kare 0–5): havada aşağı düşerken duvara doğru basılıysa bastonla duvara takılır (yerçekimi kapalı). Zıpla → duvardan uzağa sıçrar (`CONFIG.fizik.asiliZipla` 160, tam zıplama, 0.15 sn yatay kilit); ters yön, ↓ veya duvar biterse bırakır (0.25 sn tekrar takılmaz).
+- **İtme** (`it`, kare 6–11): yerde, önünde aynı zeminde bitişik sandık varsa yürüyerek yavaşça iter (`CONFIG.fizik.itme` 90 px/sn). Çekilebilen her şey itilebilir.
+- **Duruma göre darbe karesi**: tırmanırken 12, eğikken 13, havada 14, çekerken 15, iterken 16, asılıyken 17. Yerde ayaktayken eski `sersem` (15–17 ana sayfa).
+- **Duvara basarak zıplama düzeltmesi**: duvara doğru basarken yatay hız verilmez (gövde duvara sürtünüp zıplamayı engellemiyordu).
 
 ## Sandık çekme (v0.14, bombanın yerine)
 - Bomba tamamen kaldırıldı (eşyalar, tuş, HUD).
@@ -72,6 +79,7 @@ Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web ad
 - **Ara kayalar** (v0.18, `level1.js` → `kayalar`, 8 adet): tek yosunlu taş karosu (`sK`), çarpışmalı. Rahat zıplamayla ulaşılamayan yerler simülasyonla bulundu, her kaya tek tek denenerek en az kayayla çözüldü. Kontrol: patron, çıkış, 5 kontrol noktası, tüm sandıklar, elmaslar ve özel eşyalar pogo kullanmadan rahat zıplamayla ulaşılabilir.
 - **Kontrol aracı**: `node araclar/erisim.js` → ulaşılamayan önemli yerleri listeler; `node araclar/erisim.js --coz` → çözüm için kaya önerir. Bölüme yeni platform/tepe/eşya eklenince çalıştır.
 - Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, altın para 50, düşman 200, patron 5000.
+- v0.33: taşın/zeminin içinde kalan 14 elmas ve 2 özel eşya en yakın boş yere taşındı.
 - **Toplanabilirler (v0.29)**: kaynak `assets/kaynak/toplanan_seti.png` → `python3 araclar/toplananKes.py` → `assets/toplanan.png` (6 satır × 6 karelik dönme; renkli hale silinir). Hepsi dönerek durur; oyundaki boylar `CONFIG.toplanBoy`.
   | Görsel | Ne | Etki |
   |---|---|---|
@@ -102,7 +110,7 @@ v0.32: tüm düşmanlar %10 küçük (`CONFIG.dusmanOlcek` 0.9, görsel ve gövd
 - Yuvarlak (pembe top): hızlı devriye, 1 can
 - Arı (sarı top): havada bekler; 360 px yaklaşınca oyuncuyu kovalar (95 px/sn), 520 px uzaklaşınca bırakır
 - Maymun: oyuncu **aynı zemine basınca** (yerde, ayak hizası aynı; v0.28) ve 420 px içindeyse dönüp 0.4 sn hazırlanıp ateş topu fırlatır (210 px/sn, 2.4 sn aralık)
-- Mızraklı köpek: aynı şekilde mızrak fırlatır (280 px/sn, 1.8 sn aralık), 2 can
+- Mızraklı köpek (v0.33: maymun gibi sadece aynı zemindeyken): aynı şekilde mızrak fırlatır (280 px/sn, 1.8 sn aralık), 2 can
 - Örümcek (mor): tavandan ipiyle inip çıkar, 1 can
 - Patron (kırmızı büyük küp): 4 can; yürü → sarı uyarı → atılma → dinlen; 2 canın altında hızlanır ve zıplayarak atılır. Hasar sonrası 1.1 sn dokunulmaz. 520 px yaklaşınca uyanır.
 - Uzaktaki düşmanlar (900 px) uyur. Mermiler 2.6 sn sonra kaybolur.
@@ -119,6 +127,7 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/oyuncuEk.py` oyuncu ek karelerini (asılma, itme, darbe) üretir
 - `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)
 - `araclar/zeminDose.py` zemin karo ızgarasını bloklardan yeniden döşer
 - `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)

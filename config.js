@@ -1,7 +1,8 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.32",
+  surum: "v0.33",
   tile: 32,
+  bayrakBoy: 57.6,      // kontrol noktası bayrağı (v0.33: %10 küçük, 64 → 57.6)
   dusmanOlcek: 0.9,     // v0.32: tüm düşmanlar %10 küçük (görsel + gövde)
   tasUstYuz: 0.15,      // taş blok görselinde 3B üst yüzün oranı (üst üste dizerken örtüşme)
   selaleHiz: 140,       // şelale suyunun aşağı akış hızı (dünya px/sn)
@@ -12,7 +13,9 @@ const CONFIG = {
   fizik: {
     yercekimi: 1400,
     yurume: 200,
-    egilYurume: 100,    // eğilerek yürüme hızı
+    egilYurume: 100,
+    itme: 90,           // sandık itme hızı
+    asiliZipla: 160,    // bastonla asılıyken zıplayınca duvardan uzağa hız    // eğilerek yürüme hızı
     ziplama: -625,      // tepe ≈ 625²/(2·1400) ≈ 140 px ≈ 4.4 kare → 4 karelik basamaklar rahat aşılır
     pogo: -700,         // ≈ 175 px ≈ 5.5 kare
     pogoYuksek: -790,   // pogo sırasında zıpla tuşu basılıysa ≈ 223 px ≈ 7 kare
@@ -27,7 +30,8 @@ const CONFIG = {
     canMax: 3,
     yasam: 3,
     boy: 52.8,           // v0.32: %10 büyük (48 → 52.8); animOlcek oranları bunun üstüne çarpılır, gövde aynı             // karakterin ekrandaki boyu (dünya px, ayakta)
-    kare: { w: 176, h: 141, ayakY: 125, ayakBoy: 117 },  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
+    kare: { w: 176, h: 141, ayakY: 125, ayakBoy: 117 },
+    kare2: { w: 176, h: 220, ayakY: 200 },   // assets/oyuncu2.png (asılma, itme, darbe kareleri) — aynı ölçek  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
     ayakGomme: 2,        // ayaklar zemin çizgisinin bu kadar altına çizilir (px) — çimene basmış görünür
     govdeG: 18,          // çarpışma gövdesi genişliği (px)
     govdeY: 42,          // çarpışma gövdesi yüksekliği (px) — ayaktayken 1 karelik (32 px) aralığa sığmaz

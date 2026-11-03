@@ -1,7 +1,7 @@
 # Zemin karo ızgarasını (level1.js → 'on') çarpışma bloklarından yeniden döşer.
 # Çalıştırma (repo kökünde): python3 araclar/zeminDose.py   — bloklar değişince çalıştır.
 # Malzeme: yeraltı (YERALTI_SATIR ve altı) → topraklı kök 't', üstü → gri parke taş 's'.
-# Yüzen zeminler, ara kayalar, basamaklar ve taş bloklar karo almaz (kendi görselleri var),
+# Basamaklar ve taş bloklar karo almaz (kendi görselleri var),
 # ama komşu sayılır (üstlerindeki/altlarındaki zemin kenarı buna göre seçilir).
 import re, json, random
 KOK = __file__.rsplit('/araclar/', 1)[0]
@@ -24,7 +24,8 @@ def isaretle(x, y, w, h, v):
 for b in sayilar('bloklar'): isaretle(*map(int, b), 1)
 for b in sayilar('yuzenler'): isaretle(int(b[0]), int(b[1]), int(b[2]), T, 2)
 for b in sayilar('basamaklar'): isaretle(*map(int, b), 2)
-for b in sayilar('kayalar') + sayilar('taslar'): isaretle(int(b[0]), int(b[1]), T, T, 2)
+for b in sayilar('kayalar'): isaretle(int(b[0]), int(b[1]), T, T, 1)   # v0.33: ara (uçan) kayalar normal zemin karosu
+for b in sayilar('taslar'): isaretle(int(b[0]), int(b[1]), T, T, 2)
 def bos(i, j):
     if i < 0 or i >= GX or j < 0 or j >= GY: return False
     return dolu[j][i] == 0
