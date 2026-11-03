@@ -61,7 +61,8 @@ Object.assign(GameScene.prototype, {
       return;
     }
 
-    // Bastonla duvara asılma: havada düşerken duvara doğru basılıysa bastonla takılır.
+    // Bastonla duvara asılma: havada düşerken duvara doğru basılıysa ve baston kancası önündeki taşa değiyorsa takılır.
+    // Kanca değmiyorsa (kafa/bacak değse bile) düşmeye devam eder, kancanın taşa ilk değdiği yerde durur.
     // Zıpla → duvardan uzağa sıçrar; ters yön / ↓ / duvar biterse bırakır.
     if (this.asiliBekle > 0) this.asiliBekle -= dt;
     if (this.yatayKilit > 0) this.yatayKilit -= dt;
@@ -72,7 +73,7 @@ Object.assign(GameScene.prototype, {
         this.bakis = -this.asiliSon; p.setFlipX(this.bakis < 0);
         b.setVelocity(this.bakis * F.asiliZipla, F.ziplama);
         this.ziplarken = true; this.ziplaTampon = 0; this.yatayKilit = 0.15;   // kısa süre yatay kontrol yok (duvardan uzaklaşsın)
-      } else if (ters || k.asagi || yerde || !this.duvarVar(this.asili)) {
+      } else if (ters || k.asagi || yerde || !this.kancaDuvar(this.asili)) {
         this.asiliBirak();
       } else {
         b.setVelocity(0, 0);
@@ -81,7 +82,7 @@ Object.assign(GameScene.prototype, {
       }
     } else if (!yerde && this.asiliBekle <= 0 && b.velocity.y > 0 && this.knock <= 0 && !this.pogoModu) {
       const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
-      if (y && this.duvarVar(y)) {
+      if (y && this.kancaDuvar(y)) {
         this.asili = y; this.asiliSon = y; this.bakis = y; p.setFlipX(y < 0);
         b.setAllowGravity(false); b.setVelocity(0, 0);
         this.pogoModu = false; this.pogoAktif = false; this.saldiriZaman = 0;

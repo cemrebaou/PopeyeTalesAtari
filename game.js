@@ -328,12 +328,19 @@ class GameScene extends Phaser.Scene {
       .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
   }
 
-  // Bakılan yönde gövdeye bitişik duvar (zemin bloğu / takoz) var mı
-  duvarVar(yon) {
+  // Bakılan yönde gövdeye bitişik duvar (zemin bloğu / takoz) var mı. y0/h verilirse sadece o yükseklik aralığı.
+  duvarVar(yon, y0, h) {
     const b = this.player.body;
     const x = yon > 0 ? b.right : b.left - 2;
-    return this.physics.overlapRect(x, b.y + 4, 2, b.height - 8, false, true)
+    if (y0 === undefined) { y0 = b.y + 4; h = b.height - 8; }
+    return this.physics.overlapRect(x, y0, 2, h, false, true)
       .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject)));
+  }
+
+  // Asılma kancası (baston) önündeki taşa değiyor mu: kanca ayakların CONFIG.oyuncu.kancaY px üstünde
+  kancaDuvar(yon) {
+    const b = this.player.body;
+    return this.duvarVar(yon, b.bottom - CONFIG.oyuncu.kancaY - 3, 6);
   }
 
   createPlayer() {
