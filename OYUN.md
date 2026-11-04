@@ -1,12 +1,13 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.41 (`config.js` → `surum`)
+Sürüm: v0.42 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
 - **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
 - Karo setinde 5 malzeme, her biri 4 dolgu (F0–F3) + üst kenar parçaları (TL0/TL1 sol köşe, TM0/TM1 orta, TR0/TR1 sağ köşe): `k` kaya, `s` yosunlu parke taş, `h` tapınak tuğlası (sarmaşıklı), `w` tahta, `t` topraklı kök. Arka plan sürümleri aynı karoların %50 karartılmışı (`a` önekli, örn. `ahF0`).
+- v0.42 yan bitiş karoları: gri taş zeminde yanı açık (yanında taş olmayan) karelere sağ bitiş `sKR` / sol bitiş `sKL` (kaynak `assets/kaynak/kenar_tas.png`, `python3 araclar/kenarEkle.py` ile tileset'e eklenir). En üst sıradaki taşlar eski köşe karosunu kullanır.
 - Zemin (çarpışan): çarpışma bloklarından otomatik döşenir (`python3 araclar/zeminDose.py`, bloklar değişince çalıştır). v0.21: yeraltında (satır 115 / 3680 px altı) topraklı kök `t`, üstünde her yerde gri parke taş `s`. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. 
 - Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
 - Yere değmeyen zeminler (v0.31): normal zemin karoları (v0.21–0.30 arası ada / taş levha görseli kullanılıyordu, kaldırıldı). Çarpışmaları 1 kare yükseklikte kaldı.
@@ -130,6 +131,7 @@ Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', 
 ## Dosyalar
 - `araclar/oyuncuEk.py` oyuncu ek karelerini (asılma, itme, darbe) üretir
 - `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)
+- `araclar/kenarEkle.py` zemin yan bitiş karolarını tileset'e ekler
 - `araclar/zeminDose.py` zemin karo ızgarasını bloklardan yeniden döşer
 - `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)
 - `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)

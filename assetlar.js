@@ -114,7 +114,9 @@ const ASSETLER = {
   "wsuDerin": 110,
   "wsuSol": 111,
   "wsuSag": 112,
-  "sis": 113
+  "sis": 113,
+  "sKR": 114,
+  "sKL": 115
  },
  "tileset": {
   "boyut": 128,

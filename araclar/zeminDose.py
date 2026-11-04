@@ -39,7 +39,12 @@ for j in range(GY):
         if bos(i, j - 1):
             sol, sag = bos(i - 1, j), bos(i + 1, j)
             p = ('TL' if sol and not sag else 'TR' if sag and not sol else 'TM') + str(rnd.randint(0, 1))
-        else: p = 'F' + str(rnd.randint(0, 3))
+        else:
+            # v0.42: yanı açık (taş olmayan) gri taş duvar → yan bitiş karosu (sadece en üst sıra değil; üst sıra köşe karosu kalır)
+            sol, sag = bos(i - 1, j), bos(i + 1, j)
+            if m == 's' and sol and not sag: p = 'KL'
+            elif m == 's' and sag and not sol: p = 'KR'
+            else: p = 'F' + str(rnd.randint(0, 3))
         r += alf[NO[m + p] + 1]
     on.append(r)
 m = re.search(r"\n  on: \[.*?\n  \]", L, re.S)
