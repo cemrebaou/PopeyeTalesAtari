@@ -7,19 +7,22 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 KOK = __file__.rsplit('/araclar/', 1)[0]
-im = np.array(Image.open(KOK + '/assets/kaynak/dusman_seti.png').convert('RGBA')).astype(int)
-r, g, b, a = [im[:, :, i] for i in range(4)]
-hale = ((r > 200) & (g < 70) & (b < 70)) | ((r > 210) & (g > 210) & (b < 70)) | \
-       ((g > 200) & (r < 170) & (b < 90) & (g - r > 60)) | ((r > 200) & (b > 200) & (g < 80))
-aday = hale | (a < 40)
-dis = a < 10
-for _ in range(12):
-    yeni = ndimage.binary_dilation(dis) & aday & ~dis
-    if not yeni.any(): break
-    dis |= yeni
-im[dis] = 0
-im = im.astype(np.uint8)
-A = im[:, :, 3] > 60
+def temizle(dosya):
+    im = np.array(Image.open(KOK + '/assets/kaynak/' + dosya).convert('RGBA')).astype(int)
+    r, g, b, a = [im[:, :, i] for i in range(4)]
+    hale = ((r > 200) & (g < 70) & (b < 70)) | ((r > 210) & (g > 210) & (b < 70)) | \
+           ((g > 200) & (r < 170) & (b < 90) & (g - r > 60)) | ((r > 200) & (b > 200) & (g < 80))
+    aday = hale | (a < 40)
+    dis = a < 10
+    for _ in range(12):
+        yeni = ndimage.binary_dilation(dis) & aday & ~dis
+        if not yeni.any(): break
+        dis |= yeni
+    im[dis] = 0
+    im = im.astype(np.uint8)
+    return im, im[:, :, 3] > 60
+KAYNAK = {'1': temizle('dusman_seti.png'), '2': temizle('dusman_seti2.png')}   # v0.52: 2 = maymun, köpek, patron yeni görseller
+im, A = KAYNAK['1']
 
 def parcalar(y0, y1, bol=()):
     col = A[y0:y1].sum(0)
@@ -29,9 +32,14 @@ def parcalar(y0, y1, bol=()):
         if not v and inr: seg.append([s, x]); inr = False
     if inr: seg.append([s, len(col)])
     seg = [s for s in seg if A[y0:y1, s[0]:s[1]].sum() > 40]
-    for i in sorted(bol, reverse=True):   # iki kare birleşik: en ince sütundan böl
-        s0, s1 = seg[i]; m = s0 + (s1 - s0) // 4 + int(np.argmin(col[s0 + (s1 - s0) // 4: s1 - (s1 - s0) // 4]))
-        seg[i:i + 1] = [[s0, m], [m, s1]]
+    bol = bol if isinstance(bol, dict) else {i: 2 for i in bol}
+    for i in sorted(bol, reverse=True):   # k kare birleşik: eşit aralık yakınındaki en ince sütunlardan böl
+        s0, s1 = seg[i]; k = bol[i]; w = (s1 - s0) / k; kes = [s0]
+        for j in range(1, k):
+            c = int(s0 + j * w); a0, a1 = int(c - w / 4), int(c + w / 4)
+            kes.append(a0 + int(np.argmin(col[a0:a1])))
+        kes.append(s1)
+        seg[i:i + 1] = [[kes[j], kes[j + 1]] for j in range(k)]
     return seg
 
 def birlestir(seg, n):
@@ -48,15 +56,17 @@ DUS = {
   'yuvarlak': (238, 333, 10, (), {'yuru': [0,1,2,3,4,5], 'ol': [6,7,8,9]}, None, 32),
   'ari':      (352, 445, 8, (), {'uc': [0,1,2,3], 'ol': [4,5,6,7]}, None, 30),
   'orumcek':  (465, 575, 6, (), {'bekle': [0,1], 'ol': [2,3,4,5]}, None, 34),
-  'maymun':   (590, 681, 9, (), {'dur': [0], 'at': [0,1,2,3], 'ol': [4,5,6,7]}, 8, 38),
-  'kopek':    (698, 781, 16, (7,), {'yuru': [0,1,2,3,4,5], 'at': [6,7,8,9], 'ol': [10,11,12,13,14]}, 15, 40),
-  'boss':     (797, 933, 14, (), {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8,9], 'ol': [10,11,12,13]}, None, 84),
+  # v0.52: kaynak 2 (dusman_seti2.png)
+  'maymun':   (192, 301, 15, (), {'yuru': [0,1,2,3,4,5], 'dur': [0], 'at': [6,7,8,9,10], 'ol': [11,12,13]}, 14, 38, '2'),
+  'kopek':    (416, 529, 13, (2,), {'yuru': [0,1,2,3,4,5], 'at': [6,7,8,9], 'ol': [10,11]}, 12, 40, '2'),
+  'boss':     (631, 812, 10, {4: 3}, {'yuru': [0,1,2,3], 'saldir': [4,5,6,7], 'ol': [8,9]}, None, 84, '2'),
 }
 # Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
-EK = {'maymun': ('maymun_yuru.png', 'yuru', 6)}   # v0.27: maymun yürüme
+EK = {}   # v0.27'deki maymun yürüme eki v0.52'de yeni sayfaya geçti
 MERMI = {'maymun': ('atesTopu', 22), 'kopek': ('mizrak', 44)}   # oyundaki genişlik px
 meta = {}
-for ad, (y0, y1, n, bol, an, mi, boy) in DUS.items():
+for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
+    im, A = KAYNAK[kay[0] if kay else '1']
     seg = parcalar(y0, y1, bol)
     seg = birlestir(seg, n)
     assert len(seg) == n, (ad, len(seg))

@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.51 (`config.js` → `surum`)
+Sürüm: v0.52 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -56,6 +56,14 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## v0.52
+- **Yeni düşman görselleri**: maymun, mızraklı köpek ve patron `assets/kaynak/dusman_seti2.png`'den (`dusmanKes.py`, kaynak '2'). Maymun: yuru 6, at 5, ol 3 + ateş topu (eski ayrı yürüme eki kaldırıldı). Köpek: yuru 6, at 4, ol 2 + mızrak. Patron: yuru 4, saldır 4 (hazır 2 → atıl 1 → dinlen 1), ol 2.
+- **Ölüm sesleri**: `olMaymun` (maymun ve mızraklı köpek), `olGul`, `olYuvarlak` (pembe kirpi), `olAri`, `olOrumcek`, `olYilan`.
+- **Gizli yer sesi** (`gizli`): `level1.js` → `gizliler: [x, y]` (şimdilik 3 mavi elmas + yaşam sandığı), oyuncu yaklaşınca bir kez çalar.
+- **Zıplama sesi**: tek ses yerine `zipla1..7` sırayla.
+- **Arı sesi** arı ölünce veya kameradan çıkınca o an kesilir.
+- **Düşman devriyesi** (titreme düzeltmesi): her yürüyen düşmanın alanı doğuşta katı zemin ızgarasından hesaplanır (bastığı zemin parçasının duvar/uçuruma kadar iki ucu). Uçlarda her zaman döner; duvara/sandığa çarpınca döner ama 0.35 sn tekrar dönmez → sağ-sol titreme olmaz. `level1.js`'deki min/max artık kullanılmıyor.
 
 ## v0.51
 - **Yeni sesler**: `olum` (yeni game over), `zipla` (yeni), `inis` (yere iniş), `bastonTakil` (yeni, duvara asılma), `cekTakil` (sandığa kanca takılma), `tirmanCik` / `tirmanIn` (sarmaşıkta çıkarken / inerken 0.4 sn arayla), `ates1` / `ates2` (maymun ateş topu, sırayla), `mizrak` (köpek), `ari` (arı kameraya girince).

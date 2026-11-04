@@ -13,8 +13,10 @@ class BootScene extends Phaser.Scene {
     const K2 = CONFIG.oyuncu.kare2;   // v0.33 ek kareler (araclar/oyuncuEk.py)
     this.load.spritesheet('oyuncu2', 'assets/oyuncu2.png', { frameWidth: K2.w, frameHeight: K2.h });
     // Sesler (v0.49)
-    ['bastonSalla', 'bastonTakil', 'sekme1', 'sekme2', 'zipla', 'olum', 'adim1', 'adim2', 'adim3', 'elmas', 'kizilElmas', 'buyukElmas', 'can',
-      'inis', 'tirmanIn', 'tirmanCik', 'cekTakil', 'ates1', 'ates2', 'mizrak', 'ari'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+    ['bastonSalla', 'bastonTakil', 'sekme1', 'sekme2', 'olum', 'adim1', 'adim2', 'adim3', 'elmas', 'kizilElmas', 'buyukElmas', 'can',
+      'inis', 'tirmanIn', 'tirmanCik', 'cekTakil', 'ates1', 'ates2', 'mizrak', 'ari',
+      'gizli', 'olMaymun', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
+      'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6', 'zipla7'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
     // Arayüz görselleri (v0.44, araclar/uiKes.py)
     ASSETLER.ui.forEach(ad => this.load.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
     // Harf görselleri (v0.45, araclar/harfKes.py)

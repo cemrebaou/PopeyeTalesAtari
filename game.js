@@ -267,7 +267,14 @@ class GameScene extends Phaser.Scene {
     L.ipuclari.forEach(([x, y, text]) => harfYazi(this, text, 11, 'sol').setPosition(x, y).setDepth(4));
 
     // Düşmanlar ve patron
+    // Katı zemin ızgarası (düşman devriye alanları için)
+    this.izgara = [...Array(L.yukseklik / T)].map(() => new Uint8Array(L.genislik / T));
+    const izIsaret = (x, y, w, h) => { for (let r = y / T; r < (y + h) / T; r++) for (let c = x / T; c < (x + w) / T; c++) if (this.izgara[r]) this.izgara[r][c] = 1; };
+    L.bloklar.concat(L.basamaklar || []).forEach(q => izIsaret(...q));
+    (L.kayalar || []).concat(L.taslar || []).forEach(([x, y]) => izIsaret(x, y, T, T));
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
+    // Gizli yerler: yaklaşınca bir kez gizli yer sesi (L.gizliler [x, y])
+    this.gizliler = (L.gizliler || []).map(([x, y]) => ({ x, y, bulundu: false }));
     this.dusmanYarat({ tip: 'boss', x: L.boss[0], y: L.boss[1] });
   }
 
@@ -431,6 +438,9 @@ class GameScene extends Phaser.Scene {
     if (this.durum.bitti || this.durum.oyunBitti) return;
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
+    this.gizliler.forEach(z => {
+      if (!z.bulundu && Math.abs(this.player.x - z.x) < 110 && Math.abs(this.player.y - z.y) < 90) { z.bulundu = true; this.ses('gizli'); }
+    });
     // Şelale akışı (doku koordinatında; ölçekten bağımsız aynı hız)
     this.selaleler.forEach(sp => { sp.tilePositionY -= CONFIG.selaleHiz * dt / sp.tileScaleY; });
     this.updateMermiler(dt);

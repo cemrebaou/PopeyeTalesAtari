@@ -80,7 +80,7 @@ Object.assign(GameScene.prototype, {
         this.asiliBirak();
         this.bakis = -this.asiliSon; p.setFlipX(this.bakis < 0);
         b.setVelocity(this.bakis * F.asiliZipla, F.ziplama);
-        this.ses('zipla');
+        this.zipSes();
         this.ziplarken = true; this.ziplaTampon = 0; this.yatayKilit = 0.15;   // kısa süre yatay kontrol yok (duvardan uzaklaşsın)
       } else if (ters || k.asagi || yerde || !this.kancaDuvar(this.asili)) {
         this.asiliBirak();
@@ -143,7 +143,7 @@ Object.assign(GameScene.prototype, {
       b.setVelocityY(F.ziplama);
       this.ziplaTampon = 0; this.coyote = 0; this.ziplarken = true;
       this.egilKilit = false;
-      this.ses('zipla');
+      this.zipSes();
     }
     if (this.ziplarken && !k.zipla && b.velocity.y < -200) {
       b.setVelocityY(b.velocity.y * 0.5);
@@ -326,6 +326,12 @@ Object.assign(GameScene.prototype, {
     this.gorselOlcek(CONFIG.oyuncu.animOlcek[a] || 1);
     if (durdur) { if (!p.anims.isPaused) p.anims.pause(); }
     else if (p.anims.isPaused) p.anims.resume();
+  },
+
+  // Zıplama sesi: zipla1..7 sırayla (v0.52)
+  zipSes() {
+    this.zipNo = ((this.zipNo || 0) % 7) + 1;
+    this.ses('zipla' + this.zipNo);
   },
 
   // Ses çal (assets/ses). Pogo sekmesi sekme1 / sekme2 sırayla.

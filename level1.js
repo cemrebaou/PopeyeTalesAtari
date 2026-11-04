@@ -504,6 +504,13 @@ const LEVEL1 = {
     [2368,4128],
     [2752,672]
   ],
+  // [x, y] gizli yerler: yaklaşınca 'gizli' sesi çalar (mavi elmaslar + yaşam sandığı)
+  gizliler: [
+    [2575,570],
+    [496,1744],
+    [318,1776],
+    [3734,2992]
+  ],
   // [x, w, ustY, altY] şelaleler (piksel)
   selaleler: [
     [2432,64,1984,3392],

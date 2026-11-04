@@ -55,10 +55,27 @@ Object.assign(GameScene.prototype, {
     d.yon = d.yon || 1;
     d.minX = e.min !== undefined ? e.min : e.x - 80;
     d.maxX = e.max !== undefined ? e.max : e.x + 80;
+    if (['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek', 'boss'].includes(e.tip)) this.devriyeAlani(d, e);
     d.setDepth(6);
     this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', orumcek: 'bekle', maymun: 'dur' }[e.tip] || 'yuru');
     if (e.tip === 'boss') d.anims.pause();
     return d;
+  },
+
+  // Yürüyen düşmanın devriye alanı: bastığı zemin parçası (duvar ya da uçuruma kadar), ızgaradan
+  devriyeAlani(d, e) {
+    const T = this.L.karo, G = this.izgara, W = G[0].length, H = G.length;
+    let c = Math.floor(e.x / T), r = Math.floor((e.y + 1) / T);
+    while (r < H && !G[r][c]) r++;
+    if (r >= H) return;
+    const ok = cc => cc >= 0 && cc < W && G[r][cc] && !G[r - 1][cc];
+    if (!ok(c)) return;
+    let a = c, z = c;
+    while (ok(a - 1)) a--;
+    while (ok(z + 1)) z++;
+    const yarim = d.body.width / 2 + 2;
+    d.minX = a * T + yarim; d.maxX = (z + 1) * T - yarim;
+    if (d.maxX < d.minX) d.minX = d.maxX = (a + z + 1) * T / 2;
   },
 
   // Düşman animasyonu oynat (aynısı oynuyorsa dokunma)
@@ -70,6 +87,7 @@ Object.assign(GameScene.prototype, {
 
   updateDusmanlar(time, dt) {
     const p = this.player;
+    this.dtSon = dt;
     this.ipGrafik.clear();
     this.dusmanlar.getChildren().forEach(d => {
       if (!d.active || d.oldu) return;
@@ -91,7 +109,8 @@ Object.assign(GameScene.prototype, {
           const mesafe = Math.hypot(dx, dy);
           // v0.51: sadece kamera görüş alanına girince kovalar; girdiği an arı sesi
           const gorus = this.cameras.main.worldView.contains(d.x, d.y);
-          if (gorus && !d.gorundu) this.ses('ari', { volume: 0.5 });
+          if (gorus && !d.gorundu) { d.sesObj = this.sound.add('ari', { volume: 0.5 }); d.sesObj.play(); }
+          if (!gorus && d.sesObj) { d.sesObj.stop(); d.sesObj.destroy(); d.sesObj = null; }
           d.gorundu = gorus;
           if (gorus && !this.durum.olu) d.kovala = true;
           else if (mesafe > 520) d.kovala = false;
@@ -121,15 +140,14 @@ Object.assign(GameScene.prototype, {
 
   // Gidip gelen yürüyen düşman (zemin kenarında/duvarda döner)
   devriye(d) {
+    // v0.52: zemin parçasının bir ucundan diğerine (d.minX..d.maxX, doğuşta ızgaradan hesaplanır).
+    // Uç sınırları her zaman geçerli; duvara/sandığa çarpınca döner ama dönüşten sonra 0.35 sn tekrar dönmez (titreme olmaz).
     const b = d.body;
-    if (d.x <= d.minX) d.yon = 1; else if (d.x >= d.maxX) d.yon = -1;
-    if (b.blocked.left) d.yon = 1; else if (b.blocked.right) d.yon = -1;
-    // v0.51: önünde zemin yoksa (uçurum) geri döner, düşmez
-    if (b.blocked.down || b.touching.down) {
-      const ox = d.yon > 0 ? b.right + 2 : b.left - 4;
-      const zemin = this.physics.overlapRect(ox, b.bottom + 1, 2, 6, false, true)
-        .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject) || this.platforms.contains(o.gameObject)));
-      if (!zemin) d.yon = -d.yon;
+    if (d.donBekle > 0) d.donBekle -= this.dtSon || 0.016;
+    if (d.x <= d.minX) d.yon = 1;
+    else if (d.x >= d.maxX) d.yon = -1;
+    else if (!(d.donBekle > 0) && ((b.blocked.left && d.yon < 0) || (b.blocked.right && d.yon > 0))) {
+      d.yon = -d.yon; d.donBekle = 0.35;
     }
     b.setVelocityX(d.yon * d.hiz);
     d.setFlipX(d.yon < 0);
@@ -278,6 +296,9 @@ Object.assign(GameScene.prototype, {
 
   // Ölüm: gövde kapanır, parçalanma animasyonu oynar, sonra solup kaybolur
   dusmanOlum(d, bitince) {
+    if (d.sesObj) { d.sesObj.stop(); d.sesObj.destroy(); d.sesObj = null; }   // arı sesi o an kesilir
+    const olSes = { maymun: 'olMaymun', kopek: 'olMaymun', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan' }[d.tip];
+    if (olSes) this.ses(olSes);
     d.clearTint();
     d.body.setVelocity(0, 0);
     d.body.enable = false;
