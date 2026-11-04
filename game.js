@@ -266,11 +266,12 @@ class GameScene extends Phaser.Scene {
     L.sarmasiklar.forEach(([x, y, h], i) => {
       const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], gen = 21, sx = gen / O.w;
       // v0.58: görsel, üstteki ilk katı karonun alt kenarından başlar (tırmanma alanı aynı kalır)
-      const c = Math.floor(x / T); let r = Math.floor(y / T) - 1, k = 0;
+      // v0.60: üst ucu taşın içindeyse o taştan başlar (yukarı devam etmez); görsel taşın altına 8 px girer, zemin katmanının arkasında
+      const c = Math.floor(x / T); let r = Math.floor((y - 1) / T), k = 0;
       while (r >= 0 && !this.izgara[r][c] && k < 12) { r--; k++; }
-      const gy = r >= 0 && this.izgara[r][c] ? (r + 1) * T : y, gh = y + h - gy;
+      const gy = (r >= 0 && this.izgara[r][c] ? (r + 1) * T : y) - 8, gh = y + h - gy;
       const n = Math.max(1, Math.round(gh / (O.h * sx))), sy = gh / (n * O.h);
-      this.add.tileSprite(x, gy, gen, gh, ad).setOrigin(0.5, 0).setDepth(1.5).setTileScale(sx, sy);
+      this.add.tileSprite(x, gy, gen, gh, ad).setOrigin(0.5, 0).setDepth(0.95).setTileScale(sx, sy);
       this.vineRects.push(new Phaser.Geom.Rectangle(x - 9, y - 12, 18, h + 12));
     });
 
