@@ -48,7 +48,7 @@ Object.assign(GameScene.prototype, {
 
     const yerde = b.blocked.down || b.touching.down;
     this.vurIsle(k, yerde, dt);   // VUR tuşu: dokun = vur, sandık önünde basılı = çek, havada basılı = pogo
-    if (yerde && this.havadaydi && !this.pogoModu) this.inisZaman = 0.1;   // iniş tozu karesi
+    if (yerde && this.havadaydi && !this.pogoModu) { this.inisZaman = 0.1; this.ses('inis', { volume: 0.5 }); }   // iniş tozu karesi + iniş sesi
     this.havadaydi = !yerde;
     this.coyote = yerde ? 0.09 : this.coyote - dt;
     this.ziplaTampon = k.ziplaBas ? 0.11 : this.ziplaTampon - dt;
@@ -225,7 +225,7 @@ Object.assign(GameScene.prototype, {
       if (this.cekZaman <= 0) {
         if (this.cekSandik && this.cekSandik.active) {
           this.cekDurum = 'cek';
-          this.ses('bastonTakil');
+          this.ses('cekTakil');
           this.cekMesafe = Math.max(0, this.cekBosluk(this.cekSandik));
         } else {
           this.cekBirak();   // boşa uzatıldı
@@ -428,7 +428,12 @@ Object.assign(GameScene.prototype, {
       }
     } else {
       b.setAllowGravity(false);
-      b.setVelocity(0, k.yukari ? -F.sarmasik : (k.asagi ? F.sarmasik : 0));
+      p.x = v.centerX;   // v0.51: tırmanırken hep sarmaşığın ortasında
+      const vy = k.yukari ? -F.sarmasik : (k.asagi ? F.sarmasik : 0);
+      b.setVelocity(0, vy);
+      // tırmanma sesi: çıkarken / inerken sırayla
+      this.tirmanSes = (this.tirmanSes || 0) - this.game.loop.delta / 1000;
+      if (vy && this.tirmanSes <= 0) { this.tirmanSes = 0.4; this.ses(vy < 0 ? 'tirmanCik' : 'tirmanIn', { volume: 0.5 }); }
     }
   },
 

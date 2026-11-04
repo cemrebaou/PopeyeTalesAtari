@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.50 (`config.js` → `surum`)
+Sürüm: v0.51 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -56,6 +56,17 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## v0.51
+- **Yeni sesler**: `olum` (yeni game over), `zipla` (yeni), `inis` (yere iniş), `bastonTakil` (yeni, duvara asılma), `cekTakil` (sandığa kanca takılma), `tirmanCik` / `tirmanIn` (sarmaşıkta çıkarken / inerken 0.4 sn arayla), `ates1` / `ates2` (maymun ateş topu, sırayla), `mizrak` (köpek), `ari` (arı kameraya girince).
+- **Elmas takası**: mavi elmas (1000) artık zor yerlerdeki 3 noktada, kızıl yakut (500) eski mavi elmas yerlerinde ve sandık ödüllerinde (`kizil`). Sesler de takas edildi (güzel ses mavi elmasta).
+- **Tırmanırken** karakter her kare sarmaşığın tam ortasında.
+- **Kalpler** arası boşluk açıldı (36 → 46).
+- **Düşmanlar kenardan düşmez**: devriyede önünde zemin yoksa geri döner. Bölüm verisinde her yürüyen düşmanın devriye alanı bastığı zemin parçasına sığdırıldı; 3 kareden dar yerde başlayan 2 gül silindi.
+- **Arılar** sadece kamera görüş alanına girince kovalar.
+- **Yaşam ikonu**: karakterin çapalı şapkası (`assets/kaynak/ui_ek.png`).
+- **Harf seti** genişledi: Q q, noktalama (! ? . , ; : … ’ ” “ ( ) [ ] { } < > « »), + − × ÷ = %, @ # $ € ₺ & * ^ ~ _ | \ / (`harfKes.py`, kaynak `ui_ek.png`; diğer ikonlar — oklar, oynat/duraklat, kilit, anahtar, pusula, harita, sandık, taç, yıldız — ileride kullanılmak üzere kaynakta duruyor).
+- **Yazılar mobil**: `harfYazi` metinde `{zipla}`, `{saldir}`, `{sol}` vb. yerine tuş görseli koyar. İpuçları tuş görselleriyle, ekranda görünecek yükseklikte; bitiş ekranında "Dokun: tekrar oyna". Dünya içi yazılar kamera içinde kalır. Eski takoz ipucu kaldırıldı.
 
 ## v0.49
 - **Sesler** (`assets/ses/`): `bastonSalla` (baston vuruşu), `bastonTakil` (duvara asılma, sandığa kanca takılma), `sekme1` / `sekme2` (pogo sekmesi, sırayla), `zipla` (zıplama, duvardan sıçrama). `oyuncu.js` → `ses(ad)`.

@@ -68,6 +68,44 @@ sd = round(capH / (dTaban - dUst), 4)
 for ch, (p, y0, y1, x0, x1) in rk.items():
     Image.fromarray(p[y0:y1, x0:x1]).save(KOK + '/assets/harf/%d.png' % ord(ch), optimize=True)
     harf[ch] = [int(x1 - x0), int(y1 - y0), int(y0 - dTaban), sd]
+# v0.51 ek karakterler: assets/kaynak/ui_ek.png (Q q, noktalama, matematik, semboller). Ölçek '!' yüksekliği = büyük harf.
+ek = np.array(Image.open(KOK + '/assets/kaynak/ui_ek.png').convert('RGBA'))
+EA = ek[:, :, 3] > 150
+def kolon(y0, y1):
+    v = EA[y0:y1].sum(0) > 0; out, inr = [], False
+    for i, x in enumerate(v):
+        if x and not inr: st, inr = i, True
+        if not x and inr: out.append((st, i)); inr = False
+    return [q for q in out if q[1] - q[0] >= 20 or EA[y0:y1, q[0]:q[1]].sum() > 300]
+def kirp(y0, y1, x0, x1):
+    p = ek[y0:y1, x0:x1].copy(); p[p[:, :, 3] < 40] = 0
+    m = p[:, :, 3] > 40; ys, xs = np.where(m.any(1))[0], np.where(m.any(0))[0]
+    return p[ys[0]:ys[-1] + 1, xs[0]:xs[-1] + 1], y0 + ys[0], y0 + ys[-1] + 1
+BANT = {'A': (90, 245, 'Qq@+−×÷=%'), 'B': (250, 345, '!?.,;:…’”“()[]{}<>«»'), 'C': (348, 435, '@#$€₺&*^~_|\\/')}
+# A satırında 3. parça Popeye başı (atlanır: '@' yer tutucu)
+parcalar = {}
+for k, (y0, y1, kar_) in BANT.items():
+    kol = kolon(y0, y1)
+    assert len(kol) == len(kar_), (k, len(kol), len(kar_))
+    for (x0, x1), ch in zip(kol, kar_):
+        if k == 'A' and ch == '@': continue
+        parcalar[ch] = kirp(y0, y1, x0, x1)
+unlem = parcalar['!']; hU = unlem[2] - unlem[1]; se = round(capH / hU, 4)
+tabanB = unlem[2]
+tabanA = parcalar['%'][2]; tabanC = parcalar['&'][2]
+for ch, (p, top, bot) in parcalar.items():
+    if ch in 'Qq': tb = parcalar['Q'][2] - round(0.06 * (parcalar['Q'][2] - parcalar['Q'][1]))
+    elif ch in '+−×÷=%': tb = tabanA
+    elif ch in '@#$€₺&*^~_|\\/': tb = tabanC
+    else: tb = tabanB
+    if ch in harf: continue   # '+' '/' rakam setinden kalır
+    Image.fromarray(p).save(KOK + '/assets/harf/%d.png' % ord(ch), optimize=True)
+    harf[ch] = [int(p.shape[1]), int(p.shape[0]), int(top - tb), se]
+# klavye eksisi '-' = '−' görseli; düz tırnaklar kıvrık tırnak görseliyle
+import shutil
+for a_, b_ in [('-', '−'), ("'", '’'), ('"', '”')]:
+    shutil.copy(KOK + '/assets/harf/%d.png' % ord(b_), KOK + '/assets/harf/%d.png' % ord(a_)); harf[a_] = harf[b_]
+
 ap = KOK + '/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'// Harf görselleri.*?;\n', '', s, flags=re.S)

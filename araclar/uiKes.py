@@ -32,6 +32,12 @@ for (y0, y1), isimler in zip(seg(A.sum(1) > 0), SATIR):
         else:
             Image.fromarray(s[ys[0]:ys[-1] + 1]).save(KOK + '/assets/ui/' + ad + '.png', optimize=True)
         adlar.append(ad)
+# v0.51: yaşam ikonu yeni şapka (karakterin şapkası, çapalı) — assets/kaynak/ui_ek.png sol alt
+ek = np.array(Image.open(KOK + '/assets/kaynak/ui_ek.png').convert('RGBA'))[570:712, 40:255].copy()
+ek[ek[:, :, 3] < 40] = 0
+m = ek[:, :, 3] > 40; ys, xs = np.where(m.any(1))[0], np.where(m.any(0))[0]
+Image.fromarray(ek[ys[0]:ys[-1] + 1, xs[0]:xs[-1] + 1]).save(KOK + '/assets/ui/sapka.png', optimize=True)
+
 ap = KOK + '/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'// Arayüz görselleri.*?;\n', '', s, flags=re.S)

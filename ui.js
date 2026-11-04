@@ -45,10 +45,19 @@ function gorselYazi(sahne, parcalar, boy, ikonBoy) {
 // hiza: 'orta' | 'sol'. Görseli olmayan karakterler (! : . vb.) aynı renkte metinle çizilir.
 // Container döner: sol üst köşe orijin, genislik / yukseklik alanlarıyla.
 function harfYazi(sahne, metin, boy, hiza) {
-  const H = ASSETLER.harf, c = sahne.add.container(0, 0), s0 = boy / H.capH, ara = boy * 0.02, satirH = boy * 1.55;
+  const H = ASSETLER.harf, c = sahne.add.container(0, 0), s0 = boy / H.capH, ara = boy * 0.02, satirH = boy * (String(metin).includes('{') ? 2.1 : 1.55);
   const satirlar = String(metin).split('\n').map(satir => {
     const ogeler = []; let x = 0;
-    for (const ch of satir) {
+    // {ad} → dokunmatik tuş görseli (ui_t_ad), örn. {zipla} {saldir} {sol}
+    const parca = satir.split(/(\{\w+\})/);
+    for (const pr of parca) {
+      const ik = pr.match(/^\{(\w+)\}$/);
+      if (ik) {
+        const img = sahne.add.image(x, boy * 0.5, 'ui_t_' + ik[1]).setOrigin(0, 0.5);
+        img.setScale(boy * 1.7 / img.height); ogeler.push(img); x += img.displayWidth + boy * 0.15;
+        continue;
+      }
+    for (const ch of pr) {
       const m = H.k[ch];
       if (ch === ' ') { x += boy * 0.4; continue; }
       if (m) {
@@ -62,6 +71,7 @@ function harfYazi(sahne, metin, boy, hiza) {
         }).setOrigin(0, 0.86);
         ogeler.push(t); x += t.width + ara;
       }
+    }
     }
     return { ogeler, w: x };
   });
@@ -166,7 +176,7 @@ class UIScene extends Phaser.Scene {
     this.hud = [];
     // Sol üst: kalpler (dolu / boş)
     for (let i = 0; i < max; i++) {
-      const k = this.add.image((12 + i * 36) * u, 10 * u, i < S.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0);
+      const k = this.add.image((12 + i * 46) * u, 10 * u, i < S.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0);
       k.setScale(30 * u / k.height);
       this.hud.push(k);
     }
@@ -227,6 +237,9 @@ Object.assign(GameScene.prototype, {
 
   // Dünya içi yazı. '+500', '+1' gibi sayılar rakam görselleriyle (ikon: 'ui_kalp', 'ui_sapka' vb.), diğerleri metin.
   popup(x, y, yazi, ikon) {
+    const v = this.cameras.main.worldView;   // v0.51: yazı ekran dışında kalmasın
+    y = Phaser.Math.Clamp(y, v.y + 30, v.bottom - 30);
+    x = Phaser.Math.Clamp(x, v.x + 60, v.right - 60);
     if (/^[+\d\/]+$/.test(yazi)) {
       const c = gorselYazi(this, ikon ? [yazi, ikon] : [yazi], 13, 16);
       c.setPosition(x - c.genislik / 2, y).setDepth(50);
@@ -269,11 +282,11 @@ Object.assign(GameScene.prototype, {
     this.player.body.setVelocity(0, 0);
     this.player.body.setAllowGravity(false);
     this.bitisGoster('1. BÖLÜM TAMAMLANDI!',
-      'Puan: ' + S.puan + '\nElmas: ' + S.elmas + '/' + S.elmasToplam + '\n\nR veya dokun: tekrar oyna');
+      'Puan: ' + S.puan + '\nElmas: ' + S.elmas + '/' + S.elmasToplam + '\n\nDokun: tekrar oyna');
   },
 
   oyunBitti() {
     this.durum.oyunBitti = true;
-    this.bitisGoster('OYUN BİTTİ', 'Puan: ' + this.durum.puan + '\n\nR veya dokun: tekrar dene');
+    this.bitisGoster('OYUN BİTTİ', 'Puan: ' + this.durum.puan + '\n\nDokun: tekrar dene');
   }
 });

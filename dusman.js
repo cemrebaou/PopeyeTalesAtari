@@ -89,7 +89,11 @@ Object.assign(GameScene.prototype, {
         case 'ari': {
           const dx = p.x - d.x, dy = p.y - d.y;
           const mesafe = Math.hypot(dx, dy);
-          if (mesafe < 360 && !this.durum.olu) d.kovala = true;
+          // v0.51: sadece kamera görüş alanına girince kovalar; girdiği an arı sesi
+          const gorus = this.cameras.main.worldView.contains(d.x, d.y);
+          if (gorus && !d.gorundu) this.ses('ari', { volume: 0.5 });
+          d.gorundu = gorus;
+          if (gorus && !this.durum.olu) d.kovala = true;
           else if (mesafe > 520) d.kovala = false;
           if (d.kovala) {
             const a = Math.atan2(dy, dx);
@@ -120,6 +124,13 @@ Object.assign(GameScene.prototype, {
     const b = d.body;
     if (d.x <= d.minX) d.yon = 1; else if (d.x >= d.maxX) d.yon = -1;
     if (b.blocked.left) d.yon = 1; else if (b.blocked.right) d.yon = -1;
+    // v0.51: önünde zemin yoksa (uçurum) geri döner, düşmez
+    if (b.blocked.down || b.touching.down) {
+      const ox = d.yon > 0 ? b.right + 2 : b.left - 4;
+      const zemin = this.physics.overlapRect(ox, b.bottom + 1, 2, 6, false, true)
+        .some(o => o.gameObject && (this.solids.contains(o.gameObject) || this.takozlar.contains(o.gameObject) || this.platforms.contains(o.gameObject)));
+      if (!zemin) d.yon = -d.yon;
+    }
     b.setVelocityX(d.yon * d.hiz);
     d.setFlipX(d.yon < 0);
   },
@@ -156,6 +167,8 @@ Object.assign(GameScene.prototype, {
 
   mermiAt(d, yon) {
     const kopek = d.tip === 'kopek', ad = kopek ? 'mizrak' : 'atesTopu', M = ASSETLER.dusman[ad];
+    if (kopek) this.ses('mizrak');
+    else { this.atesSira = !this.atesSira; this.ses(this.atesSira ? 'ates1' : 'ates2'); }
     const m = this.mermiler.create(d.x + yon * 18, d.y - (kopek ? 18 : 20), ad).setDepth(7);
     m.setDisplaySize(M.gen, M.gen * M.h / M.w);
     m.body.setAllowGravity(false);
@@ -368,6 +381,11 @@ Object.assign(GameScene.prototype, {
     } else if (s.odul === 'yasam') {
       this.yasamVer(s.x, s.y);
       this.odulGoster('yasam', s.x, s.y);
+    } else if (s.odul === 'kizil') {
+      this.durum.puan += CONFIG.puan.kizil;
+      this.popup(s.x, s.y - 20, '+' + CONFIG.puan.kizil);
+      this.ses('kizilElmas');
+      this.odulGoster('kizilelmas', s.x, s.y);
     } else {
       this.durum.puan += CONFIG.puan.buyuk;
       this.popup(s.x, s.y - 20, '+' + CONFIG.puan.buyuk);
