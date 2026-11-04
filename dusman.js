@@ -300,6 +300,7 @@ Object.assign(GameScene.prototype, {
   elmasAl(e) {
     if (!e.active) return;
     e.disableBody(true, true);
+    this.ses('elmas');
     this.durum.elmas++;
     this.durum.puan += CONFIG.puan.elmas;
     this.hudGuncelle();
@@ -310,12 +311,14 @@ Object.assign(GameScene.prototype, {
     o.disableBody(true, true);
     if (o.tip === 'kizil') {
       this.puanEkle(CONFIG.puan.kizil, o.x, o.y - 20);
+      this.ses('kizilElmas');
     } else if (o.tip === 'yasam') {
       this.yasamVer(o.x, o.y);
     } else if (o.tip === 'altin') {
       this.puanEkle(CONFIG.puan.altin, o.x, o.y - 20);
     } else {
       this.puanEkle(CONFIG.puan.buyuk, o.x, o.y - 20);
+      this.ses('buyukElmas');
     }
     this.hudGuncelle();
   },
@@ -323,6 +326,7 @@ Object.assign(GameScene.prototype, {
   // Çapa jetonu: +1 yaşam
   yasamVer(x, y) {
     this.durum.yasam++;
+    this.ses('can');
     this.popup(x, y - 20, '+1', 'ui_sapka');
     this.hudGuncelle();
   },
@@ -341,6 +345,7 @@ Object.assign(GameScene.prototype, {
 
   kalpVer(x, y) {
     const S = this.durum;
+    this.ses('can');
     if (S.can < CONFIG.oyuncu.canMax) {
       S.can++;
       this.popup(x, y - 20, '+1', 'ui_kalp');
@@ -366,6 +371,7 @@ Object.assign(GameScene.prototype, {
     } else {
       this.durum.puan += CONFIG.puan.buyuk;
       this.popup(s.x, s.y - 20, '+' + CONFIG.puan.buyuk);
+      this.ses('buyukElmas');
       this.odulGoster('buyukelmas', s.x, s.y);
     }
     this.hudGuncelle();

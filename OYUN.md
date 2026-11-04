@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.49 (`config.js` → `surum`)
+Sürüm: v0.50 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -59,6 +59,7 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 
 ## v0.49
 - **Sesler** (`assets/ses/`): `bastonSalla` (baston vuruşu), `bastonTakil` (duvara asılma, sandığa kanca takılma), `sekme1` / `sekme2` (pogo sekmesi, sırayla), `zipla` (zıplama, duvardan sıçrama). `oyuncu.js` → `ses(ad)`.
+- v0.50 sesleri: `sekme2` değiştirildi; `olum` (her ölümde, game over sesi); `adim1/2/3` (koşarken 0.3 sn, eğilerek yürürken / iterken 0.45 sn arayla sırayla, ses %35); `elmas` (küçük sarı elmas), `kizilElmas` (kızıl yakut), `buyukElmas` (mavi elmas, sandıktan çıkan dahil), `can` (kalp ve yaşam jetonu).
 - **Eğilme aç/kapa**: dokunmatik ▼ bir kez basınca eğilir ve tuş basılı görünür, tekrar basınca kalkar; zıplayınca kapanır. Sarmaşıkta ▼ basılı tutunca aşağı iner. Klavyede ↓ basılı tutma eskisi gibi.
 - **Otomatik eğilme**: yerde ileri basarken önünde 1 karelik geçit (üstü kapalı, altı açık) varsa kendiliğinden eğilir.
 - **Düşmana ilk vuruş belli olur** (çok canlılar): beyaz parlama (2 kez), geri savrulma + hafif sıçrama, 0.3 sn sersemleme, kıvılcım, küçük ekran sarsıntısı.

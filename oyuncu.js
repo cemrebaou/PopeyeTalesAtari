@@ -312,6 +312,16 @@ Object.assign(GameScene.prototype, {
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else a = 'dur';
     if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
+    // Adım sesleri: koşarken / eğilerek yürürken / iterken sırayla adim1-2-3
+    const adimAralik = a === 'kos' ? 0.3 : (a === 'egil' || a === 'it') && !durdur ? 0.45 : 0;
+    if (adimAralik) {
+      this.adimZaman = (this.adimZaman || 0) - this.game.loop.delta / 1000;
+      if (this.adimZaman <= 0) {
+        this.adimZaman = adimAralik;
+        this.adimNo = ((this.adimNo || 0) % 3) + 1;
+        this.ses('adim' + this.adimNo, { volume: 0.35 });
+      }
+    } else this.adimZaman = 0;
     // Animasyona göre görsel ölçek (CONFIG.oyuncu.animOlcek; yoksa 1)
     this.gorselOlcek(CONFIG.oyuncu.animOlcek[a] || 1);
     if (durdur) { if (!p.anims.isPaused) p.anims.pause(); }
@@ -459,6 +469,7 @@ Object.assign(GameScene.prototype, {
     b.setVelocity(0, -420);
     if (this.asili) this.asiliBirak();
     p.setAlpha(1);
+    this.ses('olum');
     p.play('olum');   // ölüm animasyonu bir kez, son karesi sabit kalarak aşağı düşer
     this.gorselOlcek(CONFIG.oyuncu.animOlcek.olum || 1);
     this.time.delayedCall(1200, () => {
