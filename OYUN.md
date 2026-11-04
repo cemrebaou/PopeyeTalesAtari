@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.44 (`config.js` → `surum`)
+Sürüm: v0.45 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -26,6 +26,11 @@ Kaynak `assets/kaynak/ui_seti.png` → `python3 araclar/uiKes.py` → `assets/ui
 - Dokunmatik tuşlar görsel; basınca basılı görseline geçer. Tam ekran tuşu yazılı kaldı.
 - Dünya içi sayı yazıları (+500, +1 kalp, +1 yaşam) rakam görselleri + ikonla; "PATRON!", "Kapı açıldı!", "Kontrol noktası!" metin.
 - Bitiş ekranları taş çerçeveli panelin içinde.
+
+## Harf görselleri (v0.45)
+Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) → `python3 araclar/harfKes.py` → `assets/harf/<karakter kodu>.png`, ölçüler `ASSETLER.harf` (capH = büyük harf yüksekliği, her karakter için taban çizgisine göre konum). Rakamlar ve + / da aynı sisteme eklendi (ui rakamları, büyük harf boyuna ölçekli). Yapışık dış çizgiler en yakın harfe göre ayrıldı.
+- `ui.js` → `harfYazi(sahne, metin, boy, hiza)`: çok satırlı, ortalı/sola hizalı yazı (Container). Görseli olmayan karakterler (! : . ← → vb.) aynı renkte (altın, kahve çizgili) metin olarak çizilir.
+- Kullanıldığı yerler: dünya içi yazılar (PATRON!, Kapı açıldı!, Kontrol noktası!), bitiş ekranı başlık ve alt yazı (panele sığacak şekilde küçülür), tam ekran tuşu, bölümdeki ipucu yazıları.
 
 ## Ekran ve kamera (v0.14)
 - Oyun açıldığı ekranın/pencerenin tamamını doldurur (sabit en-boy oranı yok, siyah bant yok). Ekran döner ya da pencere değişirse anında yeniden boyutlanır (`main.js`).
@@ -136,6 +141,7 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/harfKes.py` harf görsellerini keser
 - `araclar/uiKes.py` arayüz görsellerini keser
 - `araclar/oyuncuEk.py` oyuncu ek karelerini (asılma, itme, darbe) üretir
 - `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)

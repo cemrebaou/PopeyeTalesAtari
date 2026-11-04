@@ -264,12 +264,7 @@ class GameScene extends Phaser.Scene {
     this.kapi = this.boyutla(this.add.image(L.cikis[0], L.cikis[1] + 2, 'kapi').setOrigin(0.5, 1).setDepth(1.6), 'kapi', { h: 72 });
 
     // İpuçları
-    L.ipuclari.forEach(([x, y, text]) => {
-      this.add.text(x, y, text, {
-        fontFamily: 'monospace', fontSize: '14px', color: '#ffffff',
-        stroke: '#000000', strokeThickness: 3, resolution: 3
-      }).setDepth(4);
-    });
+    L.ipuclari.forEach(([x, y, text]) => harfYazi(this, text, 9, 'sol').setPosition(x, y).setDepth(4));
 
     // Düşmanlar ve patron
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
