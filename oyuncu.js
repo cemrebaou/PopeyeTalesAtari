@@ -340,6 +340,7 @@ Object.assign(GameScene.prototype, {
 
   // Ses çal (assets/ses). Pogo sekmesi sekme1 / sekme2 sırayla.
   ses(ad, ayar) {
+    if (!this.cache.audio.exists(ad)) return;   // dosyası henüz olmayan sesler sessiz geçer
     try { this.sound.play(ad, Object.assign({ volume: 0.6 }, ayar)); } catch (e) {}
   },
 
@@ -367,9 +368,13 @@ Object.assign(GameScene.prototype, {
       if (!d.active || d.oldu || this.vurulan.has(d)) return;
       if (kesisir(this.govdeRect(d.body))) {
         this.vurulan.add(d);
+        if (!this.vurulan.has('ses')) { this.vurulan.add('ses'); this.ses('bastonVur'); }
         this.dusmanHasar(d, 1);
       }
     });
+    // Kırılmaz duvara / zemine çarpınca da aynı ses (boşluğa vurunca çalmaz)
+    if (!this.vurulan.has('ses') && this.physics.overlapRect(r.x, r.y, r.width, r.height, false, true)
+      .some(o => o.gameObject && this.solids.contains(o.gameObject))) { this.vurulan.add('ses'); this.ses('bastonVur'); }
     this.breakables.getChildren().slice().forEach(bl => {
       if (bl.active && kesisir(new Phaser.Geom.Rectangle(bl.x, bl.y, 32, 32))) this.blokKir(bl);
     });

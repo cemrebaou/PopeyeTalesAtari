@@ -96,7 +96,8 @@ class GameScene extends Phaser.Scene {
     const tex = this.textures.get('selaleOrta').getSourceImage();
     this.selaleler = (this.L.selaleler || []).map(([x, w, y0, y1]) => {
       const s = w / tex.width;
-      return this.add.tileSprite(x, y0, w, y1 - y0, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(-4.9);
+      // v0.61: arka planın önünde, basılan zeminin arkasında; üst ve alt ucu zeminin içine 16 px girer
+      return this.add.tileSprite(x, y0 - 16, w, y1 - y0 + 32, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(0.5);
     });
   }
 
@@ -383,7 +384,7 @@ class GameScene extends Phaser.Scene {
     s.vurus++;
     this.parcala(s.x, s.y - 16, 0xcfc6b8);
     if (s.vurus < 3) {
-      this.ses('tasCatla');   // 1. ve 2. vuruş: çatlama sesi
+      this.ses('tasVur' + s.vurus);   // 1. vuruş rock1, 2. vuruş rock2; 3. vuruşta kırılma sesi
       s.setFrame(s.kirSira + s.vurus);
       this.tweens.add({ targets: s, angle: { from: -4, to: 4 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
       return;

@@ -212,6 +212,7 @@ Object.assign(GameScene.prototype, {
     if (!d.aktif) {
       if (Math.abs(p.x - d.x) < CONFIG.patron.uyanMesafe && Math.abs(p.y - d.y) < 300 && !this.durum.olu) {
         d.aktif = true;
+        this.bossSes(true);
         this.popup(d.x, d.y - 90, 'PATRON!');
       } else { b.setVelocityX(0); d.anims.pause(); return; }
     }
@@ -220,6 +221,8 @@ Object.assign(GameScene.prototype, {
       d.setAlpha(Math.floor(d.dokunulmaz * 12) % 2 ? 0.4 : 1);
     } else d.setAlpha(1);
 
+    // Çukura düşerse yenilir (patron kapısı önündeki kırılır taşlar kırılıp çukur açılırsa)
+    if (!d.oldu && d.y > this.L.boss[1] + 60) { d.hp = 0; this.bossYen(d); return; }
     const hizli = d.hp <= Math.ceil(CONFIG.patron.can / 2);
     d.durumZaman -= dt;
     switch (d.durum) {
@@ -228,7 +231,8 @@ Object.assign(GameScene.prototype, {
         b.setVelocityX(yon * (hizli ? 110 : 80));
         d.setFlipX(yon < 0);
         this.dusmanAnim(d, 'yuru');
-        if (d.durumZaman <= 0) { d.durum = 'hazir'; d.durumZaman = 0.6; b.setVelocityX(0); d.setTint(0xffff66); d.play('d_boss_hazir'); }
+        if (d.durumZaman <= 0) { d.durum = 'hazir'; d.durumZaman = 0.6; b.setVelocityX(0); d.setTint(0xffff66); d.play('d_boss_hazir'); this.bossSes(); }
+        else if (Math.random() < dt * 0.25) this.bossSes();   // yürürken arada bir
         break;
       }
       case 'hazir':
@@ -272,6 +276,7 @@ Object.assign(GameScene.prototype, {
       if (d.dokunulmaz > 0 || !d.aktif) return false;
       d.hp -= n > 1 ? 2 : n;
       d.dokunulmaz = 1.1;
+      this.bossSes(true);
       this.cameras.main.shake(150, 0.006);
       if (d.hp <= 0) this.bossYen(d);
       return true;
@@ -300,7 +305,7 @@ Object.assign(GameScene.prototype, {
   // Ölüm: gövde kapanır, parçalanma animasyonu oynar, sonra solup kaybolur
   dusmanOlum(d, bitince) {
     if (d.sesObj) { d.sesObj.stop(); d.sesObj.destroy(); d.sesObj = null; }   // arı sesi o an kesilir
-    const olSes = { maymun: 'olMaymun', kopek: 'olMaymun', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan' }[d.tip];
+    const olSes = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan' }[d.tip];
     if (olSes) this.ses(olSes);
     d.clearTint();
     d.body.setVelocity(0, 0);
@@ -311,7 +316,17 @@ Object.assign(GameScene.prototype, {
     });
   },
 
+  // Patron sesi: boss1..13 rastgele; zorla=false ise başka patron sesi çalarken çalmaz
+  bossSes(zorla) {
+    if (!zorla && this.bossSesObj && this.bossSesObj.isPlaying) return;
+    const ad = 'boss' + Phaser.Math.Between(1, 13);
+    if (!this.cache.audio.exists(ad)) return;
+    if (this.bossSesObj) { this.bossSesObj.stop(); this.bossSesObj.destroy(); }
+    this.bossSesObj = this.sound.add(ad, { volume: 0.6 }); this.bossSesObj.play();
+  },
+
   bossYen(d) {
+    if (this.bossSesObj) { this.bossSesObj.stop(); this.bossSesObj.destroy(); this.bossSesObj = null; }
     d.oldu = true;
     d.aktif = false;
     d.clearTint();
@@ -322,6 +337,7 @@ Object.assign(GameScene.prototype, {
   },
 
   cikisAc(bossX, bossY) {
+    this.ses('kapiAcil');   // kapı açılma sesi (dosyası gelince çalar)
     // Ödül sandığı
     this.sandikYarat(bossX, bossY, 'buyuk');
     // Çıkış kapısı açılır

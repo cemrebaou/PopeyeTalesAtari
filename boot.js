@@ -16,7 +16,8 @@ class BootScene extends Phaser.Scene {
     ['bastonSalla', 'bastonTakil', 'sekme1', 'sekme2', 'olum', 'adim1', 'adim2', 'adim3', 'elmas', 'kizilElmas', 'buyukElmas', 'can',
       'inis', 'tirmanIn', 'tirmanCik', 'cekTakil', 'ates1', 'ates2', 'mizrak', 'ari',
       'gizli', 'olMaymun', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
-      'bayrak', 'sandikDus', 'kaydir1', 'kaydir2', 'tasKir', 'tasCatla', 'selale', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+      'bayrak', 'sandikDus', 'kaydir1', 'kaydir2', 'tasKir', 'tasVur1', 'tasVur2', 'selale', 'bastonVur', 'olBoss', 'olKopek', 'tamKaybet',
+      'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
     // Kırılır taşlar (v0.58, araclar/kirTasKes.py): 10 satır × 5 kare (sağlam, çatlak, çatlak, kırılıyor, enkaz)
     this.load.spritesheet('kirTas', 'assets/kirTas.png', { frameWidth: 128, frameHeight: 128 });
     // Arayüz görselleri (v0.44, araclar/uiKes.py)

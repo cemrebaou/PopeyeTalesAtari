@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.60 (`config.js` → `surum`)
+Sürüm: v0.61 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -56,6 +56,16 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## v0.61
+- **Eski taş bloklar (tasBlok) kalktı**: 5 basamak yığını kırılır taş oldu (bölgeye göre tuğla / gri / toprak), `basamaklar` boş. `bloklar` ızgaradan yeniden üretildi.
+- **Sol alt yeraltı**: en soldaki sandığın odasının sol duvarı (sütun 9, satır 127-129) 3 üst üste toprak taşı → kırınca alttaki boşluğa (dikey geçit + alt koridor) girilir.
+- **Patron kapısı önündeki çukur** (sütun 109-110, satır 40-43) kırılır tuğla taşla dolu. Kırılıp çukur açılırsa ve patron düşerse patron yenilir (`bossGuncelle`: patron başlangıç yüksekliğinin 60 px altına inerse).
+- **Taş vuruş sesleri**: 1. vuruş `tasVur1` (rock1), 2. vuruş `tasVur2` (rock2), 3. vuruş kırılma (`tasKir`). Eski çatlama sesi silindi.
+- **Baston vuruş sesi** (`bastonVur`): düşmana ya da kırılmaz zemine/duvara değince, vuruş başına bir kez; boşluğa vurunca çalmaz.
+- **Sesler**: yeni ölüm (`olum`), patron ölümü (`olBoss`), mızraklı ölümü (`olKopek`), tüm canlar bitince `tamKaybet`. Patron sesleri `boss1..13`: uyanınca, hasar alınca, saldırıya hazırlanırken ve yürürken arada bir rastgele (birbirinin üstüne binmez). Kapı açılma (`kapiAcil`) ve kazanma (`kazanma`) kancaları hazır, dosyaları gelince çalar (`ses()` yüklü olmayan sesi sessiz geçer).
+- **Şelale** arka planın önünde, basılan zeminin arkasında (`depth` 0.5); üst/alt uçları zeminin içine 16 px girer.
+- `erisim.js`: kırılır taşlar katı sayılır (kristal ve yosun kapı taşları hariç).
 
 ## v0.60
 - **Sarmaşık**: üst ucu bir taşın içinde başlayan sarmaşık o taşın altından başlar, taşın üstünden yukarı devam etmez (iki sarmaşığın verisi taşın alt kenarına çekildi). Görsel taşın 8 px altına girer ve zemin katmanının arkasında çizilir (`depth` 0.95).

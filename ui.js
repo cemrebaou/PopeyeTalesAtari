@@ -279,6 +279,7 @@ Object.assign(GameScene.prototype, {
     const S = this.durum;
     if (S.bitti) return;
     S.bitti = true;
+    this.ses('kazanma');   // kapıdan girince (dosyası gelince çalar)
     this.player.body.setVelocity(0, 0);
     this.player.body.setAllowGravity(false);
     this.bitisGoster('1. BÖLÜM TAMAMLANDI!',
@@ -287,6 +288,7 @@ Object.assign(GameScene.prototype, {
 
   oyunBitti() {
     this.durum.oyunBitti = true;
+    this.ses('tamKaybet');
     this.bitisGoster('OYUN BİTTİ', 'Puan: ' + this.durum.puan + '\n\nDokun: tekrar dene');
   }
 });
