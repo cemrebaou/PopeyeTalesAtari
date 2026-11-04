@@ -438,6 +438,13 @@ class GameScene extends Phaser.Scene {
     if (this.durum.bitti || this.durum.oyunBitti) return;
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
+    // Sandık yere düşme sesi: hızla düşen sandık yere değince bir kez
+    this.sandiklar.getChildren().forEach(s => {
+      if (!s.active || !s.body) return;
+      const yerde = s.body.blocked.down || s.body.touching.down;
+      if (!yerde && s.body.velocity.y > 150) s.dusuyor = true;
+      else if (yerde && s.dusuyor) { s.dusuyor = false; this.ses('sandikDus'); }
+    });
     this.gizliler.forEach(z => {
       if (!z.bulundu && Math.abs(this.player.x - z.x) < 110 && Math.abs(this.player.y - z.y) < 90) { z.bulundu = true; this.ses('gizli'); }
     });
