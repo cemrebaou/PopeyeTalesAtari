@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.45",
+  surum: "v0.46",
   tile: 32,
   bayrakBoy: 57.6,      // kontrol noktası bayrağı (v0.33: %10 küçük, 64 → 57.6)
   dusmanOlcek: 0.9,     // v0.32: tüm düşmanlar %10 küçük (görsel + gövde)
@@ -29,17 +29,17 @@ const CONFIG = {
   oyuncu: {
     canMax: 3,
     yasam: 3,
-    boy: 63.36,          // v0.43: %20 büyük (52.8 → 63.36; v0.32'de 48 → 52.8); animOlcek oranları bunun üstüne çarpılır, gövde aynı             // karakterin ekrandaki boyu (dünya px, ayakta)
+    boy: 60.19,          // v0.46: %5 küçük (63.36 → 60.19; v0.43'te 52.8 → 63.36, v0.32'de 48 → 52.8); animOlcek oranları bunun üstüne çarpılır, gövde aynı             // karakterin ekrandaki boyu (dünya px, ayakta)
     kare: { w: 176, h: 141, ayakY: 125, ayakBoy: 117 },
     kare2: { w: 240, h: 220, ayakY: 200 },   // assets/oyuncu2.png (asılma, itme, darbe kareleri) — aynı ölçek  // assets/oyuncu.png hücresi: ayak çizgisi, ayakta boy (px)
-    kancaY: 62,          // asılma karesinde bastonun ayaklardan yüksekliği (px); kanca bu hizada taşa değince asılır
+    kancaY: 59,          // asılma karesinde bastonun ayaklardan yüksekliği (px); kanca bu hizada taşa değince asılır
     ayakGomme: 2,        // ayaklar zemin çizgisinin bu kadar altına çizilir (px) — çimene basmış görünür
     govdeG: 18,          // çarpışma gövdesi genişliği (px)
     govdeY: 42,          // çarpışma gövdesi yüksekliği (px) — ayaktayken 1 karelik (32 px) aralığa sığmaz
     govdeEgik: 26,       // eğikken gövde yüksekliği — 1 karelik aralıktan eğilerek geçilir
     // animasyona göre görsel ölçek: tırmanma %30 büyük, çekme %16 büyük (v0.25: %30'dan %11 küçültüldü), eğilerek yürüme %16 küçük, pogo %20 büyük, baston vuruşu %10 büyük
     animOlcek: { tirman: 1.3, uzat: 1.16, cek: 1.16, egil: 0.84, pogoHava: 1.2, pogoSek: 1.2, vur: 1.1,
-      asili: 0.7, it: 0.7, h_tirman: 0.7, h_egil: 0.7, h_hava: 0.7, h_cek: 0.7, h_it: 0.7, h_asili: 0.7, olum: 0.7 },   // v0.34: oyuncu2 kareleri %30 küçük
+      asili: 0.7, it: 0.77, h_tirman: 0.7, h_egil: 0.7, h_hava: 0.7, h_cek: 0.7, h_it: 0.7, h_asili: 0.7, olum: 0.7 },   // v0.34: oyuncu2 kareleri %30 küçük
     dokunulmaz: 1.5,     // sn
     saldiriSure: 0.24,   // sn
     saldiriBekleme: 0.32 // sn
