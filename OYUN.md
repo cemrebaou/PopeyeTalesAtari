@@ -1,233 +1,98 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.61 (`config.js` → `surum`)
-Motor: Phaser 3.80.1 (CDN), Arcade Physics.
-Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
+Sürüm: v0.62 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
-## Görsel sistemi
-- **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
-- Karo setinde 5 malzeme, her biri 4 dolgu (F0–F3) + üst kenar parçaları (TL0/TL1 sol köşe, TM0/TM1 orta, TR0/TR1 sağ köşe): `k` kaya, `s` yosunlu parke taş, `h` tapınak tuğlası (sarmaşıklı), `w` tahta, `t` topraklı kök. Arka plan sürümleri aynı karoların %50 karartılmışı (`a` önekli, örn. `ahF0`).
-- v0.42 yan bitiş karoları: gri taş zeminde yanı açık (yanında taş olmayan) karelere sağ bitiş `sKR` / sol bitiş `sKL` (kaynak `assets/kaynak/kenar_tas.png`, `python3 araclar/kenarEkle.py` ile tileset'e eklenir). En üst sıradaki taşlar eski köşe karosunu kullanır.
-- Zemin (çarpışan): çarpışma bloklarından otomatik döşenir (`python3 araclar/zeminDose.py`, bloklar değişince çalıştır). v0.21: yeraltında (satır 115 / 3680 px altı) topraklı kök `t`, üstünde her yerde gri parke taş `s`. Üstü açık kare → üst kenar (solu açıksa sol köşe, sağı açıksa sağ köşe, ikisi de/hiçbiri → orta), diğerleri dolgu. 
-- Arka plan: çarpışmasız, yükseğe göre bantlar: tapınak tuğlası (en üst) → parke taş → kaya → toprak (yeraltı). Bant geçişinde üst kenar karosu. Süsler (karartılmış): kemerli pencere, yuvarlak delik, sütun üst/orta/alt, sarmaşık, meşale.
-- Yere değmeyen zeminler (v0.31): normal zemin karoları (v0.21–0.30 arası ada / taş levha görseli kullanılıyordu, kaldırıldı). Çarpışmaları 1 kare yükseklikte kaldı.
-- v0.21 taş bloklar (v0.33: ara/uçan kayalar artık normal zemin karosu; şelaleye değen kaya kaldırıldı): basamaklar ve kırılmayan taşlar (`taslar`) çevre objesi `assets/tasBlok.png` ile çizilir (karo değil). v0.31: ön yüz tam bir kare, 3B üst yüz (`CONFIG.tasUstYuz` %15) karenin üstüne taşar; üst üste dizilince üstteki blok alttakinin üst yüzünü örter. Kırılışı `tasKirik.png` hazır.
-- Engel kuralı (v0.21): kırılması gereken zayıf şeyler → tahta kasa (`kirilir`), kolay kırılmayanlar → taş blok (`taslar`, ileride güçlenince kırılacak), kırmızı takoz sadece patron odası girişinde (`takozlar`, kapı aralığına alındı: x 3344). Eski 4 takoz taş bloğa çevrildi (hiçbiri geçiş için gerekli değildi — `erisim.js` ile kontrol).
-- Sarmaşıklar (v0.21): %30 ince (30 → 21 px), tam parça sayısıyla döşenir (son yaprak yarım kesilmez).
-- Şelaleler (`level1.js` → `selaleler: [x, w, ustY, altY]`, 4 adet, 2 kare genişliğinde): v0.30'dan beri baştan sona sadece gövde dokusu `assets/selaleOrta.png` (üst/dip parçaları kaldırıldı). Doku dikeyde kesintisiz yapıldı (alt üçte biri üst kısma yumuşak geçişle karıştırıldı → kesim yeri görünmez) ve aşağı doğru akar (`CONFIG.selaleHiz` 140 px/sn).
-- Su (3 yüzey, derin, sol/sağ taş duvarlı) ve sis karoları sette hazır, bölümde henüz kullanılmıyor.
-- Kontrol noktası: bayrak direği (v0.33: %10 küçük, `CONFIG.bayrakBoy` 57.6 px) (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
-- Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
-Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
-
-## Arayüz görselleri (v0.44)
-Kaynak `assets/kaynak/ui_seti.png` → `python3 araclar/uiKes.py` → `assets/ui/<ad>.png` (`ASSETLER.ui`): kalp / boş kalp, kaptan şapkası (yaşam), elmas, altın para (puan), rakamlar r0–r9 + `rArti` + `rBolu`, 7 dokunmatik tuş (`t_<ad>`) ve basılı hâlleri (`tb_<ad>`), taş çerçeveli panel.
-- HUD: sol üst 3 kalp (dolu/boş); altında şapka + yaşam, elmas + toplanan/toplam; sağ üst altın para + puan. Hepsi rakam görselleriyle (`ui.js` → `gorselYazi`).
-- Dokunmatik tuşlar görsel; basınca basılı görseline geçer. Tam ekran tuşu yazılı kaldı.
-- Dünya içi sayı yazıları (+500, +1 kalp, +1 yaşam) rakam görselleri + ikonla; "PATRON!", "Kapı açıldı!", "Kontrol noktası!" metin.
-- Bitiş ekranları taş çerçeveli panelin içinde.
-
-## Harf görselleri (v0.45)
-Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) → `python3 araclar/harfKes.py` → `assets/harf/<karakter kodu>.png`, ölçüler `ASSETLER.harf` (capH = büyük harf yüksekliği, her karakter için taban çizgisine göre konum). Rakamlar ve + / da aynı sisteme eklendi (ui rakamları, büyük harf boyuna ölçekli). Yapışık dış çizgiler en yakın harfe göre ayrıldı.
-- `ui.js` → `harfYazi(sahne, metin, boy, hiza)`: çok satırlı, ortalı/sola hizalı yazı (Container). Görseli olmayan karakterler (! : . ← → vb.) aynı renkte (altın, kahve çizgili) metin olarak çizilir.
-- Kullanıldığı yerler: dünya içi yazılar (PATRON!, Kapı açıldı!, Kontrol noktası!), bitiş ekranı başlık ve alt yazı (panele sığacak şekilde küçülür), tam ekran tuşu, bölümdeki ipucu yazıları.
-
-## Ekran ve kamera (v0.14)
-- Oyun açıldığı ekranın/pencerenin tamamını doldurur (sabit en-boy oranı yok, siyah bant yok). Ekran döner ya da pencere değişirse anında yeniden boyutlanır (`main.js`).
-- Tuval cihaz piksel oranında (en fazla 2x) çizilir → telefon/retina ekranda keskin görüntü.
-- Kamera yakınlığı ekrana göre: her zaman ≈ 360 px dünya yüksekliği görünür (`CONFIG.kamera.gorunurY`, eskisi 544 → ~1.5x yakın); dar/dikey ekranda en az 560 px genişlik (`minGorunurX`).
-- Arayüz (HUD, dokunmatik tuşlar, tam ekran tuşu, bitiş ekranı) ayrı `UI` sahnesinde: kamera yakınlaştırmasından etkilenmez, ekran boyutuna göre ölçeklenir.
-- Tam ekran tuşu: tam ekrana geçer ve telefonu **yatay kilitler** (`screen.orientation.lock('landscape')`; Android Chrome'da çalışır, iPhone Safari kilit desteklemez). v0.30: "Telefonu yan çevirin" uyarısı kaldırıldı; yatay çevirmeyi tam ekran tuşu yapar (kilit ilk denemede olmazsa bir kez daha dener).
-
-## Ana karakter sprite'ı (v0.14)
-`assets/oyuncu.png`: 53 kare, 10 sütun, hücre 176×141 px (`CONFIG.oyuncu.kare`). Kaynak görsel düzensiz ızgaralıydı; kareler tek tek tespit edilip kesildi, kirli hale temizlendi. Her karede ayak çizgisi y=125, kafa hücrenin yatay ortasında (sola dönünce kayma olmaz).
-**v0.19: bütün kareler tek ve sabit ölçekte (%100)** — satır bazlı büyütme/küçültme yok (v0.15'teki zıplama %10 / tırmanma %30 büyütmesi iptal). Asıl sorun eski bekleme ve koşma karelerinin büyük çizilmesiydi: 0–9 kullanıcının gönderdiği yeni bekleme (4) ve koşma (6) görselleriyle değiştirildi (kenardaki kırmızı hale temizlendi). 49–52 ayrı gönderilen pogo görselinden. Oyunda bekleme karesinde ayakta boy 60.19 px (`CONFIG.oyuncu.boy`; v0.32'de 48 → 52.8, v0.43'te %20 büyütüldü → 63.36, v0.46'da %5 küçültüldü; animasyon ölçek oranları korunur, çarpışma gövdesi aynı). Çarpışma gövdesi (v0.26) ayakta 18×42 px → 1 karelik (32 px) aralıklara sığmaz; eğikken 18×26 px (`govdeEgik`) → eğilerek geçilir. Üstü kapalı yerde ↓ bırakılsa da eğik kalır ve zıplanamaz; açık yere çıkınca kalkar.
-| Animasyon | Kareler | Ne zaman |
-|---|---|---|
-| dur | 0–3 | yerde dururken |
-| kos | 4–9 | yürürken |
-| zipla / dus / in | 10–12 / 13 / 14 | yükselirken / düşerken / yere inişte (toz) |
-| sersem | 15–17 | hasar alınca (yıldızlar), ölünce |
-| (yürüme döngüsü) | 18–23 | şimdilik kullanılmıyor |
-| vur | 24–28 | baston vuruşu (v0.23: %10 büyük) |
-| tirman | 29–32 | sarmaşıkta (durunca durur; v0.21: %30 büyük çizilir, `CONFIG.oyuncu.animOlcek`) |
-| pogoHava | 49 | pogo açıkken havada (bastonun üstünde; v0.22: pogo kareleri %20 büyük) |
-| pogoSek | 50 → 51 → 52 | değme anı: 50 sarı kıvılcım sadece o an, sonra 51, 52 (sekme); havada tekrar 49 |
-| (eski pogo) | 33–40 | artık kullanılmıyor |
-| uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
-| egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
-
-## v0.61
-- **Eski taş bloklar (tasBlok) kalktı**: 5 basamak yığını kırılır taş oldu (bölgeye göre tuğla / gri / toprak), `basamaklar` boş. `bloklar` ızgaradan yeniden üretildi.
-- **Sol alt yeraltı**: en soldaki sandığın odasının sol duvarı (sütun 9, satır 127-129) 3 üst üste toprak taşı → kırınca alttaki boşluğa (dikey geçit + alt koridor) girilir.
-- **Patron kapısı önündeki çukur** (sütun 109-110, satır 40-43) kırılır tuğla taşla dolu. Kırılıp çukur açılırsa ve patron düşerse patron yenilir (`bossGuncelle`: patron başlangıç yüksekliğinin 60 px altına inerse).
-- **Taş vuruş sesleri**: 1. vuruş `tasVur1` (rock1), 2. vuruş `tasVur2` (rock2), 3. vuruş kırılma (`tasKir`). Eski çatlama sesi silindi.
-- **Baston vuruş sesi** (`bastonVur`): düşmana ya da kırılmaz zemine/duvara değince, vuruş başına bir kez; boşluğa vurunca çalmaz.
-- **Sesler**: yeni ölüm (`olum`), patron ölümü (`olBoss`), mızraklı ölümü (`olKopek`), tüm canlar bitince `tamKaybet`. Patron sesleri `boss1..13`: uyanınca, hasar alınca, saldırıya hazırlanırken ve yürürken arada bir rastgele (birbirinin üstüne binmez). Kapı açılma (`kapiAcil`) ve kazanma (`kazanma`) kancaları hazır, dosyaları gelince çalar (`ses()` yüklü olmayan sesi sessiz geçer).
-- **Şelale** arka planın önünde, basılan zeminin arkasında (`depth` 0.5); üst/alt uçları zeminin içine 16 px girer.
-- `erisim.js`: kırılır taşlar katı sayılır (kristal ve yosun kapı taşları hariç).
-
-## v0.60
-- **Sarmaşık**: üst ucu bir taşın içinde başlayan sarmaşık o taşın altından başlar, taşın üstünden yukarı devam etmez (iki sarmaşığın verisi taşın alt kenarına çekildi). Görsel taşın 8 px altına girer ve zemin katmanının arkasında çizilir (`depth` 0.95).
-
-## v0.59
-- **Şelale sesi** (`selale`): kadrajda şelale varken döngüde çalar (ses %40), kadrajdan çıkınca durur.
-- **Taş çatlama sesi** (`tasCatla`): kırılır taşa 1. ve 2. vuruşta; 3. vuruşta kırılma sesi (`tasKir`).
-
-## v0.58
-- **3 bölge, yeni karolar** (`python3 araclar/bolgeKaro.py`, kaynaklar `assets/kaynak/bolge_tapinak.png`, `bolge_orta.png`, `bolge_toprak.png`): her bölge 3×3 — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Karolar 128 px'e getirildi, köşe boşlukları dolduruldu. Önekler: `p` tapınak (satır < 48), `c` yosunlu parke taş + koyu kaya arka plan (48–116), `d` toprak ve kökler (117+). `zeminDose.py` artık hem zemini hem arka planı bölgeye göre döşer. Toprak bölgesi 2 kare aşağı kaydı (115 → 117): başlangıçta kamera alttaki toprağı daha az gösterir, toprak daha derinde başlar. Eski arka plan süsleri kaldırıldı.
-- **Kırılır taşlar** (`assets/kirTas.png`, `python3 araclar/kirTasKes.py`, kaynak `kirilir_taslar.png`; türler: kasa, gri, koyu, kristal, toprak, kizil, tugla, kum, mor, yosun): `level1.js` → `kirTaslar: [x, y, tür, sabit]`. Baston veya pogo (baston altı) vuruşu: 1. vuruş çatlak, 2. daha çatlak, 3. kırılır → enkaz → 0.3 sn'de solup kaybolur (`tasKir` sesi). Sandık grubundadırlar: itilir, çekilir, üst üste durur, düşer; düşen taş düşmanı öldürür. Yerdeki taşlar uykuda başlar (yerçekimsiz, sabit) ve itilince/çekilince ya da altındaki kırılınca zincirleme uyanıp düşer, durunca yeniden uyur. `sabit=1` olanlar havada durur (sadece kırılır).
-  - Patron kapısı: kırmızı takozlar yerine 2 yosunlu taş (`takozlar` boş).
-  - 1. mavi elmas odası (en üst): girişte tavana kadar 7 kristal taş sütunu (alttakini kır ya da çek → üsttekiler düşer, üstte açılan boşluktan geçilir).
-  - 2-3. mavi elmas odası (sol): odanın ağzı 12 sabit kristal taşla kapalı — pogo ile kırılıp içine inilir.
-  - Eski kırılmayan taşlar: 3 tapınak tuğlası (üst), 1 toprak taşı (yeraltı).
-  - Uçan tek karolardan, kırılınca oyunu bozmayacak 4 tanesi (erişim aracıyla tek tek denendi) sabit gri taş oldu (arılı bölge).
-- **Kaydırma sesleri** `kaydir1/2`: sandık/taş çekerken ve iterken sırayla (ayak sesinin yerine).
-- **Mızrak** %40 küçük (gen 44 → 26).
-- **Sarmaşık görseli** üstteki ilk katı karonun alt kenarından başlar (tırmanma alanı aynı).
-- **Gizli yer sesi** aynı alanda (300 px içi) bir kez çalar.
-- **Puanlar 10'a bölündü**: elmas 10, kızıl 50, mavi 100, altın 5, kalp fazlası 50, düşman 20, patron 500.
-
-## v0.57
-- **P tuşu (bilgisayar)**: tüm harita tek ekranda, kamera sabit; tekrar P → normal kamera.
-- **Dikenler devriye sınırı**: yürüyen düşmanlar dikenli zemine çıkmaz, diken ile duvar/uçurum arasında gidip gelir.
-- **Düşmanlar asla düşmez** (patron hariç): vuruşla savrulsa da zemin parçasının dışına çıkamaz.
-- Yeraltına 1 pembe kirpi (yuvarlak) daha eklendi (x 1120, y 3840).
-
-## v0.56
-- 14 sn'lik zıplama sesi (jump_sound, eski zipla4) silindi; zıplama sesleri artık `zipla1..6`.
-
-## v0.55
-- **Sandık yere düşme sesi** (`sandikDus`): sandık hızla (150 px/sn üstü) düşüp yere değince bir kez çalar.
-
-## v0.54
-- **Siyah ekran düzeltmesi**: v0.52'de `dusmanKes.py` assetlar.js'teki kendi bölümünü silerken sonraki toplanabilir, arayüz ve harf bölümlerini de siliyordu → oyun yüklenirken hata verip siyah ekranda kalıyordu. Regex sadece kendi satırını silecek şekilde düzeltildi, bölümler yeniden üretildi.
-- **Kontrol noktası sesi** (`bayrak`): bayrak kalkınca çalar.
-
-## v0.53
-- Duvara bastonla tutunma sesi (`bastonTakil`) yenisiyle değiştirildi.
-
-## v0.52
-- **Yeni düşman görselleri**: maymun, mızraklı köpek ve patron `assets/kaynak/dusman_seti2.png`'den (`dusmanKes.py`, kaynak '2'). Maymun: yuru 6, at 5, ol 3 + ateş topu (eski ayrı yürüme eki kaldırıldı). Köpek: yuru 6, at 4, ol 2 + mızrak. Patron: yuru 4, saldır 4 (hazır 2 → atıl 1 → dinlen 1), ol 2.
-- **Ölüm sesleri**: `olMaymun` (maymun ve mızraklı köpek), `olGul`, `olYuvarlak` (pembe kirpi), `olAri`, `olOrumcek`, `olYilan`.
-- **Gizli yer sesi** (`gizli`): `level1.js` → `gizliler: [x, y]` (şimdilik 3 mavi elmas + yaşam sandığı), oyuncu yaklaşınca bir kez çalar.
-- **Zıplama sesi**: tek ses yerine `zipla1..7` sırayla.
-- **Arı sesi** arı ölünce veya kameradan çıkınca o an kesilir.
-- **Düşman devriyesi** (titreme düzeltmesi): her yürüyen düşmanın alanı doğuşta katı zemin ızgarasından hesaplanır (bastığı zemin parçasının duvar/uçuruma kadar iki ucu). Uçlarda her zaman döner; duvara/sandığa çarpınca döner ama 0.35 sn tekrar dönmez → sağ-sol titreme olmaz. `level1.js`'deki min/max artık kullanılmıyor.
-
-## v0.51
-- **Yeni sesler**: `olum` (yeni game over), `zipla` (yeni), `inis` (yere iniş), `bastonTakil` (yeni, duvara asılma), `cekTakil` (sandığa kanca takılma), `tirmanCik` / `tirmanIn` (sarmaşıkta çıkarken / inerken 0.4 sn arayla), `ates1` / `ates2` (maymun ateş topu, sırayla), `mizrak` (köpek), `ari` (arı kameraya girince).
-- **Elmas takası**: mavi elmas (1000) artık zor yerlerdeki 3 noktada, kızıl yakut (500) eski mavi elmas yerlerinde ve sandık ödüllerinde (`kizil`). Sesler de takas edildi (güzel ses mavi elmasta).
-- **Tırmanırken** karakter her kare sarmaşığın tam ortasında.
-- **Kalpler** arası boşluk açıldı (36 → 46).
-- **Düşmanlar kenardan düşmez**: devriyede önünde zemin yoksa geri döner. Bölüm verisinde her yürüyen düşmanın devriye alanı bastığı zemin parçasına sığdırıldı; 3 kareden dar yerde başlayan 2 gül silindi.
-- **Arılar** sadece kamera görüş alanına girince kovalar.
-- **Yaşam ikonu**: karakterin çapalı şapkası (`assets/kaynak/ui_ek.png`).
-- **Harf seti** genişledi: Q q, noktalama (! ? . , ; : … ’ ” “ ( ) [ ] { } < > « »), + − × ÷ = %, @ # $ € ₺ & * ^ ~ _ | \ / (`harfKes.py`, kaynak `ui_ek.png`; diğer ikonlar — oklar, oynat/duraklat, kilit, anahtar, pusula, harita, sandık, taç, yıldız — ileride kullanılmak üzere kaynakta duruyor).
-- **Yazılar mobil**: `harfYazi` metinde `{zipla}`, `{saldir}`, `{sol}` vb. yerine tuş görseli koyar. İpuçları tuş görselleriyle, ekranda görünecek yükseklikte; bitiş ekranında "Dokun: tekrar oyna". Dünya içi yazılar kamera içinde kalır. Eski takoz ipucu kaldırıldı.
-
-## v0.49
-- **Sesler** (`assets/ses/`): `bastonSalla` (baston vuruşu), `bastonTakil` (duvara asılma, sandığa kanca takılma), `sekme1` / `sekme2` (pogo sekmesi, sırayla), `zipla` (zıplama, duvardan sıçrama). `oyuncu.js` → `ses(ad)`.
-- v0.50 sesleri: `sekme2` değiştirildi; `olum` (her ölümde, game over sesi); `adim1/2/3` (koşarken 0.3 sn, eğilerek yürürken / iterken 0.45 sn arayla sırayla, ses %35); `elmas` (küçük sarı elmas), `kizilElmas` (kızıl yakut), `buyukElmas` (mavi elmas, sandıktan çıkan dahil), `can` (kalp ve yaşam jetonu).
-- **Eğilme aç/kapa**: dokunmatik ▼ bir kez basınca eğilir ve tuş basılı görünür, tekrar basınca kalkar; zıplayınca kapanır. Sarmaşıkta ▼ basılı tutunca aşağı iner. Klavyede ↓ basılı tutma eskisi gibi.
-- **Otomatik eğilme**: yerde ileri basarken önünde 1 karelik geçit (üstü kapalı, altı açık) varsa kendiliğinden eğilir.
-- **Düşmana ilk vuruş belli olur** (çok canlılar): beyaz parlama (2 kez), geri savrulma + hafif sıçrama, 0.3 sn sersemleme, kıvılcım, küçük ekran sarsıntısı.
-- **Ölüm animasyonu** her ölümde (diken, düşman, mermi) oynar; başka animasyon ezemez.
-- **Düşen sandık** düşmanın kafasına inerse düşman ölür (patron 1 hasar alır); uçan düşmanlar dahil.
-
-## Yeni hareketler (v0.33)
-- Ek kareler `assets/oyuncu2.png` (`python3 araclar/oyuncuEk.py`; kaynak `assets/kaynak/oyuncu_ek.png` + `oyuncu_asiliHasar.png`): 10 sütun, hücre 240×220 (v0.40'ta 176'dan genişletildi), ayak çizgisi y=200, gövde ortası x=120, ana sayfayla aynı ölçek (şapka genişliği eşitlendi). `CONFIG.oyuncu.kare2`. v0.34: oyunda hepsi %30 küçük çizilir (`animOlcek` 0.7).
-- **Bastonla duvara asılma** (`asili`, kare 0–5; v0.36: kareler bastona göre hizalı → baston takıldığı yerde sabit, sadece gövde sallanır; v0.38: takılınca gövde taşa yaslanır ve baston ucu ~10 px taşın içine girer; v0.39: sadece yandan — kanca hizası ile gövdenin üstü ve altı aynı yanda taşa değmeli, alttan/kenar köşesinden ya da tepeye zıplarken asılmaz; v0.43: sadece kancanın değdiği taş gövdenin yanında olmalı — tek uçan taşa yandan da asılır, taş gövdenin üstündeyse (alttan kafa girince) asılmaz; asılı duruş 5 px geri alındı, `kancaY` 62; v0.41: kafa tavana çarpınca geri düşer ve 0.35 sn asılamaz — ileri basılı olsa bile; yaslanma en fazla 4 px, ışınlanma hatası giderildi): havada aşağı düşerken duvara doğru basılıysa ve **baston kancası** (ayakların `CONFIG.oyuncu.kancaY` 52 px üstü, v0.35) önündeki taşa değiyorsa takılır; sadece kafa/bacak değiyorsa düşmeye devam eder ve kancanın taşa ilk değdiği yerde durur (yerçekimi kapalı). Zıpla → duvardan uzağa sıçrar (`CONFIG.fizik.asiliZipla` 160, tam zıplama, 0.15 sn yatay kilit); ters yön, ↓ veya duvar biterse bırakır (0.25 sn tekrar takılmaz).
-- **İtme** (`it`, kare 6–11; v0.46: diğer yeni karelerden %10 büyük, `animOlcek.it` 0.77; v0.40: el ucu gövdenin ön kenarına hizalı → eller nesneye değer, içine girmez; karelerdeki küçük siyah lekeler temizlendi): yerde, önünde aynı zeminde bitişik sandık varsa yürüyerek yavaşça iter (`CONFIG.fizik.itme` 90 px/sn). Çekilebilen her şey itilebilir.
-- **Ölüm** (v0.37, `olum`, kare 18–23, kaynak `assets/kaynak/oyuncu_olum.png`): ölünce eski yukarı sıçrayıp aşağı düşme aynı, sırasında bu animasyon bir kez oynar ve son karesi sabit kalarak düşmeye devam eder (gri renk kaldırıldı).
-- **Duruma göre darbe karesi**: tırmanırken 12, eğikken 13, havada 14, çekerken 15, iterken 16, asılıyken 17. Yerde ayaktayken eski `sersem` (15–17 ana sayfa).
-- **Duvara basarak zıplama düzeltmesi**: duvara doğru basarken yatay hız verilmez (gövde duvara sürtünüp zıplamayı engellemiyordu).
-
-## Sandık çekme (v0.14, bombanın yerine)
-- Bomba tamamen kaldırıldı (eşyalar, tuş, HUD).
-- Sandıklar (v0.28: %20 küçük, 32 px) ağırlıklı kutu: yerçekimiyle düşer, üstüne çıkılır (yüksek yerlere basamak), yürüyerek itilemez.
-- C / L basılı tut: baston kanca gibi uzanır (0.2 sn). Önünde (bakılan yönde, aynı zeminde, ~30 px menzilde) sandık varsa takılır; sonra **geri yürüyerek** sandık peşinden çekilir (110 px/sn). Bırakınca, zıplayınca, hasar alınca veya sandık kenardan düşünce kanca bırakır.
-- Sandığı açmak: baston vuruşu (X) ya da pogo ile üstüne inmek. Açık sandık da kutu olarak kalır (çekilebilir, üstüne çıkılır).
-- Kırmızı takoz: artık bastonla (X) kırılır (eskiden sadece bomba kırıyordu).
+## Klasör yapısı
+```
+index.html                 betikleri sırayla yükler
+js/
+  ayarlar.js               CONFIG (tüm sayılar), SESLER (yüklenen sesler), KIRTAS (taş türleri)
+  veri/assetlar.js         görsel verileri — araclar/*.py üretir, elle düzenlenmez
+  veri/level1.js           1. bölüm verisi (koordinatlar piksel, ızgara 32 px)
+  cekirdek/yardimci.js     yerdeMi, govdeRect, ses (sesCal / sesBaslat / sesDurdur), tam ekran, harfYazi, gorselYazi
+  sahneler/BootSahnesi.js  yükleme + tüm animasyon tanımları
+  sahneler/OyunSahnesi.js  seviye kurulumu, kamera (P: tüm harita), çarpışmalar, klavye, ana döngü, şelale
+  sistemler/oyuncu.js      oyuncu: girdi, hareket, baston (vur/çek/it/asıl), sarmaşık, hasar/ölüm, animasyon, adım sesleri
+  sistemler/dusmanlar.js   düşmanlar, patron, mermiler, hasar ve ölüm
+  sistemler/nesneler.js    toplanabilirler ve ödüller, sandık, kırılır taşlar, kontrol noktası, gizli yer, çıkış
+  sistemler/efektler.js    uçan yazılar, parçacıklar, puan, bölüm sonu, arayüz köprüsü
+  sahneler/ArayuzSahnesi.js HUD, dokunmatik tuşlar, tam ekran tuşu, bitiş ekranı
+  main.js                  Phaser oyununu başlatır, ekran boyutlama
+assets/
+  karo/ oyuncu/ dusman/ nesne/ ui/ harf/ ses/   oyunun kullandığı dosyalar
+  kaynak/                  kullanıcının gönderdiği ham sayfalar (araçların girdisi, oyun yüklemez)
+araclar/                   Python / Node araçları (aşağıda)
+```
+Sistem dosyaları `Object.assign(OyunSahnesi.prototype, {...})` ile sahneye yöntem ekler; hepsi aynı `this` (sahne) üzerinden çalışır.
+Oyun `file://` ile değil bir web adresinden açılmalı (GitHub Pages, raw.githack.com, `python3 -m http.server`).
 
 ## Kontroller
-- Tam ekran: sağ üstteki "⛶ Tam ekran" butonu veya F tuşu (telefonda yataya kilitler)
-- ← → (A/D): yürü
-- ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
-- ↓ (S) yerde: eğilerek yürü (v0.21); 1 karelik aralıklardan sadece eğilerek geçilir (v0.26)
-- v0.48: **VUR tek tuşta üç iş** — dokun = vur (sandık açar); sandık önünde 0.18 sn basılı = kanca/çek; havada 0.15 sn basılı = POGO (bırakana kadar seker). ↓ artık pogo yapmaz, sadece eğilir. ÇEK tuşu kalktı (klavyede C/L hâlâ doğrudan çeker).
-- (eski, v0.47'ye kadar) ↓ (S): **POGO** — sadece havadayken açılır: önce zıpla, havada ↓ basılı tut. Açılınca ↓ basılı kaldıkça zemine, düşmana, dikene, sandığa seker. Yerde dururken ↓ basmak pogo açmaz.
-- X / K: baston vuruşu (yerde ve havada; düşmana vurur, mermi bozar, kasa/takoz kırar, sandık açar)
-- C / L basılı tut: baston kancası — sandığı çek (geri yürü)
-- R: bölümü yeniden başlat
-- Mobil (v0.48, 6 tuş): solda ◀ ▶ ve üstlerinde ▼ (eğil); sağda ZIPLA, VUR ve ZIPLA'nın üstünde ▲ (tırman)
+| Klavye | Dokunmatik | İş |
+|---|---|---|
+| ← → (A/D) | sol: ◀ ▶ | yürü |
+| ↓ (S) basılı | sol: ▼ (aç/kapa, basılı görünür) | eğil; 1 karelik aralıklardan sadece eğilerek geçilir. İleri basarken önünde 1 karelik geçit varsa otomatik eğilir. Zıplayınca kapanır. Sarmaşıkta ▼ basılı = aşağı in |
+| SPACE / Z (↑ de) | sağ: ZIPLA | zıpla (basılı tut = yüksek); sarmaşıktan atla |
+| ↑ (W) | sağ: ▲ (ZIPLA'nın üstü) | sarmaşığa tırman |
+| X / K | sağ: VUR | dokun = baston vuruşu · sandık/taş önünde 0.18 sn basılı = kanca, geri yürüyerek çek · havada 0.15 sn basılı = pogo (bırakana kadar seker) |
+| C / L basılı | — | doğrudan çek |
+| F | Tam ekran tuşu | tam ekran + telefonda yatay kilit |
+| R / P | — | bölümü yeniden başlat / tüm harita (kamera sabit) |
 
-## Sayılar
-- Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
-- Yürüme 200 px/sn.
-- **Zıplama yüksekliği** (v0.14 ölçüldü/ayarlandı): tepe = hız² / (2·yerçekimi). Eski: 520²/2800 ≈ 97 px (3 kare) — bölümde 4 karelik 27 basamak vardı, bu yüzden bazı yerlere zıplanamıyordu. Yeni: 625²/2800 ≈ **140 px ≈ 4.4 kare** → **en yüksek basamak 4 kare (128 px) olmalı**. Pogo 700 → ≈ 5.5 kare, pogo + zıpla basılı 790 → ≈ 7 kare, yaprak 950 → ≈ 10 kare.
-- Bölüm taraması (v0.14): 4 kareyi aşan 5 duvarın dibine ara taş basamak eklendi (`level1.js` → `basamaklar`). 10 karelik olanlar sarmaşıkla çıkılan kule duvarları.
-- **Yatay zıplama menzili** (v0.18 ölçüldü; havada tam sağa basılı, zıplama basılı, 60 Hz adımlar): yükseklik farkına göre en uzak iniş — 4 kare yukarı: 110 px (3.4 kare) · 3 yukarı: 137 px (4.3) · 2 yukarı: 153 px (4.8) · 1 yukarı: 167 px (5.2) · aynı hiza: 177 px (5.5) · 1 aşağı: 187 px (5.8) · 3 aşağı: 203 px (6.3).
-- **Rahat zıplama kuralı**: bir atlayış, havada tam hızın **%65'iyle** yapılabiliyorsa rahat sayılır (telefonda kusursuz zamanlama gerekmesin). Pogo hesaba katılmaz. Örn. 3 kare yukarı + 3 kare boşluk (100. sütun şelalesi yanı) tam menzilde ancak bloğun ucuna 9 px'le iniliyordu → arasına kaya kondu.
-- **Ara kayalar** (v0.18, `level1.js` → `kayalar`, 8 adet): tek yosunlu taş karosu (`sK`), çarpışmalı. Rahat zıplamayla ulaşılamayan yerler simülasyonla bulundu, her kaya tek tek denenerek en az kayayla çözüldü. Kontrol: patron, çıkış, 5 kontrol noktası, tüm sandıklar, elmaslar ve özel eşyalar pogo kullanmadan rahat zıplamayla ulaşılabilir.
-- **Kontrol aracı**: `node araclar/erisim.js` → ulaşılamayan önemli yerleri listeler; `node araclar/erisim.js --coz` → çözüm için kaya önerir. Bölüme yeni platform/tepe/eşya eklenince çalıştır.
-- Puan: elmas 100, büyük elmas / sandık 1000, kızıl elmas 500, altın para 50, düşman 200, patron 5000.
-- v0.33: taşın/zeminin içinde kalan 14 elmas ve 2 özel eşya en yakın boş yere taşındı.
-- **Toplanabilirler (v0.29)**: kaynak `assets/kaynak/toplanan_seti.png` → `python3 araclar/toplananKes.py` → `assets/toplanan.png` (6 satır × 6 karelik dönme; renkli hale silinir). Hepsi dönerek durur; oyundaki boylar `CONFIG.toplanBoy`.
-  | Görsel | Ne | Etki |
-  |---|---|---|
-  | küçük altın taş (`elmas`) | elmaslar | +100 |
-  | mavi elmas (`buyukelmas`) | özel eşya `buyuk`, sandık ödülü | +1000 |
-  | kızıl yakut (`kizilelmas`) | özel eşya `kizil` | +500 |
-  | kalp (`kalp`) | sandık ödülü `kalp` | +1 can kalbi (dolu ise +500) |
-  | çapalı jeton (`yasam`) | özel eşya `yasam`, sandık ödülü `yasam` | +1 yaşam |
-  | altın para (`altin`) | özel eşya `altin` (bölümde henüz yok) | +50 |
-- Sandık açılınca ödülün görseli yukarı süzülür. 1 sandık (x 3734) çapalı jeton (+1 yaşam) verir.
+Hareketler: yürürken önündeki sandık/taşı **iter**; havada düşerken duvara doğru basılıysa ve baston kancası yandaki taşa değiyorsa **bastonla asılır** (zıpla → duvardan sıçrar; ters yön / ↓ / duvar biterse bırakır; alttan kafa girince asılmaz). Kafa tavana çarpınca geri düşer.
+
+## Sayılar (hepsi `CONFIG`)
+- Can 3, yaşam 3; hasar sonrası 1.5 sn dokunulmaz. Yürüme 200, eğik 100, itme 90 px/sn.
+- Zıplama tepesi ≈ 140 px (4.4 karo) → en yüksek basamak 4 karo. Pogo ≈ 5.5 karo, pogo + zıpla basılı ≈ 7 karo.
+- Yatay menzil (yükseklik farkına göre en uzak iniş): 4 yukarı 110 px · 3 yukarı 137 · 2 yukarı 153 · 1 yukarı 167 · aynı hiza 177 · 1 aşağı 187 · 3 aşağı 203.
+- **Rahat zıplama kuralı**: atlayış havada tam hızın %65'iyle yapılabiliyorsa rahat sayılır; pogo hesaba katılmaz. `node araclar/erisim.js` bunu denetler.
+- Oyuncu gövdesi 18×42 (eğik 18×26), görünür boy 60 px; animasyona göre görsel ölçek `CONFIG.oyuncu.animOlcek` (gövde değişmez).
+- Puan: elmas 10, yakut 50, mavi elmas 100, altın 5, kalp fazlası 50, düşman 20, patron 500.
+
+## Görseller
+- **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+). Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
+- **Şelale**: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. Kadrajdayken şelale sesi döngüde.
+- **Sarmaşık**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`.
+- **Oyuncu**: `oyuncu.png` (176×141 hücre) + `oyuncu2.png` (240×220: asılma, itme, duruma göre darbe kareleri, ölüm). Kare numaraları `BootSahnesi.oyuncuAnimasyonlari`.
+- **Düşmanlar** `assets/dusman/<tip>.png` şerit, animasyon kareleri ve görünür boy `ASSETLER.dusman`; tümü `CONFIG.dusmanOlcek` (0.9).
+- **Arayüz**: kalpler, yaşam şapkası, elmas/altın ikonları, rakamlar, 6 dokunmatik tuş (normal / basılı), taş panel. **Harfler**: Türkçe büyük/küçük, Q, noktalama, semboller (`harfYazi`, `{zipla}` gibi işaretler tuş görseli olur).
+
+## Nesneler
+- **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), çapalı jeton (`yasam`, +1 yaşam), altın para (`altin`, +5, bölümde yok).
+- **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam / kizil / buyuk) yukarı süzülür. Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
+- **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır, 3. kırar (enkaz solar). Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
+  Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak — alttaki gizli geçide açılır), eski basamaklar ve uçan tek karolar.
+- **Kontrol noktası** (5): bayrak kalkar, ses, yeniden doğma yeri. **Gizli yer** (`gizliler`): yaklaşınca bir kez ses (300 px içindekiler tek alan).
+- **Çıkış**: patron ölünce ödül sandığı çıkar, kapı açılır; kapıdan girince bölüm biter.
 
 ## Düşmanlar
-Görseller (v0.24): kaynak `assets/kaynak/dusman_seti.png` → `python3 araclar/dusmanKes.py` → her düşman `assets/d_<ad>.png` şeridi, mermiler `atesTopu.png` / `mizrak.png`, ölçüler `assetlar.js` → `ASSETLER.dusman` (hücre, ayak çizgisi, oyundaki görünür boy `boy`, animasyon kareleri). Kenardaki renkli hale temizlenir. Görseller sağa bakar, sola giderken çevrilir. Ölünce gövde kapanır, parçalanma animasyonu oynar, solup kaybolur (patronda bitince kapı açılır).
-v0.32: tüm düşmanlar %10 küçük (`CONFIG.dusmanOlcek` 0.9, görsel ve gövde; tablodaki boylar ölçeksiz değer).
-
-| Düşman | Animasyonlar (kare) | Boy (px) |
+| Tip | Can | Davranış |
 |---|---|---|
-| gul (gül) | yuru 6, ol 4 | 36 |
-| yilan | yuru 6, ol 4 | 22 |
-| yuvarlak | yuru 6, ol 4 | 32 |
-| ari | uc 4, ol 4 | 30 |
-| orumcek | bekle 2, ol 4 | 34 |
-| maymun | yuru 6 (v0.27, ayrı görsel `assets/kaynak/maymun_yuru.png`, şeridin sonuna eklendi), dur 1, at 4 (0.4 sn hazırlık), ol 4 + ateş topu | 38 |
-| kopek | yuru 6, at 4, ol 5 + mızrak | 40 |
-| boss | yuru 6, hazir 2 → atil 1 → dinlen 1, ol 4 | 84 |
-- Gül (pembe küp): devriye yürür, 1 can
-- Yılan (yeşil, alçak): yavaş devriye, 1 can
-- Yuvarlak (pembe top): hızlı devriye, 1 can
-- Arı (sarı top): havada bekler; 360 px yaklaşınca oyuncuyu kovalar (95 px/sn), 520 px uzaklaşınca bırakır
-- Maymun: oyuncu **aynı zemine basınca** (yerde, ayak hizası aynı; v0.28) ve 420 px içindeyse dönüp 0.4 sn hazırlanıp ateş topu fırlatır (210 px/sn, 2.4 sn aralık)
-- Mızraklı köpek (v0.33: maymun gibi sadece aynı zemindeyken): aynı şekilde mızrak fırlatır (280 px/sn, 1.8 sn aralık), 2 can
-- Örümcek (mor): tavandan ipiyle inip çıkar, 1 can
-- Patron (kırmızı büyük küp): 4 can; yürü → sarı uyarı → atılma → dinlen; 2 canın altında hızlanır ve zıplayarak atılır. Hasar sonrası 1.1 sn dokunulmaz. 520 px yaklaşınca uyanır.
-- Uzaktaki düşmanlar (900 px) uyur. Mermiler 2.6 sn sonra kaybolur.
+| gul, yilan, yuvarlak | 1 | devriye (hız 55 / 45 / 120) |
+| maymun / kopek (mızraklı) | 1 / 2 | devriye; oyuncu aynı zemine basınca döner, 0.4 sn hazırlanıp ateş topu / mızrak atar (2.4 / 1.8 sn arayla) |
+| ari | 1 | kamera görüş alanına girince kovalar (95 px/sn), 520 px uzaklaşınca bırakır; görünürken arı sesi |
+| orumcek | 1 | tavandan ipiyle inip çıkar |
+| boss | 4 | 520 px'te uyanır; yürü → hazırlan → atıl → dinlen; yarı canın altında hızlanır, zıplayarak atılır; rastgele patron sesleri |
+- Yürüyenler bastıkları zemin parçasının (duvar / uçurum / dikene kadar) iki ucu arasında gider, asla düşmez; duvara çarpınca döner (0.35 sn tekrar dönmez → titreme yok).
+- Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar.
 
-## 1. Bölüm — Unity seviyesinden aktarıldı
-Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken, sarmaşık, takoz konumları). 1 Unity birimi = 48 px. Dünya 5440 × 4544 px (170 × 142 karo), çok katlı:
-- Alt kat (başlangıç, sol altta): uzun koridor, dikenli çukurlar, maymunlar, yeraltına inen merdiven
-- Orta bölge: sarmaşıklarla çıkılan bloklar ve arılar
-- Üst katlar: koridorlar, örümcekler, mızraklı köpekler
-- En üst: patron (kırmızı takozlarla kapalı alanlar), patron ölünce sandık ve çıkış (helikopter yeri)
+## Sesler
+`SESLER` listesindeki `assets/ses/<ad>.mp3` yüklenir. Kodda çalınıp listede olmayan ses sessizce atlanır — **eksik**: `kapiAcil` (çıkış kapısı açılınca) ve `kazanma` (kapıdan girince); dosyaları gelince `assets/ses/`'e koyup `SESLER`'e eklemek yeterli.
 
-`level1.js`: `on` (zemin karoları) ve `arka` (arka plan karoları) satırları `araclar/karoUret.py` ile üretildi; çarpışma blokları `bloklar`. Kontrol noktaları: 5 adet. Çıkış patron öldükten sonra açılır.
+## 1. Bölüm
+Unity projesindeki `SampleScene`'den aktarıldı (1 Unity birimi = 48 px). Dünya 5440 × 4544 px (170 × 142 karo), çok katlı: başlangıç sol altta, ortada sarmaşıklı bloklar ve arılar, üstte koridorlar, en üstte patron ve çıkış, altta yeraltı.
+`level1.js` alanları: `bloklar` (çarpışma), `kayalar` (ara kaya), `dikenler`, `sarmasiklar`, `sandiklar`, `elmaslar`, `ozeller`, `kirTaslar`, `kontrol`, `ipuclari`, `dusmanlar`, `gizliler`, `selaleler`, `on` / `arka` (zeminDose.py üretir).
 
-Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
-
-## Dosyalar
-- `araclar/harfKes.py` harf görsellerini keser
-- `araclar/uiKes.py` arayüz görsellerini keser
-- `araclar/oyuncuEk.py` oyuncu ek karelerini (asılma, itme, darbe) üretir
-- `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)
-- `araclar/kenarEkle.py` zemin yan bitiş karolarını tileset'e ekler
-- `araclar/bolgeKaro.py` bölge karolarını tileset'e ekler · `araclar/kirTasKes.py` kırılır taş sayfasını üretir
-- `araclar/zeminDose.py` zemin karo ızgarasını bloklardan yeniden döşer
-- `araclar/karoUret.py` karo seti + bölüm ızgarası üretici (Python, PIL)
-- `araclar/erisim.js` bölüm erişilebilirlik kontrolü (Node ile çalışır, oyuna dahil değil)
-- `config.js` ayarlar ve sürüm · `level1.js` bölüm verisi (piksel) · `assetlar.js` karo numaraları ve obje boyutları (otomatik üretildi) · `assets/` görseller
-- `main.js` oyun ayarı, ekran boyutlama · `boot.js` görsel yükleme, karakter animasyonları, yer tutucu görseller · `game.js` sahne, bölüm kurulumu, kamera · `oyuncu.js` oyuncu mekanikleri, sandık çekme, animasyon seçimi · `dusman.js` düşmanlar, patron, toplanabilirler, sandık açma · `ui.js` UI sahnesi (HUD, tuşlar, tam ekran, bitiş ekranı)
+## Araçlar (`araclar/`)
+Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `bash araclar/hepsiniUret.sh`.
+| Araç | Ne yapar |
+|---|---|
+| `bolgeKaro.py` | `kaynak/bolge_*.png` → `karo/tileset.png` + `ASSETLER.tile` |
+| `zeminDose.py` | `level1.js` → `on` / `arka` karo ızgaraları (bloklar değişince çalıştır) |
+| `erisim.js` | önemli yerlere rahat zıplamayla ulaşılıyor mu (`--coz`: çözüm için kaya önerir) |
+| `oyuncuEk.py` | `kaynak/oyuncu_ek.png` vb. → `oyuncu/oyuncu2.png` |
+| `dusmanKes.py` | `kaynak/dusman_seti*.png` → `dusman/*.png` + `ASSETLER.dusman` |
+| `toplananKes.py` | `kaynak/toplanan_seti.png` → `nesne/toplanan.png` + `ASSETLER.toplanan` |
+| `kirTasKes.py` | `kaynak/kirilir_taslar.png` → `nesne/kirTas.png` |
+| `uiKes.py` | `kaynak/ui_seti.png`, `ui_ek.png` → `ui/*.png` + `ASSETLER.ui` |
+| `harfKes.py` | `kaynak/harf_seti.png`, `ui_ek.png` + rakamlar → `harf/*.png` + `ASSETLER.harf` (uiKes'ten sonra) |

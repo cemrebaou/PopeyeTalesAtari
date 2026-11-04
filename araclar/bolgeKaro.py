@@ -1,7 +1,8 @@
 # Bölge karoları (v0.58): her bölge için 3×3 sayfa — 1. satır basılan üst (sol / orta / sağ),
 # 2. satır alt dolgu (sol / orta / sağ), 3. satır arka plan (3 çeşit). Kaynaklar assets/kaynak/bolge_*.png.
-# Karolar 128×128'e getirilir (oran gerekirse bozulur), köşe boşlukları en yakın renkle doldurulur,
-# assets/tileset.png'nin sonuna eklenir, assetlar.js 'tile' güncellenir. Çalıştırma: python3 araclar/bolgeKaro.py
+# Karolar 128×128'e getirilir (oran gerekirse bozulur), köşe boşlukları en yakın renkle doldurulur.
+# assets/karo/tileset.png sıfırdan bu 27 karoyla kurulur, js/veri/assetlar.js → ASSETLER.tile / tileset güncellenir.
+# Sonra: python3 araclar/zeminDose.py (seviyenin karo ızgaraları yeniden döşenir). Çalıştırma: python3 araclar/bolgeKaro.py
 import json, re
 import numpy as np
 from PIL import Image
@@ -31,12 +32,10 @@ def doldur(arr, ust_bos):
         out[:ust] = np.where(arr[:ust, :, 3:4] > 200, out[:ust], 0)
         bit = arr[:ust, :, 3] > 200; out[:ust][bit] = arr[:ust][bit]; out[:ust][bit, 3] = 255
     return out
-ts = Image.open(KOK + '/assets/tileset.png').convert('RGBA')
-ap = KOK + '/assetlar.js'
-s = open(ap, encoding='utf8').read()
-m = re.search(r'"tile": (\{.*?\})', s, re.S); NO = json.loads(m.group(1))
-KOLON = json.loads(re.search(r'"tileset": (\{.*?\})', s, re.S).group(1))['kolon']
+KOLON = 9
 P = B + 2 * EX
+ts = Image.new('RGBA', (KOLON * P, P), (0, 0, 0, 0))
+NO = {}
 for on, dosya in BOLGE.items():
     im = np.array(Image.open(KOK + '/assets/kaynak/' + dosya).convert('RGBA'))
     im[im[:, :, 3] < 200] = 0
@@ -54,7 +53,7 @@ for on, dosya in BOLGE.items():
             t = np.array(Image.fromarray(parca).resize((B, B), Image.LANCZOS))
             t = doldur(t, ri == 0)
             ad = on + ADLAR[k]; k += 1
-            i = NO.get(ad, max(NO.values()) + 1); NO[ad] = i
+            i = len(NO); NO[ad] = i
             ox, oy = (i % KOLON) * P, (i // KOLON) * P
             if oy + P > ts.height:
                 y = Image.new('RGBA', (ts.width, oy + P), (0, 0, 0, 0)); y.paste(ts, (0, 0)); ts = y
@@ -62,7 +61,10 @@ for on, dosya in BOLGE.items():
             ts.paste((0, 0, 0, 0), (ox, oy, ox + P, oy + P))
             ts.paste(timg.resize((P, P), Image.NEAREST), (ox, oy))
             ts.paste(timg, (ox + EX, oy + EX))
-ts.save(KOK + '/assets/tileset.png', optimize=True)
-s = s[:m.start(1)] + json.dumps(NO, indent=1).replace('\n', '\n ') + s[m.end(1):]
+ts.save(KOK + '/assets/karo/tileset.png', optimize=True)
+ap = KOK + '/js/veri/assetlar.js'
+s = open(ap, encoding='utf8').read()
+s = re.sub(r'"tile": \{.*?\},\n "tileset": \{.*?\}', lambda _: '"tile": ' + json.dumps(NO) + ',\n "tileset": '
+           + json.dumps({'boyut': B, 'extrude': EX, 'kolon': KOLON}), s, count=1, flags=re.S)
 open(ap, 'w', encoding='utf8').write(s)
 print(len(NO), 'karo')

@@ -1,6 +1,6 @@
 # Toplanabilir görsel kesici (v0.28). Kaynak: assets/kaynak/toplanan_seti.png (6 satır × 6 kare dönme döngüsü).
-# Düşük alfalı renkli hale silinir, her kare eşit hücreye ortalanır → assets/toplanan.png (6 sütun),
-# hücre boyu ve satır sırası assetlar.js → ASSETLER.toplanan. Çalıştırma: python3 araclar/toplananKes.py
+# Düşük alfalı renkli hale silinir, her kare eşit hücreye ortalanır → assets/nesne/toplanan.png (6 sütun),
+# hücre boyu ve satır sırası js/veri/assetlar.js → ASSETLER.toplanan. Çalıştırma: python3 araclar/toplananKes.py
 import json, re
 import numpy as np
 from PIL import Image
@@ -32,8 +32,8 @@ for r, satir in enumerate(kareler):
     for c, (y0, y1, x0, x1) in enumerate(satir):
         p = Image.fromarray(im[y0 - 4:y1 + 4, x0 - 4:x1 + 4])
         out.paste(p, (c * W + (W - p.width) // 2, r * H + (H - p.height) // 2))
-out.save(KOK + '/assets/toplanan.png', optimize=True)
-ap = KOK + '/assetlar.js'
+out.save(KOK + '/assets/nesne/toplanan.png', optimize=True)
+ap = KOK + '/js/veri/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'\n// Toplanabilirler.*?;\n', '\n', s, flags=re.S)
 s += '// Toplanabilirler (araclar/toplananKes.py): hücre w×h, satır sırası (her satır 6 karelik dönme)\nASSETLER.toplanan = ' + json.dumps({'w': W, 'h': H, 'sira': SIRA}) + ';\n'

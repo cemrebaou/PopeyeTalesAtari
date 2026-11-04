@@ -9,9 +9,9 @@ import re, json, random
 KOK = __file__.rsplit('/araclar/', 1)[0]
 YERALTI_SATIR = 117          # v0.58: 2 kare aşağı (3744 px / 32) — taşlı bölge daha uzun, toprak daha derinde
 TAPINAK_SATIR = 48
-lp = KOK + '/level1.js'
+lp = KOK + '/js/veri/level1.js'
 L = open(lp, encoding='utf8').read()
-NO = json.loads(re.search(r'"tile": (\{.*?\})', open(KOK + '/assetlar.js', encoding='utf8').read(), re.S).group(1))
+NO = json.loads(re.search(r'"tile": (\{.*?\})', open(KOK + '/js/veri/assetlar.js', encoding='utf8').read(), re.S).group(1))
 alf = re.search(r"alfabe: '(.*?)',", L).group(1)
 def sayilar(ad):
     m = re.search(r"\n  " + ad + r": \[(.*?)\n  \]", L, re.S)

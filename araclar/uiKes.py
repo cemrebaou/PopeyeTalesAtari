@@ -1,5 +1,5 @@
 # Arayüz görselleri kesici (v0.44). Kaynak: assets/kaynak/ui_seti.png (kullanıcı görseli, şeffaf).
-# Çıktı: assets/ui/<ad>.png ve assetlar.js → ASSETLER.ui (ad listesi). Çalıştırma: python3 araclar/uiKes.py
+# Çıktı: assets/ui/<ad>.png ve js/veri/assetlar.js → ASSETLER.ui (ad listesi). Çalıştırma: python3 araclar/uiKes.py
 import json, re
 import numpy as np
 from PIL import Image
@@ -38,7 +38,7 @@ ek[ek[:, :, 3] < 40] = 0
 m = ek[:, :, 3] > 40; ys, xs = np.where(m.any(1))[0], np.where(m.any(0))[0]
 Image.fromarray(ek[ys[0]:ys[-1] + 1, xs[0]:xs[-1] + 1]).save(KOK + '/assets/ui/sapka.png', optimize=True)
 
-ap = KOK + '/assetlar.js'
+ap = KOK + '/js/veri/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'// Arayüz görselleri.*?;\n', '', s, flags=re.S)
 s += '// Arayüz görselleri (araclar/uiKes.py): assets/ui/<ad>.png\nASSETLER.ui = ' + json.dumps(adlar) + ';\n'

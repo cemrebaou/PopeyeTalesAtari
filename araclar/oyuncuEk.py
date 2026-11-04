@@ -1,6 +1,6 @@
 # Oyuncu ek kareleri (v0.33): bastonla duvara asılma, itme ve durumlara göre darbe kareleri.
 # Kaynak: assets/kaynak/oyuncu_ek.png (3 satır) + assets/kaynak/oyuncu_asiliHasar.png (tek kare).
-# Çıktı: assets/oyuncu2.png — 10 sütun, hücre 240×220, ayak çizgisi y=200, şapka ortası x=120,
+# Çıktı: assets/oyuncu/oyuncu2.png — 10 sütun, hücre 240×220, ayak çizgisi y=200, şapka ortası x=120,
 # ölçek ana sayfayla aynı (şapka genişliği eşitlendi). Kareler:
 #  0–5 asili (bastonla duvara takılı), 6–11 it, 12 tırmanırken darbe, 13 eğikken darbe,
 #  14 havada darbe, 15 çekerken darbe, 16 iterken darbe, 17 asılıyken darbe, 18–23 ölüm (oyuncu_olum.png)
@@ -78,5 +78,5 @@ for n, k in enumerate(kareler):
             if v < 40: c[lab == i + 1] = 0
     cell = Image.fromarray(c)
     out.paste(cell, ((n % 10) * W, (n // 10) * H))
-out.save(KOK + '/assets/oyuncu2.png', optimize=True)
+out.save(KOK + '/assets/oyuncu/oyuncu2.png', optimize=True)
 print(len(kareler), 'kare')

@@ -1,5 +1,5 @@
 # Kırılır taşlar (v0.58). Kaynak: assets/kaynak/kirilir_taslar.png — 10 satır × 5 (sağlam, çatlak 1, çatlak 2, kırılıyor, enkaz).
-# Çıktı: assets/kirTas.png (5 sütun × 10 satır, hücre 128×128; ilk 4 kare karoya oturacak şekilde kareye getirilir,
+# Çıktı: assets/nesne/kirTas.png (5 sütun × 10 satır, hücre 128×128; ilk 4 kare karoya oturacak şekilde kareye getirilir,
 # enkaz genişliğe sığdırılıp tabana oturtulur). Satır sırası: KIRTAS listesi (game.js ile aynı).
 import numpy as np
 from PIL import Image
@@ -39,5 +39,5 @@ for ri, (y0, y1) in enumerate(satir):
         else:
             s = B / p.width; p = p.resize((B, max(1, round(p.height * s))), Image.LANCZOS); ox, oy = 0, B - p.height
         out.alpha_composite(p, (ci * B + ox, ri * B + oy))
-out.save(KOK + '/assets/kirTas.png', optimize=True)
+out.save(KOK + '/assets/nesne/kirTas.png', optimize=True)
 print('ok')

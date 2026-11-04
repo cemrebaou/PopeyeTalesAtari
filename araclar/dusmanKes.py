@@ -1,7 +1,7 @@
 # Düşman sprite sayfası kesici (v0.24). Kaynak: assets/kaynak/dusman_seti.png (kullanıcı görseli).
 # Kenardaki renkli haleyi (kırmızı/sarı/yeşil/mor) dışarıdan temizler, her düşmanı kendi sayfasına keser:
-# assets/d_<ad>.png (yatay şerit, eşit hücre), mermiler assets/atesTopu.png, assets/mizrak.png,
-# ölçüler assetlar.js → ASSETLER.dusman. Çalıştırma: python3 araclar/dusmanKes.py
+# assets/dusman/<ad>.png (yatay şerit, eşit hücre), mermiler assets/dusman/atesTopu.png ve mizrak.png,
+# ölçüler js/veri/assetlar.js → ASSETLER.dusman. Çalıştırma: python3 araclar/dusmanKes.py
 import json, re
 import numpy as np
 from PIL import Image
@@ -107,7 +107,7 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
             no = len(kareler) + k
             serit.paste(f, (no * W + (W - f.width) // 2, alt - f.height), f)
             ekNo.append(no)
-    serit.save(KOK + '/assets/d_' + ad + '.png', optimize=True)
+    serit.save(KOK + '/assets/dusman/' + ad + '.png', optimize=True)
     meta[ad] = {'w': W, 'h': H, 'ayak': int(alt), 'ust': int(ust), 'boy': boy,
                 'anim': {k: [yeniNo[i] for i in v] for k, v in an.items()}}
     if ekNo: meta[ad]['anim'][EK[ad][1]] = ekNo
@@ -116,9 +116,9 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
         ys = np.where(sub[:, :, 3].any(1))[0]
         p = Image.fromarray(sub[ys[0]:ys[-1] + 1])
         isim, gen = MERMI[ad]
-        p.save(KOK + '/assets/' + isim + '.png', optimize=True)
+        p.save(KOK + '/assets/dusman/' + isim + '.png', optimize=True)
         meta[isim] = {'w': p.width, 'h': p.height, 'gen': gen}
-ap = KOK + '/assetlar.js'
+ap = KOK + '/js/veri/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'\n// Düşman sayfaları[^\n]*\nASSETLER.dusman = [^\n]*;\n', '\n', s)   # v0.54: sadece kendi satırını sil (eskisi sonraki tüm bölümleri siliyordu)
 s += '\n// Düşman sayfaları (araclar/dusmanKes.py ile üretildi): hücre w×h, ayak çizgisi, görünür boy (oyun px), animasyon kareleri\nASSETLER.dusman = ' + json.dumps(meta, ensure_ascii=False) + ';\n'

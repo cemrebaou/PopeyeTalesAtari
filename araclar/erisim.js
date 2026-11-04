@@ -4,7 +4,7 @@
 // Model: gövde 18x30 px (eğik geçişleri de kapsasın diye; ayakta gövde 42 px, 1 karelik aralıklardan eğilerek geçilir), Arcade benzeri 60 Hz adımlar, ızgara çarpışması, zıplama 625, yerçekimi 1400, sarmaşığa tutunma.
 // Kayalar, taşlar, kırılır taşlar (kristal ve yosun kapı taşları hariç: kırılıp geçilir), bloklar ve basamaklar dahil edilir (takozlar kırılabildiği için geçilebilir sayılır). Önemli yerler: patron, çıkış, kontrol noktaları, sandıklar, elmaslar, özel eşyalar.
 const fs=require('fs'),path=require('path');
-const L=new Function(fs.readFileSync(path.join(__dirname,'..','level1.js'),'utf8')+';return LEVEL1;')();const T=32,W=L.genislik/T,H=L.yukseklik/T;
+const L=new Function(fs.readFileSync(path.join(__dirname,'..','js','veri','level1.js'),'utf8')+';return LEVEL1;')();const T=32,W=L.genislik/T,H=L.yukseklik/T;
 const BW=18,BH=30,dt=1/60,G=1400;
 const temel=[...Array(H)].map(()=>new Uint8Array(W));
 for(const [x,y,w,h] of L.bloklar.concat(L.basamaklar||[],(L.kayalar||[]).concat(L.taslar||[],(L.kirTaslar||[]).filter(k=>k[2]!=='kristal'&&k[2]!=='yosun')).map(([x,y])=>[x,y,32,32])))for(let r=y/T;r<(y+h)/T;r++)for(let c=x/T;c<(x+w)/T;c++)temel[r][c]=1;

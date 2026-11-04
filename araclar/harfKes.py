@@ -1,5 +1,5 @@
 # Harf görselleri kesici (v0.45). Kaynak: assets/kaynak/harf_seti.png (4 satır: büyük harf ×2, küçük harf ×2)
-# + rakamlar assets/ui/r0..r9, rArti, rBolu. Her karakter assets/harf/<kod>.png; ölçüler assetlar.js → ASSETLER.harf
+# + rakamlar assets/ui/r0..r9, rArti, rBolu. Her karakter assets/harf/<kod>.png; ölçüler js/veri/assetlar.js → ASSETLER.harf
 # {capH, k: {karakter: [w, h, dy, s]}} (dy = üst kenarın taban çizgisine uzaklığı, s = ek ölçek). Çalıştırma: python3 araclar/harfKes.py
 import json, re
 import numpy as np
@@ -106,7 +106,7 @@ import shutil
 for a_, b_ in [('-', '−'), ("'", '’'), ('"', '”')]:
     shutil.copy(KOK + '/assets/harf/%d.png' % ord(b_), KOK + '/assets/harf/%d.png' % ord(a_)); harf[a_] = harf[b_]
 
-ap = KOK + '/assetlar.js'
+ap = KOK + '/js/veri/assetlar.js'
 s = open(ap, encoding='utf8').read()
 s = re.sub(r'// Harf görselleri.*?;\n', '', s, flags=re.S)
 s += '// Harf görselleri (araclar/harfKes.py): assets/harf/<kod>.png; k: karakter → [w, h, dy (taban çizgisine göre), ek ölçek]\nASSETLER.harf = ' + json.dumps({'capH': capH, 'k': harf}, ensure_ascii=False) + ';\n'
