@@ -2,6 +2,7 @@
 // Oyuncu mantığı -> oyuncu.js, düşmanlar/sandıklar -> dusman.js, arayüz (ayrı UI sahnesi) -> ui.js
 
 // Platform parçaları: s = ölçek (kaynak px -> oyun px), yz = basılan yüzeyin görsel üstten uzaklığı (oyun px)
+const KIRTAS = ['kasa', 'gri', 'koyu', 'kristal', 'toprak', 'kizil', 'tugla', 'kum', 'mor', 'yosun'];   // assets/kirTas.png satırları
 const PLATFORM = {
   kutuk: { s: 0.5, yz: 6 }, tas: { s: 0.5, yz: 4 }, kopru: { s: 0.5, yz: 6 }, ada: { s: 0.45, yz: 10 },
   dal: { s: 0.45, yz: 12 }, izgara: { s: 0.5, yz: 4 }, bant: { s: 0.5, yz: 4 }, hover: { s: 0.45, yz: 5 }
@@ -178,6 +179,15 @@ class GameScene extends Phaser.Scene {
     this.onKatman = this.karoKatmani(L.on, 1);
     this.selaleCiz();
     L.bloklar.forEach(([x, y, w, h]) => this.blokCiz(x, y, w, h));
+    // Katı zemin ızgarası (düşman devriye alanları, sarmaşık tavanı için)
+    this.izgara = [...Array(L.yukseklik / T)].map(() => new Uint8Array(L.genislik / T));
+    const izIsaret = (x, y, w, h) => { for (let r = y / T; r < (y + h) / T; r++) for (let c = x / T; c < (x + w) / T; c++) if (this.izgara[r]) this.izgara[r][c] = 1; };
+    L.bloklar.concat(L.basamaklar || []).forEach(q => izIsaret(...q));
+    (L.kayalar || []).concat(L.taslar || []).forEach(([x, y]) => izIsaret(x, y, T, T));
+    // Dikenli zemin hücreleri: devriye bunların üstüne çıkmaz (diken ile duvar/uçurum arasında yürür)
+    this.dikenHucre = new Set();
+    L.dikenler.forEach(([x, y, w]) => { for (let c = Math.floor(x / T); c <= Math.floor((x + w - 1) / T); c++) this.dikenHucre.add(Math.round(y / T) + ',' + c); });
+
     // Ara kayalar, basamaklar ve kırılmayan taşlar: çevre objesi taş blok (tasBlok.png), çarpışmalı
     // Üst üste dizilişte her bloğun ön yüzü tam bir kare, 3B üst yüzü karenin üstüne taşar; üstteki blok
     // alttakinin üst yüzünü örter (alttan üste çizilir) → üst yüz sadece en tepede görünür.
@@ -253,8 +263,12 @@ class GameScene extends Phaser.Scene {
     // kesilmez); parça boyu sarmaşık boyuna tam oturacak şekilde dikeyde hafifçe ayarlanır.
     L.sarmasiklar.forEach(([x, y, h], i) => {
       const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], gen = 21, sx = gen / O.w;
-      const n = Math.max(1, Math.round(h / (O.h * sx))), sy = h / (n * O.h);
-      this.add.tileSprite(x, y, gen, h, ad).setOrigin(0.5, 0).setDepth(1.5).setTileScale(sx, sy);
+      // v0.58: görsel, üstteki ilk katı karonun alt kenarından başlar (tırmanma alanı aynı kalır)
+      const c = Math.floor(x / T); let r = Math.floor(y / T) - 1, k = 0;
+      while (r >= 0 && !this.izgara[r][c] && k < 12) { r--; k++; }
+      const gy = r >= 0 && this.izgara[r][c] ? (r + 1) * T : y, gh = y + h - gy;
+      const n = Math.max(1, Math.round(gh / (O.h * sx))), sy = gh / (n * O.h);
+      this.add.tileSprite(x, gy, gen, gh, ad).setOrigin(0.5, 0).setDepth(1.5).setTileScale(sx, sy);
       this.vineRects.push(new Phaser.Geom.Rectangle(x - 9, y - 12, 18, h + 12));
     });
 
@@ -268,6 +282,8 @@ class GameScene extends Phaser.Scene {
     L.elmaslar.forEach(([x, y]) => this.toplananYarat(this.elmaslar, 'elmas', x, y));
     this.durum.elmasToplam = L.elmaslar.length;
     L.sandiklar.forEach(([x, y, odul]) => this.sandikYarat(x, y, odul));
+    // Kırılır taşlar (v0.58): sandık grubunda — itilir, çekilir, üst üste durur, düşer; 3 vuruşta kırılır
+    (L.kirTaslar || []).forEach(([x, y, tur, sabit]) => this.kirTasYarat(x, y, tur, sabit));
     const ozelTex = { buyuk: 'buyukelmas', kizil: 'kizilelmas', yasam: 'yasam', altin: 'altin' };
     L.ozeller.forEach(([tip, x, y]) => {
       if (!ozelTex[tip]) return;
@@ -282,14 +298,6 @@ class GameScene extends Phaser.Scene {
     L.ipuclari.forEach(([x, y, text]) => harfYazi(this, text, 11, 'sol').setPosition(x, y).setDepth(4));
 
     // Düşmanlar ve patron
-    // Katı zemin ızgarası (düşman devriye alanları için)
-    this.izgara = [...Array(L.yukseklik / T)].map(() => new Uint8Array(L.genislik / T));
-    const izIsaret = (x, y, w, h) => { for (let r = y / T; r < (y + h) / T; r++) for (let c = x / T; c < (x + w) / T; c++) if (this.izgara[r]) this.izgara[r][c] = 1; };
-    L.bloklar.concat(L.basamaklar || []).forEach(q => izIsaret(...q));
-    (L.kayalar || []).concat(L.taslar || []).forEach(([x, y]) => izIsaret(x, y, T, T));
-    // Dikenli zemin hücreleri: devriye bunların üstüne çıkmaz (diken ile duvar/uçurum arasında yürür)
-    this.dikenHucre = new Set();
-    L.dikenler.forEach(([x, y, w]) => { for (let c = Math.floor(x / T); c <= Math.floor((x + w - 1) / T); c++) this.dikenHucre.add(Math.round(y / T) + ',' + c); });
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
     // Gizli yerler: yaklaşınca bir kez gizli yer sesi (L.gizliler [x, y])
     this.gizliler = (L.gizliler || []).map(([x, y]) => ({ x, y, bulundu: false }));
@@ -317,6 +325,73 @@ class GameScene extends Phaser.Scene {
     s.body.setDragX(900);
     s.setMaxVelocity(400, CONFIG.fizik.maxDusme);
     return s;
+  }
+
+  // Kırılır taş: x, y = sol üst (1 karo). tur: KIRTAS satırı. sabit: havada sabit durur (itilmez/çekilmez/düşmez)
+  kirTasYarat(x, y, tur, sabit) {
+    const T = this.L.karo, satir = Math.max(0, KIRTAS.indexOf(tur));
+    const s = this.sandiklar.create(x + T / 2, y + T, 'kirTas', satir * 5).setOrigin(0.5, 1).setDepth(2);
+    s.setDisplaySize(T, T);
+    s.kirTas = true; s.tur = tur; s.kirSira = satir * 5; s.vurus = 0; s.acik = true;
+    s.govdeW = T; s.govdeH = T;
+    this.sandikGovde(s);
+    s.body.pushable = false;
+    s.body.setDragX(900);
+    s.setMaxVelocity(400, CONFIG.fizik.maxDusme);
+    if (sabit) { s.sabit = true; s.body.setAllowGravity(false); s.body.setImmovable(true); }
+    else this.tasUyut(s);   // yerdeki taşlar uykuda başlar (üst üste dizilişte birbirine gömülmesin)
+    return s;
+  }
+
+  // Uyku: yerçekimi yok, hareketsiz (üst üste sağlam durur). Uyanık: yerçekimi var, itilir/çekilir/düşer.
+  tasUyut(s) {
+    s.uyanik = false;
+    s.body.setVelocity(0, 0); s.body.setAllowGravity(false); s.body.setImmovable(true);
+  }
+
+  // Taşı ve üstünde duran taşları (zincirleme) uyandır
+  tasUyandir(s) {
+    if (!s || s.sabit) return;
+    s.itZaman = this.time.now;
+    if (s.uyanik) return;
+    s.uyanik = true;
+    s.body.setAllowGravity(true); s.body.setImmovable(false);
+    this.ustundekiTaslar(s).forEach(u => this.tasUyandir(u));
+  }
+
+  ustundekiTaslar(s) {
+    const T = this.L.karo, ust = s.body.top;
+    return this.sandiklar.getChildren().filter(u => u !== s && u.active && u.kirTas && !u.sabit && !u.kiriliyor
+      && Math.abs(u.x - s.x) < T * 0.75 && Math.abs(u.body.bottom - ust) < 6);
+  }
+
+  // Uyanık taş durunca (yerde, hızsız, 0.25 sn itilmeden) yeniden uyur
+  taslariGuncelle() {
+    this.sandiklar.getChildren().forEach(s => {
+      if (!s.active || !s.kirTas || !s.uyanik || s.kiriliyor || this.cekSandik === s) return;
+      const yerde = s.body.blocked.down || s.body.touching.down;
+      if (yerde && Math.abs(s.body.velocity.y) < 5 && Math.abs(s.body.velocity.x) < 5 && this.time.now - (s.itZaman || 0) > 250) this.tasUyut(s);
+    });
+  }
+
+  // Taşa vuruş (baston veya pogo): 1. vuruş çatlak, 2. daha çatlak, 3. kırılır → enkaz → toz olup kaybolur
+  tasVur(s) {
+    if (!s.active || s.kiriliyor) return;
+    s.vurus++;
+    this.parcala(s.x, s.y - 16, 0xcfc6b8);
+    if (s.vurus < 3) {
+      s.setFrame(s.kirSira + s.vurus);
+      this.tweens.add({ targets: s, angle: { from: -4, to: 4 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
+      return;
+    }
+    s.kiriliyor = true;
+    if (this.cekSandik === s) this.cekBirak();
+    this.ses('tasKir');
+    this.ustundekiTaslar(s).forEach(u => this.tasUyandir(u));
+    s.body.enable = false;   // üstündekiler düşer
+    s.setFrame(s.kirSira + 3);
+    this.time.delayedCall(110, () => s.active && s.setFrame(s.kirSira + 4));
+    this.tweens.add({ targets: s, alpha: 0, delay: 200, duration: 300, onComplete: () => s.destroy() });
   }
 
   // Sandık gövdesi: görsel değişse de (açık sandık) aynı kutu boyutu, alt kenara hizalı
@@ -457,6 +532,7 @@ class GameScene extends Phaser.Scene {
     if (this.durum.bitti || this.durum.oyunBitti) return;
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
+    this.taslariGuncelle();
     // Sandık yere düşme sesi: hızla düşen sandık yere değince bir kez
     this.sandiklar.getChildren().forEach(s => {
       if (!s.active || !s.body) return;
@@ -465,7 +541,11 @@ class GameScene extends Phaser.Scene {
       else if (yerde && s.dusuyor) { s.dusuyor = false; this.ses('sandikDus'); }
     });
     this.gizliler.forEach(z => {
-      if (!z.bulundu && Math.abs(this.player.x - z.x) < 110 && Math.abs(this.player.y - z.y) < 90) { z.bulundu = true; this.ses('gizli'); }
+      if (!z.bulundu && Math.abs(this.player.x - z.x) < 110 && Math.abs(this.player.y - z.y) < 90) {
+        // aynı alandaki (300 px içi) diğer gizli noktalar da bulunmuş sayılır → alanda bir kez çalar
+        this.gizliler.forEach(q => { if (Math.hypot(q.x - z.x, q.y - z.y) < 300) q.bulundu = true; });
+        this.ses('gizli');
+      }
     });
     // Şelale akışı (doku koordinatında; ölçekten bağımsız aynı hız)
     this.selaleler.forEach(sp => { sp.tilePositionY -= CONFIG.selaleHiz * dt / sp.tileScaleY; });

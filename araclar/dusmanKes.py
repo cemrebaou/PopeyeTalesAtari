@@ -63,7 +63,7 @@ DUS = {
 }
 # Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
 EK = {}   # v0.27'deki maymun yürüme eki v0.52'de yeni sayfaya geçti
-MERMI = {'maymun': ('atesTopu', 22), 'kopek': ('mizrak', 44)}   # oyundaki genişlik px
+MERMI = {'maymun': ('atesTopu', 22), 'kopek': ('mizrak', 26)}   # v0.58: mızrak %40 küçük (44 → 26)   # oyundaki genişlik px
 meta = {}
 for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
     im, A = KAYNAK[kay[0] if kay else '1']

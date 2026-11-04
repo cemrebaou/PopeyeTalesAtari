@@ -130,6 +130,7 @@ Object.assign(GameScene.prototype, {
         const s = this.itHedefBul(yon);
         if (s) {
           this.itiyor = true; hiz = F.itme;
+          if (s.kirTas) this.tasUyandir(s);
           s.body.setVelocityX(s.body.blocked[yon > 0 ? 'right' : 'left'] ? 0 : yon * F.itme);
         }
       }
@@ -240,6 +241,7 @@ Object.assign(GameScene.prototype, {
     b.setVelocityX(geri * C.hiz);
     const fark = this.cekBosluk(s) - this.cekMesafe;
     if (fark > C.menzil) { this.cekBirak(); return; }
+    if (s.kirTas) this.tasUyandir(s);
     s.body.setVelocityX(b.velocity.x - this.bakis * fark * 10);
   },
 
@@ -253,7 +255,7 @@ Object.assign(GameScene.prototype, {
   itHedefBul(yon) {
     const b = this.player.body;
     return this.sandiklar.getChildren().find(s => {
-      if (!s.active || Math.abs(s.body.bottom - b.bottom) > 10) return false;
+      if (!s.active || s.sabit || s.kiriliyor || Math.abs(s.body.bottom - b.bottom) > 10) return false;
       const bosluk = yon > 0 ? s.body.left - b.right : b.left - s.body.right;
       return bosluk >= -4 && bosluk <= 2;
     }) || null;
@@ -270,7 +272,7 @@ Object.assign(GameScene.prototype, {
     const b = this.player.body;
     let en = null, enB = Infinity;
     this.sandiklar.getChildren().forEach(s => {
-      if (!s.active) return;
+      if (!s.active || s.sabit || s.kiriliyor) return;
       if (Math.abs(s.body.bottom - b.bottom) > 10) return;
       const bosluk = this.cekBosluk(s);
       if (bosluk < -4 || bosluk > CONFIG.cek.menzil) return;
@@ -288,7 +290,7 @@ Object.assign(GameScene.prototype, {
   // Oyuncu sandığa değince: pogo ile üstüne inerse sandık açılır ve seker
   sandikTemas(p, s) {
     if (this.pogoModu && p.body.touching.down && s.body.touching.up) {
-      this.sandikAc(s);
+      if (s.kirTas) this.tasVur(s); else this.sandikAc(s);   // pogo (baston altı) taşı da kırar
       this.pogoZipla();
     }
   },
@@ -312,14 +314,16 @@ Object.assign(GameScene.prototype, {
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else a = 'dur';
     if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
-    // Adım sesleri: koşarken / eğilerek yürürken / iterken sırayla adim1-2-3
-    const adimAralik = a === 'kos' ? 0.3 : (a === 'egil' || a === 'it') && !durdur ? 0.45 : 0;
+    // Adım sesleri: koşarken / eğilerek yürürken sırayla adim1-2-3.
+    // Nesne çekerken / iterken (hareket varsa) kaydırma sesleri kaydir1-2 sırayla (ayak kaydı gibi)
+    const kaydir = (a === 'cek' || a === 'it') && !durdur;
+    const adimAralik = a === 'kos' ? 0.3 : kaydir ? 0.4 : a === 'egil' && !durdur ? 0.45 : 0;
     if (adimAralik) {
       this.adimZaman = (this.adimZaman || 0) - this.game.loop.delta / 1000;
       if (this.adimZaman <= 0) {
         this.adimZaman = adimAralik;
-        this.adimNo = ((this.adimNo || 0) % 3) + 1;
-        this.ses('adim' + this.adimNo, { volume: 0.35 });
+        if (kaydir) { this.kaydirNo = ((this.kaydirNo || 0) % 2) + 1; this.ses('kaydir' + this.kaydirNo, { volume: 0.5 }); }
+        else { this.adimNo = ((this.adimNo || 0) % 3) + 1; this.ses('adim' + this.adimNo, { volume: 0.35 }); }
       }
     } else this.adimZaman = 0;
     // Animasyona göre görsel ölçek (CONFIG.oyuncu.animOlcek; yoksa 1)
@@ -378,7 +382,8 @@ Object.assign(GameScene.prototype, {
     });
     // Sandık bastonla açılır
     this.sandiklar.getChildren().forEach(s => {
-      if (s.active && !s.acik && kesisir(this.govdeRect(s.body))) this.sandikAc(s);
+      if (s.active && s.kirTas && !this.vurulan.has(s) && kesisir(this.govdeRect(s.body))) { this.vurulan.add(s); this.tasVur(s); }
+      else if (s.active && !s.kirTas && !s.acik && kesisir(this.govdeRect(s.body))) this.sandikAc(s);
     });
     // Bastonla mermileri boz
     this.mermiler.getChildren().slice().forEach(m => {

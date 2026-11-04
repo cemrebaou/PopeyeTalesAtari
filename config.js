@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) - ayarlar
 const CONFIG = {
-  surum: "v0.57",
+  surum: "v0.58",
   tile: 32,
   bayrakBoy: 57.6,      // kontrol noktası bayrağı (v0.33: %10 küçük, 64 → 57.6)
   dusmanOlcek: 0.9,     // v0.32: tüm düşmanlar %10 küçük (görsel + gövde)
@@ -49,7 +49,7 @@ const CONFIG = {
     hiz: 110,            // geri yürüyerek çekme hızı (px/sn)
     uzatSure: 0.2        // baston uzatma süresi (sn)
   },
-  puan: { elmas: 100, buyuk: 1000, kizil: 500, altin: 50, kalpFazla: 500, dusman: 200, patron: 5000 },
+  puan: { elmas: 10, buyuk: 100, kizil: 50, altin: 5, kalpFazla: 50, dusman: 20, patron: 500 },   // v0.58: hepsi 10'a bölündü
   toplanBoy: { elmas: 16, buyukelmas: 26, kizilelmas: 24, kalp: 22, yasam: 24, altin: 18 },   // oyundaki boy (px)
   patron: { can: 4, uyanMesafe: 520 }
 };

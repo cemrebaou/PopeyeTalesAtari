@@ -16,7 +16,9 @@ class BootScene extends Phaser.Scene {
     ['bastonSalla', 'bastonTakil', 'sekme1', 'sekme2', 'olum', 'adim1', 'adim2', 'adim3', 'elmas', 'kizilElmas', 'buyukElmas', 'can',
       'inis', 'tirmanIn', 'tirmanCik', 'cekTakil', 'ates1', 'ates2', 'mizrak', 'ari',
       'gizli', 'olMaymun', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
-      'bayrak', 'sandikDus', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+      'bayrak', 'sandikDus', 'kaydir1', 'kaydir2', 'tasKir', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+    // Kırılır taşlar (v0.58, araclar/kirTasKes.py): 10 satır × 5 kare (sağlam, çatlak, çatlak, kırılıyor, enkaz)
+    this.load.spritesheet('kirTas', 'assets/kirTas.png', { frameWidth: 128, frameHeight: 128 });
     // Arayüz görselleri (v0.44, araclar/uiKes.py)
     ASSETLER.ui.forEach(ad => this.load.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
     // Harf görselleri (v0.45, araclar/harfKes.py)
