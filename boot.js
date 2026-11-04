@@ -12,6 +12,8 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
     const K2 = CONFIG.oyuncu.kare2;   // v0.33 ek kareler (araclar/oyuncuEk.py)
     this.load.spritesheet('oyuncu2', 'assets/oyuncu2.png', { frameWidth: K2.w, frameHeight: K2.h });
+    // Sesler (v0.49)
+    ['bastonSalla', 'bastonTakil', 'sekme1', 'sekme2', 'zipla'].forEach(ad => this.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
     // Arayüz görselleri (v0.44, araclar/uiKes.py)
     ASSETLER.ui.forEach(ad => this.load.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
     // Harf görselleri (v0.45, araclar/harfKes.py)

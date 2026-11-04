@@ -102,7 +102,13 @@ class UIScene extends Phaser.Scene {
           const boyut = () => r.setDisplaySize(this.tusB || 78, this.tusB || 78);
           const ac = () => { this.oyunS.touch[anahtar] = true; r.setTexture('ui_tb_' + anahtar); boyut(); };
           const kapat = () => { this.oyunS.touch[anahtar] = false; r.setTexture('ui_t_' + anahtar); boyut(); };
-          r.on('pointerdown', ac).on('pointerup', kapat).on('pointerout', kapat);
+          if (anahtar === 'asagi') {
+            // v0.49: eğilme aç/kapa — bas: eğil (tuş basılı kalır), tekrar bas: kalk. Sarmaşıkta basılı tutunca aşağı iner.
+            r.on('pointerdown', () => { this.oyunS.touch.asagi = true; if (!this.oyunS.tirmaniyor) this.oyunS.egilKilit = !this.oyunS.egilKilit; })
+              .on('pointerup', () => { this.oyunS.touch.asagi = false; })
+              .on('pointerout', () => { this.oyunS.touch.asagi = false; });
+            this.egilTus = { r, boyut };
+          } else r.on('pointerdown', ac).on('pointerup', kapat).on('pointerout', kapat);
           this.tuslar.push({ anahtar, r, boyut });
         });
     }
@@ -111,6 +117,14 @@ class UIScene extends Phaser.Scene {
     this.yerlestir();
     this.scale.on('resize', this.yerlestir, this);
     this.guncelle();
+  }
+
+  // Eğilme tuşunun görseli aç/kapa durumunu gösterir
+  update() {
+    const t = this.egilTus;
+    if (!t || !this.oyunS) return;
+    const key = (this.oyunS.egilKilit || this.oyunS.touch.asagi) ? 'ui_tb_asagi' : 'ui_t_asagi';
+    if (t.r.texture.key !== key) { t.r.setTexture(key); t.boyut(); }
   }
 
   // Her şeyi ekran boyutuna göre yerleştir (u = arayüz ölçeği, cihaz pikseli cinsinden)

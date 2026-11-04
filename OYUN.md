@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.48 (`config.js` → `surum`)
+Sürüm: v0.49 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -56,6 +56,14 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## v0.49
+- **Sesler** (`assets/ses/`): `bastonSalla` (baston vuruşu), `bastonTakil` (duvara asılma, sandığa kanca takılma), `sekme1` / `sekme2` (pogo sekmesi, sırayla), `zipla` (zıplama, duvardan sıçrama). `oyuncu.js` → `ses(ad)`.
+- **Eğilme aç/kapa**: dokunmatik ▼ bir kez basınca eğilir ve tuş basılı görünür, tekrar basınca kalkar; zıplayınca kapanır. Sarmaşıkta ▼ basılı tutunca aşağı iner. Klavyede ↓ basılı tutma eskisi gibi.
+- **Otomatik eğilme**: yerde ileri basarken önünde 1 karelik geçit (üstü kapalı, altı açık) varsa kendiliğinden eğilir.
+- **Düşmana ilk vuruş belli olur** (çok canlılar): beyaz parlama (2 kez), geri savrulma + hafif sıçrama, 0.3 sn sersemleme, kıvılcım, küçük ekran sarsıntısı.
+- **Ölüm animasyonu** her ölümde (diken, düşman, mermi) oynar; başka animasyon ezemez.
+- **Düşen sandık** düşmanın kafasına inerse düşman ölür (patron 1 hasar alır); uçan düşmanlar dahil.
 
 ## Yeni hareketler (v0.33)
 - Ek kareler `assets/oyuncu2.png` (`python3 araclar/oyuncuEk.py`; kaynak `assets/kaynak/oyuncu_ek.png` + `oyuncu_asiliHasar.png`): 10 sütun, hücre 240×220 (v0.40'ta 176'dan genişletildi), ayak çizgisi y=200, gövde ortası x=120, ana sayfayla aynı ölçek (şapka genişliği eşitlendi). `CONFIG.oyuncu.kare2`. v0.34: oyunda hepsi %30 küçük çizilir (`animOlcek` 0.7).

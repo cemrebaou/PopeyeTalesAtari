@@ -12,6 +12,7 @@ Object.assign(GameScene.prototype, {
       sag: K.sag.isDown || K.d.isDown || T.sag,
       yukari: K.yukari.isDown || K.w.isDown || T.yukari,
       asagi: K.asagi.isDown || K.s.isDown || T.asagi,
+      egil: K.asagi.isDown || K.s.isDown || this.egilKilit,   // v0.49: dokunmatik ▼ aç/kapa (egilKilit)
       zipla, saldir, cek,
       ziplaBas: zipla && !this.oncekiZipla,
       ziplaBasTus: ziplaTus && !this.oncekiZiplaTus,
@@ -79,6 +80,7 @@ Object.assign(GameScene.prototype, {
         this.asiliBirak();
         this.bakis = -this.asiliSon; p.setFlipX(this.bakis < 0);
         b.setVelocity(this.bakis * F.asiliZipla, F.ziplama);
+        this.ses('zipla');
         this.ziplarken = true; this.ziplaTampon = 0; this.yatayKilit = 0.15;   // kısa süre yatay kontrol yok (duvardan uzaklaşsın)
       } else if (ters || k.asagi || yerde || !this.kancaDuvar(this.asili)) {
         this.asiliBirak();
@@ -98,6 +100,7 @@ Object.assign(GameScene.prototype, {
         const dx = Phaser.Math.Clamp(y > 0 ? duvar.left - b.right : duvar.right - b.left, -4, 4);
         p.x += dx; b.position.x += dx;
         this.asili = y; this.asiliSon = y; this.bakis = y; p.setFlipX(y < 0);
+        this.ses('bastonTakil');
         b.setAllowGravity(false); b.setVelocity(0, 0);
         this.pogoModu = false; this.pogoAktif = false; this.saldiriZaman = 0;
         this.animasyon(yerde);
@@ -116,7 +119,10 @@ Object.assign(GameScene.prototype, {
       if (yon) { this.bakis = yon; p.setFlipX(yon < 0); }
       // Eğilme: yerdeyken ↓ basılı (pogo değil) → eğilerek yavaş yürür. Üstü kapalıysa (1 karelik aralık) kalkamaz.
       this.tavan = this.egik && this.tavanVar();
-      this.egik = (yerde && k.asagi && !this.pogoModu) || this.tavan;
+      // v0.49: önünde 1 karelik geçit varsa (üstü kapalı, altı açık) ileri basınca otomatik eğilir
+      const gecit = yon && yerde && this.duvarVar(yon, b.bottom - CONFIG.oyuncu.govdeY + 2, CONFIG.oyuncu.govdeY - CONFIG.oyuncu.govdeEgik - 4)
+        && !this.duvarVar(yon, b.bottom - CONFIG.oyuncu.govdeEgik + 4, CONFIG.oyuncu.govdeEgik - 8);
+      this.egik = (yerde && (k.egil || gecit) && !this.pogoModu) || this.tavan;
       let hiz = this.egik ? F.egilYurume : F.yurume;
       // Sandık itme: yerde, önünde (aynı zeminde, bitişik) sandık varsa yavaşça iteriz
       this.itiyor = false;
@@ -136,6 +142,8 @@ Object.assign(GameScene.prototype, {
     if (!cekiyor && !this.tavan && this.ziplaTampon > 0 && this.coyote > 0 && this.knock <= 0) {
       b.setVelocityY(F.ziplama);
       this.ziplaTampon = 0; this.coyote = 0; this.ziplarken = true;
+      this.egilKilit = false;
+      this.ses('zipla');
     }
     if (this.ziplarken && !k.zipla && b.velocity.y < -200) {
       b.setVelocityY(b.velocity.y * 0.5);
@@ -151,6 +159,7 @@ Object.assign(GameScene.prototype, {
 
     // Baston vuruşu (X) — yerde ve havada
     if (k.saldirBas && this.saldiriBekleme <= 0 && !cekiyor && !this.pogoModu) {
+      this.ses('bastonSalla');
       this.saldiriZaman = CONFIG.oyuncu.saldiriSure;
       this.saldiriBekleme = CONFIG.oyuncu.saldiriBekleme;
       this.vurulan = new Set();
@@ -216,6 +225,7 @@ Object.assign(GameScene.prototype, {
       if (this.cekZaman <= 0) {
         if (this.cekSandik && this.cekSandik.active) {
           this.cekDurum = 'cek';
+          this.ses('bastonTakil');
           this.cekMesafe = Math.max(0, this.cekBosluk(this.cekSandik));
         } else {
           this.cekBirak();   // boşa uzatıldı
@@ -285,6 +295,7 @@ Object.assign(GameScene.prototype, {
 
   // ---- Animasyon ----
   animasyon(yerde) {
+    if (this.durum.olu) return;   // v0.49: ölüm animasyonu (olum) başka animasyonla ezilmesin
     const p = this.player, b = p.body;
     let a, durdur = false;
     if (this.sersemZaman > 0 || this.knock > 0) a = this.hasarAnim || 'sersem';
@@ -307,7 +318,14 @@ Object.assign(GameScene.prototype, {
     else if (p.anims.isPaused) p.anims.resume();
   },
 
+  // Ses çal (assets/ses). Pogo sekmesi sekme1 / sekme2 sırayla.
+  ses(ad, ayar) {
+    try { this.sound.play(ad, Object.assign({ volume: 0.6 }, ayar)); } catch (e) {}
+  },
+
   pogoZipla() {
+    this.sekmeSira = !this.sekmeSira;
+    this.ses(this.sekmeSira ? 'sekme1' : 'sekme2');
     const F = CONFIG.fizik;
     this.player.body.setVelocityY(this.k && this.k.zipla ? F.pogoYuksek : F.pogo);
     this.ziplarken = false;

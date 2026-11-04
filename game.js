@@ -26,7 +26,7 @@ class GameScene extends Phaser.Scene {
     this.cekDurum = null; this.cekSandik = null; this.cekZaman = 0;   // sandık çekme: null | 'uzat' | 'cek'
     this.pogoModu = false; this.pogoAktif = false; this.pogoSekZaman = 0;
     this.inisZaman = 0; this.havadaydi = false; this.sersemZaman = 0; this.cekMesafe = 0;
-    this.tirmaniyor = false; this.bakis = 1;
+    this.tirmaniyor = false; this.bakis = 1; this.egilKilit = false; this.sekmeSira = false;
     this.asili = 0; this.asiliSon = 1; this.asiliBekle = 0; this.yatayKilit = 0; this.itiyor = false; this.hasarAnim = null;
     this.coyote = 0; this.ziplaTampon = 0; this.ziplarken = false;
     this.oncekiZipla = false; this.oncekiZiplaTus = false; this.oncekiSaldir = false; this.oncekiCek = false;
@@ -390,7 +390,14 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.dusmanlar, this.takozlar, null, (d) => yerdeki(d));
     this.physics.add.collider(this.dusmanlar, this.breakables);
     this.physics.add.collider(this.dusmanlar, this.platforms, null, (d) => yerdeki(d) && d.body.velocity.y >= 0);
-    this.physics.add.collider(this.dusmanlar, this.sandiklar, null, (d) => yerdeki(d));
+    // v0.49: düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar)
+    this.physics.add.collider(this.dusmanlar, this.sandiklar, null, (d, s) => {
+      if (!d.oldu && s.body.velocity.y > 60 && s.body.bottom - d.body.top < 18) {
+        this.dusmanHasar(d, d.tip === 'boss' ? 1 : 99);
+        return false;
+      }
+      return yerdeki(d);
+    });
 
     this.physics.add.overlap(this.mermiler, this.solids, (m) => m.destroy());
     this.physics.add.overlap(this.mermiler, this.takozlar, (m) => m.destroy());

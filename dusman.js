@@ -75,6 +75,7 @@ Object.assign(GameScene.prototype, {
       if (!d.active || d.oldu) return;
       if (d.tip !== 'boss' && (Math.abs(d.x - p.x) > 900 || Math.abs(d.y - p.y) > 700)) return; // uzaktakiler uyuyor
       const b = d.body;
+      if (d.sersem > 0) { d.sersem -= dt; if (d.sersem <= 0 && d.body.allowGravity) b.setVelocityX(0); return; }   // vuruş sonrası sersem
       switch (d.tip) {
         case 'gul':
         case 'yilan':
@@ -247,8 +248,17 @@ Object.assign(GameScene.prototype, {
       this.puanEkle(CONFIG.puan.dusman, d.x, d.y - 34);
       this.dusmanOlum(d);
     } else {
-      d.setTint(0xffffff);
-      this.time.delayedCall(120, () => d.active && d.clearTint());
+      // v0.49: ilk vuruş belli olsun — beyaz parlama, geri savrulma, kısa sersemleme, kıvılcım
+      const yon = Math.sign(d.x - this.player.x) || 1;
+      d.setTintFill(0xffffff);
+      this.time.delayedCall(90, () => d.active && d.clearTint());
+      this.time.delayedCall(180, () => d.active && !d.oldu && d.setTintFill(0xffffff));
+      this.time.delayedCall(260, () => d.active && d.clearTint());
+      d.sersem = 0.3;
+      d.body.setVelocityX(yon * 150);
+      if (d.body.allowGravity && (d.body.blocked.down || d.body.touching.down)) d.body.setVelocityY(-140);
+      this.parcala(d.x, d.y - 16, 0xffffff);
+      this.cameras.main.shake(70, 0.003);
     }
     return true;
   },
