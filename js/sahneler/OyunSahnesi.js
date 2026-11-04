@@ -219,12 +219,22 @@ class OyunSahnesi extends Phaser.Scene {
     this.selaleGuncelle(dt);
   }
 
-  // Şelale akışı + sesi (kadrajda şelale varken döngüde çalar)
+  // Şelale akışı + sesi. Ses kadraja yaklaşırken (SELALE_DUYMA px) şelalenin olduğu taraftaki hoparlörden kısık başlar,
+  // kadraja girdikçe artar ve iki taraftan gelir; uzaklaşırken tersi. En yakın şelale esas alınır.
   selaleGuncelle(dt) {
     this.selaleler.forEach(sp => { sp.tilePositionY -= CONFIG.selaleHiz * dt / sp.tileScaleY; });
-    const v = this.cameras.main.worldView;
-    const gorunur = (this.L.selaleler || []).some(([x, w, y0, y1]) => x < v.right && x + w > v.x && y0 < v.bottom && y1 > v.y);
-    if (gorunur && !this.selaleSes) this.selaleSes = sesBaslat(this, 'selale', { loop: true, volume: 0.4 });
-    else if (!gorunur && this.selaleSes) this.selaleSes = sesDurdur(this.selaleSes);
+    const v = this.cameras.main.worldView, D = CONFIG.selaleDuyma;
+    let enSes = 0, enPan = 0;
+    (this.L.selaleler || []).forEach(([x, w, y0, y1]) => {
+      const dx = x + w < v.x ? x + w - v.x : x > v.right ? x - v.right : 0;   // kadraj dışındaki yatay uzaklık (işaretli)
+      const dy = y1 < v.y ? v.y - y1 : y0 > v.bottom ? y0 - v.bottom : 0;
+      const ses = Phaser.Math.Clamp(1 - Math.hypot(dx, dy) / D, 0, 1);
+      if (ses > enSes) { enSes = ses; enPan = Phaser.Math.Clamp(dx / (D * 0.5), -1, 1); }
+    });
+    if (enSes > 0 && !this.selaleSes) this.selaleSes = sesBaslat(this, 'selale', { loop: true, volume: 0 });
+    if (!this.selaleSes) return;
+    if (enSes <= 0) { this.selaleSes = sesDurdur(this.selaleSes); return; }
+    this.selaleSes.setVolume(0.4 * enSes * enSes);
+    if (this.selaleSes.setPan) this.selaleSes.setPan(enPan);
   }
 }

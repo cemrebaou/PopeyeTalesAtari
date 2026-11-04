@@ -86,7 +86,8 @@ Object.assign(OyunSahnesi.prototype, {
         return;
       }
       switch (d.tip) {
-        case 'gul': case 'yilan': case 'yuvarlak': this.devriye(d, dt); break;
+        case 'gul': case 'yilan': this.devriye(d, dt); break;
+        case 'yuvarlak': this.kirpiGuncelle(d, dt); break;
         case 'maymun': case 'kopek': this.atesEden(d, dt); break;
         case 'ari': this.ariGuncelle(d, time); break;
         case 'orumcek': this.orumcekGuncelle(d, time); break;
@@ -107,6 +108,21 @@ Object.assign(OyunSahnesi.prototype, {
     }
     b.setVelocityX(d.yon * d.hiz);
     d.setFlipX(d.yon < 0);
+  },
+
+  // Pembe kirpi: oyuncuyu kadrajda aynı zeminde görünce %25 hızlanıp üstüne koşar; geçince yavaşlar ve
+  // oyuncu kadrajdan çıkana ya da başka zemine geçene kadar normal devriyeye döner
+  kirpiGuncelle(d, dt) {
+    const p = this.player, dx = p.x - d.x;
+    const goruyor = !this.durum.olu && this.cameras.main.worldView.contains(d.x, d.y)
+      && Math.abs(p.body.bottom - d.body.bottom) < 40 && p.x >= d.minX - 16 && p.x <= d.maxX + 16;
+    if (!goruyor) d.gecti = false;
+    if (goruyor && !d.gecti) {
+      if (!d.kosuyor) { d.kosuyor = true; d.yon = Math.sign(dx) || d.yon; }
+      if (Math.sign(dx) !== d.yon && Math.abs(dx) > 8) { d.kosuyor = false; d.gecti = true; }   // geçti
+    } else d.kosuyor = false;
+    d.hiz = DUSMAN_TIP.yuvarlak[3] * (d.kosuyor ? 1.25 : 1);
+    this.devriye(d, dt);
   },
 
   // Maymun / mızraklı: oyuncu aynı zemine basınca (ayak hizası aynı) döner, hazırlanır ve fırlatır; yoksa devriye

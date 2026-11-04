@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.63 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.64 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -39,7 +39,7 @@ Oyun `file://` ile değil bir web adresinden açılmalı (GitHub Pages, raw.gith
 | F | Tam ekran tuşu | tam ekran + telefonda yatay kilit |
 | R / P | — | bölümü yeniden başlat / tüm harita (kamera sabit) |
 
-Hareketler: yürürken önündeki sandık/taşı **iter**; havada düşerken duvara doğru basılıysa ve baston kancası yandaki taşa değiyorsa **bastonla asılır** (zıpla → duvardan sıçrar; ters yön / ↓ / duvar biterse bırakır; alttan kafa girince asılmaz). Kafa tavana çarpınca geri düşer.
+Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizası) ve en yakındakine değer; **açık sandığa** vurunca vuruş yönünde 2 karo yavaşlayarak kayar. Havada bir sarmaşığa ilk değişte kendiliğinden tutunur; atladığı sarmaşığa (ondan çıkana kadar) ancak ↑ ile tekrar tutunur. Yürürken önündeki sandık/taşı **iter**; havada düşerken duvara doğru basılıysa ve baston kancası yandaki taşa değiyorsa **bastonla asılır** (zıpla → duvardan sıçrar; ters yön / ↓ / duvar biterse bırakır; alttan kafa girince asılmaz). Kafa tavana çarpınca geri düşer.
 
 ## Sayılar (hepsi `CONFIG`)
 - Can 3, yaşam 3; hasar sonrası 1.5 sn dokunulmaz. Yürüme 200, eğik 100, itme 90 px/sn.
@@ -51,7 +51,7 @@ Hareketler: yürürken önündeki sandık/taşı **iter**; havada düşerken duv
 
 ## Görseller
 - **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+). Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
-- **Şelale**: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. Kadrajdayken şelale sesi döngüde.
+- **Şelale**: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
 - **Sarmaşık**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`.
 - **Oyuncu**: `oyuncu.png` (176×141 hücre) + `oyuncu2.png` (240×220: asılma, itme, duruma göre darbe kareleri, ölüm). Kare numaraları `BootSahnesi.oyuncuAnimasyonlari`.
 - **Düşmanlar** `assets/dusman/<tip>.png` şerit, animasyon kareleri ve görünür boy `ASSETLER.dusman`; tümü `CONFIG.dusmanOlcek` (0.9).
@@ -60,15 +60,16 @@ Hareketler: yürürken önündeki sandık/taşı **iter**; havada düşerken duv
 ## Nesneler
 - **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), çapalı jeton (`yasam`, +1 yaşam), altın para (`altin`, +5, bölümde yok).
 - **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam / kizil / buyuk) yukarı süzülür. Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
-- **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır, 3. kırar (enkaz solar). Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
-  Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak — alttaki gizli geçide açılır), eski basamaklar, ara kayalar ve tek başına duran bütün tek karolar (havadakiler sabit) — kırılmayan tek taş kalmadı.
+- **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır (hafif sallanır), 3. kırar: havadaysa önce altındaki ilk desteğe düşer, enkaz orada oluşup solar. Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
+  Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak, geçit — alttaki gizli koridora açılır; koridorda mavi elmas, yakutlu sandık ve gizli yer sesi), eski basamaklar, ara kayalar ve tek başına duran bütün tek karolar (havadakiler sabit) — kırılmayan tek taş kalmadı.
 - **Kontrol noktası** (5): bayrak kalkar, ses, yeniden doğma yeri. **Gizli yer** (`gizliler`): yaklaşınca bir kez ses (300 px içindekiler tek alan).
 - **Çıkış**: patron ölünce ödül sandığı çıkar, kapı açılır; kapıdan girince bölüm biter.
 
 ## Düşmanlar
 | Tip | Can | Davranış |
 |---|---|---|
-| gul, yilan, yuvarlak | 1 | devriye (hız 55 / 45 / 120) |
+| gul, yilan | 1 | devriye (hız 55 / 45) |
+| yuvarlak (pembe kirpi) | 1 | devriye (120); oyuncuyu kadrajda aynı zeminde görünce %25 hızlanıp üstüne koşar, geçince yavaşlar |
 | maymun / kopek (mızraklı) | 1 / 2 | devriye; oyuncu aynı zemine basınca döner, 0.4 sn hazırlanıp ateş topu / mızrak atar (2.4 / 1.8 sn arayla) |
 | ari | 1 | kamera görüş alanına girince kovalar (95 px/sn), 520 px uzaklaşınca bırakır; görünürken arı sesi |
 | orumcek | 1 | tavandan ipiyle inip çıkar |

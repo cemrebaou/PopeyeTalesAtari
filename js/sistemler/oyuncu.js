@@ -334,12 +334,23 @@ Object.assign(OyunSahnesi.prototype, {
       vurSes();
       this.dusmanHasar(d, 1);
     });
-    if (this.katiBul(r.x, r.y, r.width, r.height)) vurSes();
-    this.sandiklar.getChildren().forEach(s => {
-      if (!s.active || this.vurulan.has(s) || !kesisir(govdeRect(s.body))) return;
-      this.vurulan.add(s);
-      if (s.kirTas) this.tasVur(s); else this.sandikAc(s);
-    });
+    // Sandık / taş: sadece öndeki tek karoya (ayak hizasındaki ilk kat), en yakındakine — alttakine ya da üsttekine değil
+    const on = new Phaser.Geom.Rectangle(this.bakis > 0 ? b.right : b.x - U, b.bottom - 26, U, 22);
+    if (this.katiBul(on.x, on.y, on.width, on.height)) vurSes();
+    if (!this.vurulan.has('nesne')) {
+      let hedef = null, enB = Infinity;
+      this.sandiklar.getChildren().forEach(s => {
+        if (!s.active || s.kiriliyor || !Phaser.Geom.Intersects.RectangleToRectangle(on, govdeRect(s.body))) return;
+        const bosluk = this.bakis > 0 ? s.body.left - b.right : b.left - s.body.right;
+        if (bosluk < enB) { hedef = s; enB = bosluk; }
+      });
+      if (hedef) {
+        this.vurulan.add('nesne');
+        if (hedef.kirTas) this.tasVur(hedef);
+        else if (!hedef.acik) this.sandikAc(hedef);
+        else { vurSes(); this.sandikKaydir(hedef, this.bakis); }   // açık sandık: vuruş yönünde 2 karo kayar
+      }
+    }
     this.mermiler.getChildren().slice().forEach(m => {   // bastonla mermileri boz
       if (kesisir(govdeRect(m.body))) { this.parcala(m.x, m.y, 0xffffff); m.destroy(); }
     });
@@ -367,13 +378,17 @@ Object.assign(OyunSahnesi.prototype, {
     return this.sarmasikRect.find(v => Phaser.Geom.Intersects.RectangleToRectangle(r, v));
   },
 
+  // Havada bir sarmaşığa ilk değişte kendiliğinden tutunur. Bir sarmaşıktan atlayınca, ondan çıkana kadar
+  // aynı sarmaşığa ancak ↑ ile tutunulur (başka sarmaşığa yine kendiliğinden). Yerde ↑ / ↓ ile tutunulur.
   sarmasikGuncelle(k, yerde) {
     const p = this.player, b = p.body, F = CONFIG.fizik;
     const v = this.sarmasikBul(b);
+    if (this.birakilanSarmasik && v !== this.birakilanSarmasik) this.birakilanSarmasik = null;
     if (!this.tirmaniyor) {
       if (!v) return;
       const altindaVar = this.sarmasikRect.some(r => r.contains(b.center.x, b.bottom + 10));
-      if (k.yukari || (k.asagi && yerde && altindaVar)) {
+      const kendiligindan = !yerde && !this.pogoModu && this.knock <= 0 && !this.asili && v !== this.birakilanSarmasik;
+      if (kendiligindan || k.yukari || (k.asagi && yerde && altindaVar)) {
         this.tirmaniyor = true;
         p.x = v.centerX;
         b.setVelocity(0, 0);
@@ -382,6 +397,7 @@ Object.assign(OyunSahnesi.prototype, {
     }
     if (!v || k.ziplaBasTus || (yerde && k.asagi && !k.yukari)) {
       this.tirmaniyor = false;
+      this.birakilanSarmasik = v || null;
       b.setAllowGravity(true);
       if (k.ziplaBasTus) {
         const yon = (k.sag ? 1 : 0) - (k.sol ? 1 : 0);
@@ -419,6 +435,7 @@ Object.assign(OyunSahnesi.prototype, {
 
   // Tırmanma, çekme, asılma, itme, pogo bırakılır
   hareketleriBirak() {
+    if (this.tirmaniyor) this.birakilanSarmasik = this.sarmasikBul(this.player.body) || null;
     this.tirmaniyor = false;
     this.cekBirak();
     if (this.asili) this.asiliBirak();

@@ -1,9 +1,10 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.63',
+  surum: 'v0.64',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   dusmanOlcek: 0.9,     // tüm düşmanlar (görsel + gövde)
   selaleHiz: 140,       // şelale suyunun aşağı akış hızı (px/sn)
+  selaleDuyma: 420,     // şelale sesi kadrajın bu kadar dışından duyulmaya başlar (px)
   kamera: {
     gorunurY: 360,      // ekranda görünen dünya yüksekliği — küçük = daha yakın kamera
     minGorunurX: 560    // dar/dikey ekranda en az bu kadar dünya genişliği görünür

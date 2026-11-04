@@ -296,7 +296,8 @@ const LEVEL1 = {
     [1770,3392,"kizil"],
     [1056,3584,"kalp"],
     [3540,3008,"kizil"],
-    [3734,3008,"yasam"]
+    [3734,3008,"yasam"],
+    [528,4288,"kizil"]
   ],
   // [x, y merkez]
   elmaslar: [
@@ -403,7 +404,8 @@ const LEVEL1 = {
     ["kizil",4805,4080],
     ["buyuk",2575,570],
     ["buyuk",496,1744],
-    ["buyuk",318,1776]
+    ["buyuk",318,1776],
+    ['buyuk',400,4260]
   ],
   // [x, y] ara kayalar (1 karo) — erisim.js --coz buraya önerir; oyunda kırılır taşa çevrilir (bkz. kirTaslar)
   kayalar: [
@@ -443,7 +445,7 @@ const LEVEL1 = {
     {"tip":"maymun","x":1132,"y":2432,"min":1040,"max":1272},
     {"tip":"maymun","x":1092,"y":3584,"min":968,"max":1240},
     {"tip":"kopek","x":3280,"y":1856,"min":3280,"max":3416},
-    {"tip":"kopek","x":4339,"y":1856,"min":4200,"max":4472},
+    {"tip":"kopek","x":4740,"y":1920},
     {"tip":"kopek","x":2768,"y":1856,"min":2768,"max":2904},
     {"tip":"yilan","x":4728,"y":3584,"min":4624,"max":4816},
     {"tip":"yilan","x":2514,"y":3392,"min":2448,"max":2544},
@@ -464,7 +466,7 @@ const LEVEL1 = {
     {"tip":"orumcek","x":3750,"tavan":1568,"alt":1738},
     {"tip":"orumcek","x":3521,"tavan":1568,"alt":1738}
   ],
-  // [x, y (sol üst, 1 karo), tür, sabit] kırılır taşlar (assets/kirTas.png): 3 vuruşta kırılır; sabit=0 itilir/çekilir/düşer, 1 havada sabit
+  // [x, y (sol üst, 1 karo), tür, sabit, geçit] kırılır taşlar (KIRTAS türleri). sabit=1 havada durur; geçit=1 kırılıp geçilecek kapı (erisim.js geçilebilir sayar)
   kirTaslar: [
     [2848,672,'tugla',0],
     [2784,672,'tugla',0],
@@ -505,9 +507,9 @@ const LEVEL1 = {
     [2176,4064,'toprak',0],
     [2176,4096,'toprak',0],
     [2176,4128,'toprak',0],
-    [288,4064,'toprak',0],
-    [288,4096,'toprak',0],
-    [288,4128,'toprak',0],
+    [288,4064,'toprak',0,1],
+    [288,4096,'toprak',0,1],
+    [288,4128,'toprak',0,1],
     [3488,1280,'tugla',0],
     [3520,1280,'tugla',0],
     [3488,1312,'tugla',0],
@@ -539,7 +541,8 @@ const LEVEL1 = {
     [2575,570],
     [496,1744],
     [318,1776],
-    [3734,2992]
+    [3734,2992],
+    [400,4260]
   ],
   // [x, w, ustY, altY] şelaleler (piksel)
   selaleler: [

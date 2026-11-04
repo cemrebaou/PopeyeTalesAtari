@@ -109,10 +109,23 @@ Object.assign(OyunSahnesi.prototype, {
     this.hudGuncelle();
   },
 
-  // Hızla düşen sandık / taş yere değince bir kez ses
+  // Açık sandığa vurulunca vuruş yönünde 2 karo kayar (yavaşlayarak durur)
+  sandikKaydir(s, yon) {
+    s.kaymaYon = yon;
+    s.kaymaHedef = s.x + yon * this.L.karo * 2;
+  },
+
+  // Sandık kayması + hızla düşen sandık / taş yere değince bir kez ses
   sandikDusmeGuncelle() {
     this.sandiklar.getChildren().forEach(s => {
       if (!s.active || !s.body || !s.body.enable) return;
+      if (s.kaymaHedef !== undefined && s.kaymaHedef !== null) {
+        const kalan = (s.kaymaHedef - s.x) * s.kaymaYon;
+        if (kalan <= 1 || s.body.blocked[s.kaymaYon > 0 ? 'right' : 'left'] || this.cekSandik === s) {
+          s.kaymaHedef = null;
+          s.body.setVelocityX(0);
+        } else s.body.setVelocityX(s.kaymaYon * Phaser.Math.Clamp(kalan * 4, 40, 220));
+      }
       const yerde = yerdeMi(s.body);
       if (!yerde && s.body.velocity.y > 150) s.dusuyor = true;
       else if (yerde && s.dusuyor) { s.dusuyor = false; this.ses('sandikDus'); }
@@ -202,16 +215,22 @@ Object.assign(OyunSahnesi.prototype, {
     if (s.vurus < 3) {
       this.ses('tasVur' + s.vurus);
       s.setFrame(s.kirSira + s.vurus);
-      this.tweens.add({ targets: s, angle: { from: -4, to: 4 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
+      this.tweens.add({ targets: s, angle: { from: -2, to: 2 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
       return;
     }
     s.kiriliyor = true;
     if (this.cekSandik === s) this.cekBirak();
     this.ses('tasKir');
+    // Havadaysa kırılan taş önce altındaki ilk desteğe düşer, enkaz orada oluşup solar
+    const hedef = Math.min(this.destekY(s), this.dunyaY), dusus = Math.max(0, hedef - s.body.bottom);
     s.body.enable = false;   // üstündekiler desteksiz kalır ve düşer (taslariGuncelle)
     s.setFrame(s.kirSira + 3);
-    this.time.delayedCall(110, () => s.active && s.setFrame(s.kirSira + 4));
-    this.tweens.add({ targets: s, alpha: 0, delay: 200, duration: 300, onComplete: () => s.destroy() });
+    const sure = dusus > 2 ? Math.sqrt(2 * dusus / CONFIG.fizik.yercekimi) * 1000 : 110;
+    this.tweens.add({ targets: s, y: s.y + dusus, duration: sure, ease: 'Quad.easeIn', onComplete: () => {
+      if (!s.active) return;
+      s.setFrame(s.kirSira + 4);
+      this.tweens.add({ targets: s, alpha: 0, delay: 90, duration: 300, onComplete: () => s.destroy() });
+    } });
   },
 
   // ---- Kontrol noktaları, gizli yerler, çıkış ----

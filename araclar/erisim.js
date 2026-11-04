@@ -7,7 +7,7 @@ const fs=require('fs'),path=require('path');
 const L=new Function(fs.readFileSync(path.join(__dirname,'..','js','veri','level1.js'),'utf8')+';return LEVEL1;')();const T=32,W=L.genislik/T,H=L.yukseklik/T;
 const BW=18,BH=30,dt=1/60,G=1400;
 const temel=[...Array(H)].map(()=>new Uint8Array(W));
-for(const [x,y,w,h] of L.bloklar.concat(L.basamaklar||[],(L.kayalar||[]).concat(L.taslar||[],(L.kirTaslar||[]).filter(k=>k[2]!=='kristal'&&k[2]!=='yosun')).map(([x,y])=>[x,y,32,32])))for(let r=y/T;r<(y+h)/T;r++)for(let c=x/T;c<(x+w)/T;c++)temel[r][c]=1;
+for(const [x,y,w,h] of L.bloklar.concat(L.basamaklar||[],(L.kayalar||[]).concat(L.taslar||[],(L.kirTaslar||[]).filter(k=>k[2]!=='kristal'&&k[2]!=='yosun'&&!k[4])).map(([x,y])=>[x,y,32,32])))for(let r=y/T;r<(y+h)/T;r++)for(let c=x/T;c<(x+w)/T;c++)temel[r][c]=1;
 const vinesAll=L.sarmasiklar.map(([x,y,h],i)=>({id:i,x0:x-9,x1:x+9,y0:y-12,y1:y+h,c:Math.floor(x/T)}));
 const spikeCells=new Set();L.dikenler.forEach(([x,y,w])=>{for(let c=Math.floor(x/T);c<=Math.floor((x+w-1)/T);c++)for(let r=Math.floor(y/T)-3;r<=Math.floor(y/T);r++)spikeCells.add(r+','+c);});
 const itemCells=new Set();[...L.elmaslar,...L.sandiklar.map(s=>[s[0],s[1]-16]),...L.ozeller.map(o=>[o[1],o[2]]),...L.kontrol.map(k=>[k[0],k[1]-16])].forEach(([x,y])=>{for(let dc=-1;dc<=1;dc++)for(let dr=-1;dr<=1;dr++)itemCells.add((Math.floor(y/T)+dr)+','+(Math.floor(x/T)+dc));});
