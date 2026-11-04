@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.62 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.63 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -61,7 +61,7 @@ Hareketler: yürürken önündeki sandık/taşı **iter**; havada düşerken duv
 - **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), çapalı jeton (`yasam`, +1 yaşam), altın para (`altin`, +5, bölümde yok).
 - **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam / kizil / buyuk) yukarı süzülür. Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
 - **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır, 3. kırar (enkaz solar). Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
-  Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak — alttaki gizli geçide açılır), eski basamaklar ve uçan tek karolar.
+  Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak — alttaki gizli geçide açılır), eski basamaklar, ara kayalar ve tek başına duran bütün tek karolar (havadakiler sabit) — kırılmayan tek taş kalmadı.
 - **Kontrol noktası** (5): bayrak kalkar, ses, yeniden doğma yeri. **Gizli yer** (`gizliler`): yaklaşınca bir kez ses (300 px içindekiler tek alan).
 - **Çıkış**: patron ölünce ödül sandığı çıkar, kapı açılır; kapıdan girince bölüm biter.
 
