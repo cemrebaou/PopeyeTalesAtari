@@ -50,9 +50,9 @@ def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
     return t, np.where(b[t:t + 14].any(0))[0][-1]
 ASILI = [0, 1, 2, 3, 4, 5, 17]
 ITME = [6, 7, 8, 9, 10, 11, 16]
-ON_KENAR = C + 9 / (52.8 / 117 * 0.7) + 2   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
+ON_KENAR = C + 9 / (63.36 / 117 * 0.7) + 2   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
 ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
-KANCA_X = C + 62   # v0.38: baston ucu gövdenin ~10 px önünde → kanca taşın içine girer
+KANCA_X = C + 38   # v0.43: baston ucu gövdenin ~5.5 px önünde (v0.38'deki ~10.6 px'ten 5 px geri) → kanca taşın içine girer
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
     o = OLCEK * (k[2] if len(k) > 2 else 1)

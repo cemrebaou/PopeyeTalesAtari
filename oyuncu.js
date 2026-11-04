@@ -88,10 +88,10 @@ Object.assign(GameScene.prototype, {
       }
     } else if (!yerde && this.asiliBekle <= 0 && b.velocity.y > 0 && this.knock <= 0 && !this.pogoModu) {
       const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
-      // Sadece yandan: kanca hizası, gövdenin üstü ve altı aynı yanda taşa değmeli (alttan / kenar köşesinden asılmaz)
-      const kanca = y ? this.kancaDuvar(y) : null;
-      const duvar = kanca && this.duvarVar(y, b.y + b.height / 2 - 2, 4);
-      const yandan = duvar && this.duvarVar(y, b.y + 2, 4) && this.duvarVar(y, b.bottom - 8, 4);
+      // Sadece yandan: kancanın değdiği taş gövdenin yanında olmalı (tek uçan taş da olur).
+      // Taş gövdenin üstündeyse (alttan kafa girerse) asılmaz.
+      const duvar = y ? this.kancaDuvar(y) : null;
+      const yandan = duvar && (y > 0 ? duvar.left >= b.right - 1 : duvar.right <= b.left + 1);
       if (yandan) {
         // Gövdeyi taşa yasla (arada boşluk kalmasın, en fazla 4 px); kanca görselde taşın içine girer
         const dx = Phaser.Math.Clamp(y > 0 ? duvar.left - b.right : duvar.right - b.left, -4, 4);
