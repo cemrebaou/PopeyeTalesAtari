@@ -95,7 +95,7 @@ class UIScene extends Phaser.Scene {
     // Dokunmatik tuşlar (sadece dokunmatik cihazda)
     this.tuslar = [];
     if (this.sys.game.device.input.touch) {
-      [['sol', '◀'], ['sag', '▶'], ['yukari', '▲'], ['zipla', 'ZIPLA'], ['saldir', 'VUR'], ['cek', 'ÇEK'], ['asagi', '▼ POGO']]
+      [['sol', '◀'], ['sag', '▶'], ['asagi', 'EĞİL'], ['zipla', 'ZIPLA'], ['saldir', 'VUR'], ['yukari', 'TIRMAN']]
         .forEach(([anahtar, yazi]) => {
           // Tuş görseli: normal ui_t_<ad>, basılı ui_tb_<ad>
           const r = this.add.image(0, 0, 'ui_t_' + anahtar).setInteractive();
@@ -131,8 +131,8 @@ class UIScene extends Phaser.Scene {
     this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u);
 
     const B = 78 * u, yer = {
-      sol: [70, -70], sag: [175, -70], asagi: [122, -160],   // v0.47: ↓ (eğil/pogo) solda, ↑ (tırman) zıpla tuşunun üstünde
-      zipla: [-70, -70], saldir: [-175, -70], cek: [-280, -70], yukari: [-122, -160]
+      sol: [70, -70], sag: [175, -70], asagi: [122, -160],   // v0.48: solda yürü + eğil, sağda zıpla + vur + tırman (ÇEK tuşu kalktı)
+      zipla: [-70, -70], saldir: [-175, -70], yukari: [-122, -160]
     };
     this.tusB = B;
     this.tuslar.forEach(({ anahtar, r, boyut }) => {

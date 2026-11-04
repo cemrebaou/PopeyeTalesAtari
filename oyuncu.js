@@ -46,6 +46,7 @@ Object.assign(GameScene.prototype, {
     p.setAlpha(this.dokunulmaz > 0 && Math.floor(time / 90) % 2 ? 0.35 : 1);
 
     const yerde = b.blocked.down || b.touching.down;
+    this.vurIsle(k, yerde, dt);   // VUR tuşu: dokun = vur, sandık önünde basılı = çek, havada basılı = pogo
     if (yerde && this.havadaydi && !this.pogoModu) this.inisZaman = 0.1;   // iniş tozu karesi
     this.havadaydi = !yerde;
     this.coyote = yerde ? 0.09 : this.coyote - dt;
@@ -142,9 +143,8 @@ Object.assign(GameScene.prototype, {
     }
     if (yerde && b.velocity.y >= 0) this.ziplarken = false;
 
-    // POGO: sadece havadayken açılır (önce zıpla, sonra ↓ basılı tut). Yerde ↓ basmak bir şey yapmaz.
-    // Açıldıktan sonra ↓ basılı kaldıkça her yere (zemin, düşman, diken, sandık) seker.
-    if (!k.asagi || cekiyor) this.pogoAktif = false;
+    // POGO (v0.48): havada VUR basılı tutunca açılır. Açıldıktan sonra VUR basılı kaldıkça her yere seker.
+    if (!k.pogo || cekiyor) this.pogoAktif = false;
     else if (!yerde) this.pogoAktif = true;
     this.pogoModu = this.pogoAktif;
     if (this.pogoModu && yerde && b.velocity.y >= 0 && this.knock <= 0) this.pogoZipla();
@@ -172,6 +172,30 @@ Object.assign(GameScene.prototype, {
     }
 
     this.animasyon(yerde);
+  },
+
+  // ---- VUR tuşu (v0.48): tek tuşta vurma, çekme ve pogo ----
+  // Önünde sandık yoksa dokununca hemen vurur. Sandık önündeyse: kısa dokunuş = vur (açar), 0.18 sn basılı = kanca/çek.
+  // Havada basılı 0.15 sn = pogo (bırakana kadar sürer). C/L tuşu klavyede doğrudan çeker.
+  vurIsle(k, yerde, dt) {
+    const tut = k.saldir;
+    if (k.saldirBas) {
+      this.vurSure = 0;
+      this.vurBekle = yerde && !this.cekDurum && !!this.cekHedefBul();
+      if (this.vurBekle) k.saldirBas = false;
+    }
+    if (tut) this.vurSure = (this.vurSure || 0) + dt;
+    let cekBas = false;
+    if (this.vurBekle) {
+      if (!tut) { this.vurBekle = false; k.saldirBas = true; }
+      else if (this.vurSure >= 0.18) { this.vurBekle = false; this.vurCek = true; cekBas = true; }
+    }
+    if (!tut) this.vurCek = false;
+    this.vurPogo = tut && !this.vurBekle && !this.vurCek && (this.vurPogo || (!yerde && this.vurSure >= 0.15));
+    if (this.vurPogo) this.saldiriZaman = 0;
+    k.cek = k.cek || this.vurCek;
+    k.cekBas = k.cekBas || cekBas;
+    k.pogo = this.vurPogo;
   },
 
   // ---- Sandık çekme ----

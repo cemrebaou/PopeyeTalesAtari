@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.47 (`config.js` → `surum`)
+Sürüm: v0.48 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -77,11 +77,12 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 - ← → (A/D): yürü
 - ↑ (W) / SPACE / Z: zıpla (basılı tut = yüksek). Sarmaşığa değerken ↑ tırmanır; sarmaşıktan atlamak için SPACE/Z.
 - ↓ (S) yerde: eğilerek yürü (v0.21); 1 karelik aralıklardan sadece eğilerek geçilir (v0.26)
-- ↓ (S): **POGO** — sadece havadayken açılır: önce zıpla, havada ↓ basılı tut. Açılınca ↓ basılı kaldıkça zemine, düşmana, dikene, sandığa seker. Yerde dururken ↓ basmak pogo açmaz.
+- v0.48: **VUR tek tuşta üç iş** — dokun = vur (sandık açar); sandık önünde 0.18 sn basılı = kanca/çek; havada 0.15 sn basılı = POGO (bırakana kadar seker). ↓ artık pogo yapmaz, sadece eğilir. ÇEK tuşu kalktı (klavyede C/L hâlâ doğrudan çeker).
+- (eski, v0.47'ye kadar) ↓ (S): **POGO** — sadece havadayken açılır: önce zıpla, havada ↓ basılı tut. Açılınca ↓ basılı kaldıkça zemine, düşmana, dikene, sandığa seker. Yerde dururken ↓ basmak pogo açmaz.
 - X / K: baston vuruşu (yerde ve havada; düşmana vurur, mermi bozar, kasa/takoz kırar, sandık açar)
 - C / L basılı tut: baston kancası — sandığı çek (geri yürü)
 - R: bölümü yeniden başlat
-- Mobil: sol taraf ◀ ▶ ve üstlerinde ▼ (eğil / pogo); sağ taraf ZIPLA VUR ÇEK ve ZIPLA'nın üstünde ▲ (tırman) — v0.47'de ▲ ile ▼ yer değiştirdi (zıplayıp tırmanmak kolaylaşsın)
+- Mobil (v0.48, 6 tuş): solda ◀ ▶ ve üstlerinde ▼ (eğil); sağda ZIPLA, VUR ve ZIPLA'nın üstünde ▲ (tırman)
 
 ## Sayılar
 - Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
