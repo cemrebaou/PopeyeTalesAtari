@@ -68,7 +68,7 @@ Object.assign(GameScene.prototype, {
     let c = Math.floor(e.x / T), r = Math.floor((e.y + 1) / T);
     while (r < H && !G[r][c]) r++;
     if (r >= H) return;
-    const ok = cc => cc >= 0 && cc < W && G[r][cc] && !G[r - 1][cc];
+    const ok = cc => cc >= 0 && cc < W && G[r][cc] && !G[r - 1][cc] && !this.dikenHucre.has(r + ',' + cc);
     if (!ok(c)) return;
     let a = c, z = c;
     while (ok(a - 1)) a--;
@@ -76,6 +76,7 @@ Object.assign(GameScene.prototype, {
     const yarim = d.body.width / 2 + 2;
     d.minX = a * T + yarim; d.maxX = (z + 1) * T - yarim;
     if (d.maxX < d.minX) d.minX = d.maxX = (a + z + 1) * T / 2;
+    d.alanVar = e.tip !== 'boss';   // alan dışına asla çıkmaz (düşmez), patron hariç
   },
 
   // Düşman animasyonu oynat (aynısı oynuyorsa dokunma)
@@ -93,6 +94,8 @@ Object.assign(GameScene.prototype, {
       if (!d.active || d.oldu) return;
       if (d.tip !== 'boss' && (Math.abs(d.x - p.x) > 900 || Math.abs(d.y - p.y) > 700)) return; // uzaktakiler uyuyor
       const b = d.body;
+      // Yürüyen düşman alanından (zemin parçası) asla çıkmaz → savrulsa da düşmez
+      if (d.alanVar && (d.x < d.minX || d.x > d.maxX)) { d.x = Phaser.Math.Clamp(d.x, d.minX, d.maxX); b.setVelocityX(0); }
       if (d.sersem > 0) { d.sersem -= dt; if (d.sersem <= 0 && d.body.allowGravity) b.setVelocityX(0); return; }   // vuruş sonrası sersem
       switch (d.tip) {
         case 'gul':

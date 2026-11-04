@@ -56,7 +56,22 @@ class GameScene extends Phaser.Scene {
     const cam = this.cameras.main, K = CONFIG.kamera;
     const w = this.scale.width, h = this.scale.height;
     cam.setSize(w, h);
+    if (this.haritaModu) {   // P: tüm harita, kamera sabit
+      cam.stopFollow();
+      cam.setZoom(Math.min(w / this.dunyaG, h / this.dunyaY));
+      cam.centerOn(this.dunyaG / 2, this.dunyaY / 2);
+      return;
+    }
     cam.setZoom(Math.min(h / K.gorunurY, w / K.minGorunurX));
+  }
+
+  // P tuşu: tüm haritayı göster (kamera sabit, en uzak) / geri dön
+  haritaDegistir() {
+    this.haritaModu = !this.haritaModu;
+    const cam = this.cameras.main;
+    if (this.haritaModu) cam.removeBounds();
+    else { cam.setBounds(0, 0, this.dunyaG, this.dunyaY); cam.startFollow(this.player, true, 0.12, 0.12); }
+    this.kameraAyarla();
   }
 
   // Karo katmanı: level verisindeki karakter satırlarını tilemap'e çevirir (128 px kaynak, 32 px gösterim)
@@ -272,6 +287,9 @@ class GameScene extends Phaser.Scene {
     const izIsaret = (x, y, w, h) => { for (let r = y / T; r < (y + h) / T; r++) for (let c = x / T; c < (x + w) / T; c++) if (this.izgara[r]) this.izgara[r][c] = 1; };
     L.bloklar.concat(L.basamaklar || []).forEach(q => izIsaret(...q));
     (L.kayalar || []).concat(L.taslar || []).forEach(([x, y]) => izIsaret(x, y, T, T));
+    // Dikenli zemin hücreleri: devriye bunların üstüne çıkmaz (diken ile duvar/uçurum arasında yürür)
+    this.dikenHucre = new Set();
+    L.dikenler.forEach(([x, y, w]) => { for (let c = Math.floor(x / T); c <= Math.floor((x + w - 1) / T); c++) this.dikenHucre.add(Math.round(y / T) + ',' + c); });
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
     // Gizli yerler: yaklaşınca bir kez gizli yer sesi (L.gizliler [x, y])
     this.gizliler = (L.gizliler || []).map(([x, y]) => ({ x, y, bulundu: false }));
@@ -431,6 +449,7 @@ class GameScene extends Phaser.Scene {
     });
     kb.addCapture('SPACE,UP,DOWN,LEFT,RIGHT');
     this.keys.r.on('down', () => this.scene.restart());
+    kb.on('keydown-P', () => this.haritaDegistir());
   }
 
   update(time, delta) {

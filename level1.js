@@ -459,6 +459,7 @@ const LEVEL1 = {
   ],
   // tip: gul | ari | maymun | kopek | yilan | yuvarlak | orumcek
   dusmanlar: [
+    {"tip":"yuvarlak","x":1120,"y":3840},
     {"tip":"gul","x":1076,"y":1856,"min":976,"max":1136},
     {"tip":"gul","x":3049,"y":3488,"min":3024,"max":3088},
     {"tip":"gul","x":3960,"y":3584,"min":3888,"max":4112},
