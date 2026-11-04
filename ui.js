@@ -131,8 +131,8 @@ class UIScene extends Phaser.Scene {
     this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u);
 
     const B = 78 * u, yer = {
-      sol: [70, -70], sag: [175, -70], yukari: [122, -160],
-      zipla: [-70, -70], saldir: [-175, -70], cek: [-280, -70], asagi: [-122, -160]
+      sol: [70, -70], sag: [175, -70], asagi: [122, -160],   // v0.47: ↓ (eğil/pogo) solda, ↑ (tırman) zıpla tuşunun üstünde
+      zipla: [-70, -70], saldir: [-175, -70], cek: [-280, -70], yukari: [-122, -160]
     };
     this.tusB = B;
     this.tuslar.forEach(({ anahtar, r, boyut }) => {

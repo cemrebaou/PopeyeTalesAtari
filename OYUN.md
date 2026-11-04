@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.46 (`config.js` → `surum`)
+Sürüm: v0.47 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -81,7 +81,7 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 - X / K: baston vuruşu (yerde ve havada; düşmana vurur, mermi bozar, kasa/takoz kırar, sandık açar)
 - C / L basılı tut: baston kancası — sandığı çek (geri yürü)
 - R: bölümü yeniden başlat
-- Mobil: ◀ ▶ ▲ | ▼POGO VUR ÇEK ZIPLA tuşları
+- Mobil: sol taraf ◀ ▶ ve üstlerinde ▼ (eğil / pogo); sağ taraf ZIPLA VUR ÇEK ve ZIPLA'nın üstünde ▲ (tırman) — v0.47'de ▲ ile ▼ yer değiştirdi (zıplayıp tırmanmak kolaylaşsın)
 
 ## Sayılar
 - Can: 3 kalp, Yaşam: 3. Hasar sonrası 1.5 sn dokunulmazlık.
