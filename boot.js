@@ -12,6 +12,8 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet('oyuncu', 'assets/oyuncu.png', { frameWidth: KR.w, frameHeight: KR.h });
     const K2 = CONFIG.oyuncu.kare2;   // v0.33 ek kareler (araclar/oyuncuEk.py)
     this.load.spritesheet('oyuncu2', 'assets/oyuncu2.png', { frameWidth: K2.w, frameHeight: K2.h });
+    // Arayüz görselleri (v0.44, araclar/uiKes.py)
+    ASSETLER.ui.forEach(ad => this.load.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
     // Toplanabilirler (v0.28, araclar/toplananKes.py): 6 satır × 6 karelik dönme
     const TP = ASSETLER.toplanan;
     this.load.spritesheet('toplanan', 'assets/toplanan.png', { frameWidth: TP.w, frameHeight: TP.h });

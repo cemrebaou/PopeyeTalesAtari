@@ -313,7 +313,7 @@ Object.assign(GameScene.prototype, {
   // Çapa jetonu: +1 yaşam
   yasamVer(x, y) {
     this.durum.yasam++;
-    this.popup(x, y - 20, '+1 Can');
+    this.popup(x, y - 20, '+1', 'ui_sapka');
     this.hudGuncelle();
   },
 
@@ -333,7 +333,7 @@ Object.assign(GameScene.prototype, {
     const S = this.durum;
     if (S.can < CONFIG.oyuncu.canMax) {
       S.can++;
-      this.popup(x, y - 20, '+1 ♥');
+      this.popup(x, y - 20, '+1', 'ui_kalp');
     } else {
       S.puan += CONFIG.puan.kalpFazla;
       this.popup(x, y - 20, '+' + CONFIG.puan.kalpFazla);

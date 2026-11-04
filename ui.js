@@ -23,6 +23,24 @@ function tamEkranDegistir() {
   else setTimeout(kilitle, 300);
 }
 
+// Görsel yazı: rakamlar (assets/ui/r0..r9, rArti, rBolu) ve ikonlar yan yana, dikeyde ortalı.
+// parcalar: metin ('+12/30') ve/veya 'ui_...' doku anahtarları. boy = rakam yüksekliği. Container döner (genislik alanıyla).
+function gorselYazi(sahne, parcalar, boy, ikonBoy) {
+  const c = sahne.add.container(0, 0), arali = boy * 0.02;
+  let x = 0;
+  const ekle = (key, h) => {
+    const img = sahne.add.image(x, 0, key).setOrigin(0, 0.5);
+    const s = h / img.height; img.setScale(s);
+    c.add(img); x += img.width * s + arali;
+  };
+  parcalar.forEach(p => {
+    if (p.startsWith('ui_')) { ekle(p, ikonBoy || boy * 1.15); x += boy * 0.12; return; }
+    for (const ch of p) ekle(ch === '+' ? 'ui_rArti' : ch === '/' ? 'ui_rBolu' : 'ui_r' + ch, boy);
+  });
+  c.genislik = x;
+  return c;
+}
+
 class UIScene extends Phaser.Scene {
   constructor() { super('UI'); }
 
@@ -34,10 +52,7 @@ class UIScene extends Phaser.Scene {
       this.scale.off('resize', this.yerlestir, this);
     });
 
-    const st = { fontFamily: 'monospace', color: '#ffffff', stroke: '#000000' };
-    this.hudKalp = this.add.text(0, 0, '', { ...st, color: '#ff4d4d' });
-    this.hudAlt = this.add.text(0, 0, '', st);
-    this.hudPuan = this.add.text(0, 0, '', st).setOrigin(1, 0);
+    this.hud = [];   // HUD görselleri (guncelle'de yeniden kurulur)
     this.tamBtn = this.add.text(0, 0, '⛶ Tam ekran', { fontFamily: 'monospace', color: '#ffffff', backgroundColor: '#00000088' })
       .setOrigin(1, 0).setInteractive({ useHandCursor: true })
       .on('pointerup', tamEkranDegistir);
@@ -50,12 +65,13 @@ class UIScene extends Phaser.Scene {
     if (this.sys.game.device.input.touch) {
       [['sol', '◀'], ['sag', '▶'], ['yukari', '▲'], ['zipla', 'ZIPLA'], ['saldir', 'VUR'], ['cek', 'ÇEK'], ['asagi', '▼ POGO']]
         .forEach(([anahtar, yazi]) => {
-          const r = this.add.rectangle(0, 0, 10, 10, 0xffffff, 0.22).setInteractive();
-          const t = this.add.text(0, 0, yazi, { fontFamily: 'monospace', color: '#ffffff' }).setOrigin(0.5);
-          const ac = () => { this.oyunS.touch[anahtar] = true; r.setFillStyle(0xffffff, 0.45); };
-          const kapat = () => { this.oyunS.touch[anahtar] = false; r.setFillStyle(0xffffff, 0.22); };
+          // Tuş görseli: normal ui_t_<ad>, basılı ui_tb_<ad>
+          const r = this.add.image(0, 0, 'ui_t_' + anahtar).setInteractive();
+          const boyut = () => r.setDisplaySize(this.tusB || 78, this.tusB || 78);
+          const ac = () => { this.oyunS.touch[anahtar] = true; r.setTexture('ui_tb_' + anahtar); boyut(); };
+          const kapat = () => { this.oyunS.touch[anahtar] = false; r.setTexture('ui_t_' + anahtar); boyut(); };
           r.on('pointerdown', ac).on('pointerup', kapat).on('pointerout', kapat);
-          this.tuslar.push({ anahtar, r, t });
+          this.tuslar.push({ anahtar, r, boyut });
         });
     }
 
@@ -73,33 +89,43 @@ class UIScene extends Phaser.Scene {
     this.u = u;
     this.cameras.main.setSize(W, H);
     const yazi = (t, boy, kal) => t.setFontSize(Math.round(boy * u) + 'px').setStroke('#000000', kal * u);
-    yazi(this.hudKalp, 22, 4).setPosition(12 * u, 8 * u);
-    yazi(this.hudAlt, 18, 4).setPosition(12 * u, 36 * u);
-    yazi(this.hudPuan, 20, 4).setPosition(W - 12 * u, 8 * u);
-    this.tamBtn.setFontSize(Math.round(14 * u) + 'px').setPadding(6 * u, 4 * u).setPosition(W - 12 * u, 40 * u);
+    this.tamBtn.setFontSize(Math.round(14 * u) + 'px').setPadding(6 * u, 4 * u).setPosition(W - 12 * u, 44 * u);
     this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u);
 
     const B = 78 * u, yer = {
       sol: [70, -70], sag: [175, -70], yukari: [122, -160],
       zipla: [-70, -70], saldir: [-175, -70], cek: [-280, -70], asagi: [-122, -160]
     };
-    this.tuslar.forEach(({ anahtar, r, t }) => {
+    this.tusB = B;
+    this.tuslar.forEach(({ anahtar, r, boyut }) => {
       const [x, y] = yer[anahtar];
-      const px = x > 0 ? x * u : W + x * u, py = H + y * u;
-      r.setPosition(px, py).setSize(B, B);
-      r.input.hitArea.setTo(0, 0, B, B);
-      t.setPosition(px, py).setFontSize(Math.round(15 * u) + 'px');
+      r.setPosition(x > 0 ? x * u : W + x * u, H + y * u).setAlpha(0.85);
+      boyut();
     });
 
+    this.guncelle();
     if (this.ekran) this.ekranCiz();
   }
 
   guncelle() {
     if (!this.hazir) return;
-    const S = this.oyunS.durum, max = CONFIG.oyuncu.canMax;
-    this.hudKalp.setText('♥'.repeat(Math.max(0, S.can)) + '♡'.repeat(Math.max(0, max - S.can)));
-    this.hudAlt.setText('◆ ' + S.elmas + '/' + S.elmasToplam + '   Can: ' + S.yasam);
-    this.hudPuan.setText('Puan: ' + S.puan);
+    const S = this.oyunS.durum, max = CONFIG.oyuncu.canMax, u = this.u, W = this.scale.width;
+    this.hud.forEach(n => n.destroy());
+    this.hud = [];
+    // Sol üst: kalpler (dolu / boş)
+    for (let i = 0; i < max; i++) {
+      const k = this.add.image((12 + i * 36) * u, 10 * u, i < S.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0);
+      k.setScale(30 * u / k.height);
+      this.hud.push(k);
+    }
+    // Altında: yaşam (kaptan şapkası) ve elmas sayacı
+    const yasam = gorselYazi(this, ['ui_sapka', String(Math.max(0, S.yasam))], 20 * u, 26 * u).setPosition(12 * u, 60 * u);
+    const elmas = gorselYazi(this, ['ui_elmas', S.elmas + '/' + S.elmasToplam], 20 * u, 26 * u)
+      .setPosition(12 * u + yasam.genislik + 18 * u, 60 * u);
+    // Sağ üst: puan (altın para + rakamlar), sağa hizalı
+    const puan = gorselYazi(this, ['ui_altin', String(S.puan)], 24 * u, 30 * u);
+    puan.setPosition(W - 12 * u - puan.genislik, 24 * u);
+    this.hud.push(yasam, elmas, puan);
   }
 
   // Bitiş ekranı (bölüm bitti / oyun bitti); dokununca bölüm yeniden başlar
@@ -112,8 +138,11 @@ class UIScene extends Phaser.Scene {
   ekranCiz() {
     const E = this.ekran, W = this.scale.width, H = this.scale.height, u = this.u;
     E.nesneler.forEach(n => n.destroy());
+    // Taş çerçeveli panel (yazıya göre boyu biraz uzar)
+    const pw = Math.min(W * 0.86, 760 * u), ph = Math.max(pw * 292 / 1406, 230 * u);
     E.nesneler = [
-      this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.65),
+      this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55),
+      this.add.image(W / 2, H / 2, 'ui_panel').setDisplaySize(pw, ph),
       this.add.text(W / 2, H / 2 - 60 * u, E.baslik, {
         fontFamily: 'monospace', fontSize: Math.round(34 * u) + 'px', color: '#ffe14d', stroke: '#000', strokeThickness: 5 * u
       }).setOrigin(0.5),
@@ -137,7 +166,14 @@ Object.assign(GameScene.prototype, {
     if (u) u.guncelle();
   },
 
-  popup(x, y, yazi) {
+  // Dünya içi yazı. '+500', '+1' gibi sayılar rakam görselleriyle (ikon: 'ui_kalp', 'ui_sapka' vb.), diğerleri metin.
+  popup(x, y, yazi, ikon) {
+    if (/^[+\d\/]+$/.test(yazi)) {
+      const c = gorselYazi(this, ikon ? [yazi, ikon] : [yazi], 13, 16);
+      c.setPosition(x - c.genislik / 2, y).setDepth(50);
+      this.tweens.add({ targets: c, y: y - 40, alpha: 0, duration: 1100, onComplete: () => c.destroy() });
+      return;
+    }
     const t = this.add.text(x, y, yazi, {
       fontFamily: 'monospace', fontSize: '16px', color: '#ffff66', stroke: '#000000', strokeThickness: 3, resolution: 3
     }).setOrigin(0.5).setDepth(50);

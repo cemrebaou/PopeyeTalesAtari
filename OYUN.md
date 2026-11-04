@@ -1,8 +1,8 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.43 (`config.js` → `surum`)
+Sürüm: v0.44 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
-Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24) ve toplanabilirler (v0.29): kullanıcı görseli. Arayüz hâlâ yer tutucu (renkli şekiller, `boot.js`).
+Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
 ## Görsel sistemi
 - **v0.20: yeni karo sistemi** (eski toprak dokusu / çimen / yan yosun / yeraltı katmanı / eski karolar silindi). Kaynak: `assets/kaynak/zemin_seti.png` (kullanıcının gönderdiği tek sayfa set) → `assets/tileset.png` (128 px kaynak karo, oyunda 32 px, 114 karo). Üretici: `python3 araclar/karoUret.py`.
@@ -19,6 +19,13 @@ Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/t
 - Kontrol noktası: bayrak direği (v0.33: %10 küçük, `CONFIG.bayrakBoy` 57.6 px) (geçince bayrak kalkar). Çıkış: taş kemerli kapı (patron ölünce açılır). Sandık kapalı/açık görselli.
 - Platform türleri kodda hazır, bu bölümde kullanılmıyor: kütük, taş levha, ip köprü, yüzen ada, dal, ızgara (parçalı: sol + orta + sağ), uçan hareketli platform ve asansör (altı kristalli, ipsiz), konveyör bant, çatlak taş (3 aşama), zıplatan yaprak, mantar, kırılabilir kasa.
 Not: görseller dosyadan yüklendiği için oyun `file://` ile değil bir web adresinden (GitHub Pages, githack, yerel sunucu) açılmalı.
+
+## Arayüz görselleri (v0.44)
+Kaynak `assets/kaynak/ui_seti.png` → `python3 araclar/uiKes.py` → `assets/ui/<ad>.png` (`ASSETLER.ui`): kalp / boş kalp, kaptan şapkası (yaşam), elmas, altın para (puan), rakamlar r0–r9 + `rArti` + `rBolu`, 7 dokunmatik tuş (`t_<ad>`) ve basılı hâlleri (`tb_<ad>`), taş çerçeveli panel.
+- HUD: sol üst 3 kalp (dolu/boş); altında şapka + yaşam, elmas + toplanan/toplam; sağ üst altın para + puan. Hepsi rakam görselleriyle (`ui.js` → `gorselYazi`).
+- Dokunmatik tuşlar görsel; basınca basılı görseline geçer. Tam ekran tuşu yazılı kaldı.
+- Dünya içi sayı yazıları (+500, +1 kalp, +1 yaşam) rakam görselleri + ikonla; "PATRON!", "Kapı açıldı!", "Kontrol noktası!" metin.
+- Bitiş ekranları taş çerçeveli panelin içinde.
 
 ## Ekran ve kamera (v0.14)
 - Oyun açıldığı ekranın/pencerenin tamamını doldurur (sabit en-boy oranı yok, siyah bant yok). Ekran döner ya da pencere değişirse anında yeniden boyutlanır (`main.js`).
@@ -129,6 +136,7 @@ Kaynak: Unity projesindeki `SampleScene` (zemin, düşman, sandık, elmas, diken
 Platform eklemek için `level1.js`'e alan eklenir: `platformlar: [{tip:'kutuk', x, y, n}]`, `hareketli: [{tip:'hover', y, min, max, n, hiz}]`, `asansorlar: [{x, alt, ust, hiz}]`, `bantlar: [{x, y, n, yon}]`, `catlaklar: [{x, y}]`, `yapraklar: [{x, y}]`, `kirilir: [[x, y, w, h]]`, `basamaklar: [[x, y, w, h]]` (taş basamak), `kayalar: [[x, y]]` (tek karo ara kaya) (piksel; n = orta parça sayısı).
 
 ## Dosyalar
+- `araclar/uiKes.py` arayüz görsellerini keser
 - `araclar/oyuncuEk.py` oyuncu ek karelerini (asılma, itme, darbe) üretir
 - `araclar/dusmanKes.py` düşman görsellerini keser (Python, PIL, scipy)
 - `araclar/kenarEkle.py` zemin yan bitiş karolarını tileset'e ekler
