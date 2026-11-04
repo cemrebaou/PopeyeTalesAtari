@@ -509,6 +509,7 @@ class GameScene extends Phaser.Scene {
         this.boyutla(c.spr, 'bayrak1', { h: CONFIG.bayrakBoy });
         this.spawn = { x: c.x, y: c.y - 2 };
         this.popup(c.x, c.y - 80, 'Kontrol noktası!');
+        this.ses('bayrak');
       }
     });
   }

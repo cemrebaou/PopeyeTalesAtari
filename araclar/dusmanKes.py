@@ -120,7 +120,7 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
         meta[isim] = {'w': p.width, 'h': p.height, 'gen': gen}
 ap = KOK + '/assetlar.js'
 s = open(ap, encoding='utf8').read()
-s = re.sub(r'\n// Düşman sayfaları.*', '', s, flags=re.S)
+s = re.sub(r'\n// Düşman sayfaları[^\n]*\nASSETLER.dusman = [^\n]*;\n', '\n', s)   # v0.54: sadece kendi satırını sil (eskisi sonraki tüm bölümleri siliyordu)
 s += '\n// Düşman sayfaları (araclar/dusmanKes.py ile üretildi): hücre w×h, ayak çizgisi, görünür boy (oyun px), animasyon kareleri\nASSETLER.dusman = ' + json.dumps(meta, ensure_ascii=False) + ';\n'
 open(ap, 'w', encoding='utf8').write(s)
 print(json.dumps({k: (v.get('w'), v.get('h'), v.get('ayak')) for k, v in meta.items()}))
