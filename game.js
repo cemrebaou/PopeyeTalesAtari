@@ -13,6 +13,8 @@ class GameScene extends Phaser.Scene {
 
   create() {
     const L = LEVEL1;
+    this.selaleSes = null;
+    this.events.once('shutdown', () => { if (this.selaleSes) { this.selaleSes.stop(); this.selaleSes = null; } });
     this.L = L;
     this.dunyaG = L.genislik;
     this.dunyaY = L.yukseklik;
@@ -380,6 +382,7 @@ class GameScene extends Phaser.Scene {
     s.vurus++;
     this.parcala(s.x, s.y - 16, 0xcfc6b8);
     if (s.vurus < 3) {
+      this.ses('tasCatla');   // 1. ve 2. vuruş: çatlama sesi
       s.setFrame(s.kirSira + s.vurus);
       this.tweens.add({ targets: s, angle: { from: -4, to: 4 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
       return;
@@ -533,6 +536,11 @@ class GameScene extends Phaser.Scene {
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
     this.taslariGuncelle();
+    // Şelale sesi: kadrajda şelale varken döngüde çalar, kadrajdan çıkınca durur
+    const gv = this.cameras.main.worldView;
+    const selaleGorunur = (this.L.selaleler || []).some(([x, w, y0, y1]) => x < gv.right && x + w > gv.x && y0 < gv.bottom && y1 > gv.y);
+    if (selaleGorunur && !this.selaleSes) { try { this.selaleSes = this.sound.add('selale', { loop: true, volume: 0.4 }); this.selaleSes.play(); } catch (e) {} }
+    else if (!selaleGorunur && this.selaleSes) { this.selaleSes.stop(); this.selaleSes.destroy(); this.selaleSes = null; }
     // Sandık yere düşme sesi: hızla düşen sandık yere değince bir kez
     this.sandiklar.getChildren().forEach(s => {
       if (!s.active || !s.body) return;

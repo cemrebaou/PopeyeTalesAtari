@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.58 (`config.js` → `surum`)
+Sürüm: v0.59 (`config.js` → `surum`)
 Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Görseller (v0.05, yeni set): zemin ve arka plan tek bir karo setinde (`assets/tileset.png`, 64 px kaynak, oyunda 32 px); objeler `assets/*.png` (platform parçaları, sarmaşık/ip/merdiven/zincir, kasa, taş blok, kırmızı takoz, dikenler, sandık, kapı, bayrak). Ana karakter (v0.14): `assets/oyuncu.png` sprite sheet (aşağıda). Düşmanlar (v0.24), toplanabilirler (v0.29) ve arayüz (v0.44): kullanıcı görseli. Parçalanma efekti hâlâ yer tutucu (renkli şekiller, `boot.js`).
 
@@ -56,6 +56,10 @@ Kaynak `assets/kaynak/harf_seti.png` (Türkçe büyük/küçük harfler, Q yok) 
 | (eski pogo) | 33–40 | artık kullanılmıyor |
 | uzat / cek | 41–43 / 44–48 | baston kancası uzatma / sandık çekme (v0.25: %16 büyük çizilir) |
 | egil | 53–57 | yerde ↓ basılı: eğilerek yürüme (100 px/sn), dururken ilk karede durur (v0.21, kullanıcı görseli, %72 ölçek; v0.22: oyunda %16 küçük) |
+
+## v0.59
+- **Şelale sesi** (`selale`): kadrajda şelale varken döngüde çalar (ses %40), kadrajdan çıkınca durur.
+- **Taş çatlama sesi** (`tasCatla`): kırılır taşa 1. ve 2. vuruşta; 3. vuruşta kırılma sesi (`tasKir`).
 
 ## v0.58
 - **3 bölge, yeni karolar** (`python3 araclar/bolgeKaro.py`, kaynaklar `assets/kaynak/bolge_tapinak.png`, `bolge_orta.png`, `bolge_toprak.png`): her bölge 3×3 — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Karolar 128 px'e getirildi, köşe boşlukları dolduruldu. Önekler: `p` tapınak (satır < 48), `c` yosunlu parke taş + koyu kaya arka plan (48–116), `d` toprak ve kökler (117+). `zeminDose.py` artık hem zemini hem arka planı bölgeye göre döşer. Toprak bölgesi 2 kare aşağı kaydı (115 → 117): başlangıçta kamera alttaki toprağı daha az gösterir, toprak daha derinde başlar. Eski arka plan süsleri kaldırıldı.
