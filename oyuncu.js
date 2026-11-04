@@ -328,9 +328,9 @@ Object.assign(GameScene.prototype, {
     else if (p.anims.isPaused) p.anims.resume();
   },
 
-  // Zıplama sesi: zipla1..7 sırayla (v0.52)
+  // Zıplama sesi: zipla1..6 sırayla (v0.56: 14 sn'lik jump_sound silindi)
   zipSes() {
-    this.zipNo = ((this.zipNo || 0) % 7) + 1;
+    this.zipNo = ((this.zipNo || 0) % 6) + 1;
     this.ses('zipla' + this.zipNo);
   },
 
