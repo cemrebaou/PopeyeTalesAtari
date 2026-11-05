@@ -24,7 +24,7 @@ function sesBaslat(sahne, ad, ayar) {
 function sesleriYukle(sahne) {
   const eksik = SESLER.filter(ad => !sahne.cache.audio.exists(ad));
   if (!eksik.length) return;
-  eksik.forEach(ad => sahne.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+  eksik.forEach(ad => sahne.load.audio(ad, SES_YOL[ad]));
   sahne.load.start();
 }
 

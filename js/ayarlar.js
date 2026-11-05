@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.72',
+  surum: 'v0.73',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   ustUsteGomme: 4,
   tasYukari: 3,         // kırılır taşlar (kasa hariç) bu kadar yukarıda çizilir      // üst üste taş / kasa: üstteki, alttakinin üst kenar (perspektif) payına oturur (px)
@@ -52,22 +52,22 @@ const CONFIG = {
   patron: { can: 4, uyanMesafe: 520 }
 };
 
-// assets/ses/<ad>.mp3 — yüklenen sesler. Kodda çalınıp burada olmayan ses sessizce atlanır (sesCal):
-// 'kapiAcil' (çıkış kapısı açılınca) ve 'kazanma' (kapıdan girince) dosyaları gelince buraya eklenir.
-const SESLER = [
-  // oyuncu
-  'bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
-  'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6',
-  'olum', 'tamKaybet',
-  // toplanabilir, nesne, ortam
-  'elmas', 'para1', 'para2', 'para3', 'para4', 'para5', 'capaAltin', 'kizilElmas', 'buyukElmas', 'can', 'gizli', 'bayrak', 'sandikDus',
-  'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale',
-  // düşmanlar
-  'ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
-  'olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13',
-  // arayüz
-  'tik'
-];
+// assets/ses/<klasör>/<ad>.mp3 — yüklenen sesler, klasörlere göre. Kodda sesin sadece adı kullanılır (klasör yolu yükleyicide).
+// Kodda çalınıp burada olmayan ses sessizce atlanır (sesCal): 'kapiAcil' (çıkış kapısı açılınca) ve 'kazanma' (kapıdan
+// girince) dosyaları gelince buraya eklenir.
+const SES_KLASOR = {
+  popeye: ['bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
+    'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6', 'olum', 'tamKaybet'],
+  elmaslar: ['elmas', 'para1', 'para2', 'para3', 'para4', 'para5', 'capaAltin', 'kizilElmas', 'buyukElmas', 'can'],
+  cevre: ['gizli', 'bayrak', 'sandikDus', 'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale'],
+  dusmanlar: ['ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri',
+    'olOrumcek', 'olYilan'],
+  patron: ['olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13'],
+  arayuz: ['tik']
+};
+const SESLER = Object.values(SES_KLASOR).flat();
+const SES_YOL = {};
+Object.entries(SES_KLASOR).forEach(([k, l]) => l.forEach(ad => { SES_YOL[ad] = 'assets/ses/' + k + '/' + ad + '.mp3'; }));
 
 // assets/nesne/kirTas.png satırları (araclar/kirTasKes.py ile aynı sıra)
 const KIRTAS = ['kasa', 'gri', 'koyu', 'kristal', 'toprak', 'kizil', 'tugla', 'kum', 'mor', 'yosun'];

@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.72 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.73 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -96,7 +96,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar; mermiler sandık / taş / kasaların içinden geçer.
 
 ## Sesler
-`SESLER` listesindeki `assets/ses/<ad>.mp3` yüklenir. Kodda çalınıp listede olmayan ses sessizce atlanır — **eksik**: `kapiAcil` (çıkış kapısı açılınca) ve `kazanma` (kapıdan girince); dosyaları gelince `assets/ses/`'e koyup `SESLER`'e eklemek yeterli.
+`SES_KLASOR` listesindeki `assets/ses/<klasör>/<ad>.mp3` yüklenir (klasörler: popeye, elmaslar, cevre, dusmanlar, patron, arayuz); kodda ses sadece adıyla çalınır. Kodda çalınıp listede olmayan ses sessizce atlanır — **eksik**: `kapiAcil` (çıkış kapısı açılınca) ve `kazanma` (kapıdan girince); dosyaları gelince `assets/ses/`'e koyup `SES_KLASOR`'a eklemek yeterli.
 
 ## 1. Bölüm
 Unity projesindeki `SampleScene`'den aktarıldı (1 Unity birimi = 48 px). Dünya 5440 × 4544 px (170 × 142 karo), çok katlı: başlangıç sol altta, ortada sarmaşıklı bloklar ve arılar, üstte koridorlar, en üstte patron ve çıkış, altta yeraltı.
