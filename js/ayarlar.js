@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.73',
+  surum: 'v0.74',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   ustUsteGomme: 4,
   tasYukari: 3,         // kırılır taşlar (kasa hariç) bu kadar yukarıda çizilir      // üst üste taş / kasa: üstteki, alttakinin üst kenar (perspektif) payına oturur (px)
@@ -58,7 +58,8 @@ const CONFIG = {
 const SES_KLASOR = {
   popeye: ['bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
     'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6', 'olum', 'tamKaybet'],
-  elmaslar: ['elmas', 'para1', 'para2', 'para3', 'para4', 'para5', 'capaAltin', 'kizilElmas', 'buyukElmas', 'can'],
+  elmaslar: ['para1', 'para2', 'para3', 'para4', 'para5', 'elmas', 'elmasDus', 'altin', 'capaAltin', 'kizilElmas', 'buyukElmas',
+    'yasam', 'can'],
   cevre: ['gizli', 'bayrak', 'sandikDus', 'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale'],
   dusmanlar: ['ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri',
     'olOrumcek', 'olYilan'],

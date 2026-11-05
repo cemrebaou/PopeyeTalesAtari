@@ -237,8 +237,10 @@ class OyunSahnesi extends Phaser.Scene {
     F.overlap(P, this.elmaslar, null, (p, e) => { this.elmasAl(e); return false; });
     F.overlap(P, this.ozeller, null, (p, o) => { this.ozelAl(o); return false; });
     F.overlap(P, this.taneler, null, (p, t) => { this.taneAl(t); return false; });
-    F.collider(this.taneler, this.solids);
-    F.collider(this.taneler, this.sandiklar);
+    // kristal taştan dökülen her elmas yere ilk değdiğinde bir kez elmasDus çalar
+    const taneDus = (t) => { if (!t.dustu && t.body.blocked.down) { t.dustu = true; this.ses('elmasDus', { volume: 0.7 }); } };
+    F.collider(this.taneler, this.solids, taneDus);
+    F.collider(this.taneler, this.sandiklar, taneDus);
   }
 
   // ---- Klavye ----

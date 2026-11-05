@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.73 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.74 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -64,7 +64,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - **Arayüz**: kalpler, yaşam şapkası, elmas/altın ikonları, rakamlar, 6 dokunmatik tuş (normal / basılı), taş panel. **Harfler**: Türkçe büyük/küçük, Q, noktalama, semboller (`harfYazi`, `{zipla}` gibi işaretler tuş görseli olur).
 
 ## Nesneler
-- **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), altın para (`altin`, +5), çapalı altın (`capa`, +25, bir tık büyük). Altınlar tahta kasadan çıkar. Toplanabilirler katı değildir (üstüne basılmaz, pogo / kafa çarpması tetiklemez). Sesler: elmas `para1-5` (rastgele), altın para eski `elmas` sesi, çapalı `capaAltin`.
+- **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), altın para (`altin`, +5), çapalı altın (`capa`, +25, bir tık büyük). Altınlar tahta kasadan çıkar. Toplanabilirler katı değildir (üstüne basılmaz, pogo / kafa çarpması tetiklemez). Sesler: sarı elmas `para1-5` (rastgele), küçük altın `altin`, çapalı `capaAltin`, kristal taştan dökülen elmas `elmas` (yere ilk değişte `elmasDus`), yakut `kizilElmas`, mavi elmas `buyukElmas`, +1 yaşam `yasam`, kalp `can`.
 - **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam (şapka görseli) / kizil / buyuk) yukarı süzülür. Açık sandık vurulup kayarken düşmana çarparsa düşman ölür (patron 1 hasar). Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
 - **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır (hafif sallanır), 3. kırar: havadaysa önce altındaki ilk desteğe düşer, enkaz orada oluşup solar. Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
 - **Tahta kasa** (`kasa` türü kırılır taş, boş bölgelere 40 adet): 2 vuruşta kırılır (`tahtaVur` → `tahtaKir`), %75 altın para, %25 çapalı altın düşürür. Kırılır taşlara da bastonla asılınır.

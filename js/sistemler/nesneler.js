@@ -3,7 +3,7 @@
 const ODUL = {
   buyuk: { ses: 'buyukElmas', gorsel: 'buyukelmas' },   // mavi elmas
   kizil: { ses: 'kizilElmas', gorsel: 'kizilelmas' },   // yakut
-  altin: { ses: 'elmas', gorsel: 'altin' },        // küçük altın para (tahta kasadan %75)
+  altin: { ses: 'altin', gorsel: 'altin' },        // küçük altın para (tahta kasadan %75)
   capa: { ses: 'capaAltin', gorsel: 'capa' },       // çapalı altın para (tahta kasadan %25)
   yasam: { gorsel: null },                          // görseli şapka (ui_sapka)
   kalp: { gorsel: 'kalp' }
@@ -99,7 +99,7 @@ Object.assign(OyunSahnesi.prototype, {
 
   yasamVer(x, y) {
     this.durum.yasam++;
-    this.ses('can');
+    this.ses('yasam');
     this.popup(x, y - 20, '+1', 'ui_sapka');
     this.hudGuncelle();
   },
@@ -319,7 +319,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (!t.active || this.time.now < t.alinir) return;
     const x = t.x, y = t.y;
     t.destroy();
-    this.ses('para' + Phaser.Math.Between(1, 5));
+    this.ses('elmas');
     this.puanEkle(CONFIG.puan.tane, x, y - 10);
   },
 
