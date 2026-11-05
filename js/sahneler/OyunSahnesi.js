@@ -9,6 +9,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.bolumNo = this.registry.get('bolum') || 0;   // BOLUMLER sırası (main.js)
     const L = BOLUMLER[this.bolumNo];
     this.L = L;
+    this.zeminGomme = L.zeminGomme ?? 2;   // yere basan her şey zemin çizgisinin bu kadar altına çizilir (çim / taş kenarını örter)
     this.dunyaG = L.genislik;
     this.dunyaY = L.yukseklik;
     this.durum = {
@@ -152,12 +153,15 @@ class OyunSahnesi extends Phaser.Scene {
   }
 
   // Şelaleler [x, w, y0, y1, onde]: dikeyde kesintisiz doku, aşağı akar. Arka planın önünde, zeminin arkasında; uçları zemine 16 px girer.
-  // onde=1: oyuncunun ve zeminin önünde çizilir — arkasındaki gizli zemin ve içine giren oyuncu görünmez.
+  // onde=1: oyuncunun ve zeminin önünde çizilir — arkasındaki gizli zemin ve içine giren oyuncu görünmez; taşa taşmasın diye
+  // tam y0–y1 arasında (tavanın altından çıkar, alttaki zeminin hizasında kesilir). Yan yana şelaleler farklı evrede akar.
   selaleCiz() {
     const tex = this.textures.get('selaleOrta').getSourceImage();
     this.selaleler = (this.L.selaleler || []).map(([x, w, y0, y1, onde]) => {
-      const s = w / tex.width;
-      return this.add.tileSprite(x, y0 - 16, w, y1 - y0 + 32, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(onde ? 11 : 0.5);
+      const s = w / tex.width, pay = onde ? 0 : 16;
+      const sp = this.add.tileSprite(x, y0 - pay, w, y1 - y0 + 2 * pay, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(onde ? 11 : 0.5);
+      sp.tilePositionY = Phaser.Math.Between(0, tex.height);
+      return sp;
     });
   }
 
@@ -253,6 +257,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.updateMermiler(dt);
     this.taslariGuncelle(dt);
     this.sandikDusmeGuncelle();
+    this.gommeGuncelle();
     this.kontrolNoktalariGuncelle();
     this.gizlilerGuncelle();
     this.sahteGuncelle();

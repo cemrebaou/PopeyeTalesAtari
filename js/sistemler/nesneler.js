@@ -17,13 +17,42 @@ Object.assign(OyunSahnesi.prototype, {
       const spr = this.boyutla(this.add.image(x, y + 2, 'bayrak0').setOrigin(0.5, 1).setDepth(1.6), 'bayrak0', { h: CONFIG.bayrakBoy });
       this.kontrolNoktalari.push({ x, y, spr, aktif: false });
     });
-    L.elmaslar.forEach(([x, y]) => this.toplananYarat(this.elmaslar, 'elmas', x, y));
+    this.doluKareler();
+    L.elmaslar.forEach(([x, y]) => this.toplananYarat(this.elmaslar, 'elmas', ...this.bosYer(x, y)));
     this.durum.elmasToplam = L.elmaslar.length;
-    L.ozeller.forEach(([tip, x, y]) => { if (ODUL[tip]) this.toplananYarat(this.ozeller, ODUL[tip].gorsel, x, y).tip = tip; });
+    L.ozeller.forEach(([tip, x, y]) => { if (ODUL[tip]) this.toplananYarat(this.ozeller, ODUL[tip].gorsel, ...this.bosYer(x, y)).tip = tip; });
     L.sandiklar.forEach(([x, y, odul]) => this.sandikYarat(x, y, odul));
     (L.kirTaslar || []).forEach(([x, y, tur, sabit]) => this.kirTasYarat(x, y, tur, sabit));
     this.kapi = this.boyutla(this.add.image(L.cikis[0], L.cikis[1] + 2, 'kapi').setOrigin(0.5, 1).setDepth(1.6), 'kapi', { h: 72 });
     this.gizliler = (L.gizliler || []).map(([x, y]) => ({ x, y, bulundu: false }));
+  },
+
+  // Zemin + başlangıçtaki taş / sandık kareleri: toplanabilir bunların içine konmaz
+  doluKareler() {
+    const L = this.L, T = L.karo, d = this.izgara.map(r => r.slice());
+    const isle = (x, y) => { const r = Math.floor(y / T), c = Math.floor(x / T); if (d[r]) d[r][c] = 1; };
+    (L.kirTaslar || []).forEach(([x, y]) => isle(x + 1, y + 1));
+    L.sandiklar.forEach(([x, y]) => isle(x, y - 1));
+    this.dolu = d;
+  },
+
+  // Elmas taşa değiyorsa en yakın boş yere (önce sola / sağa, sonra yukarı) kayar
+  bosYer(x, y) {
+    const T = this.L.karo, y_ = 9;
+    const bos = (px, py) => {
+      for (const [ax, ay] of [[px - y_, py - y_], [px + y_, py - y_], [px - y_, py + y_], [px + y_, py + y_]]) {
+        const r = Math.floor(ay / T), c = Math.floor(ax / T);
+        if (!this.dolu[r] || this.dolu[r][c]) return false;
+      }
+      return true;
+    };
+    if (bos(x, y)) return [x, y];
+    for (let k = 4; k <= 96; k += 4) {
+      if (bos(x - k, y)) return [x - k, y];
+      if (bos(x + k, y)) return [x + k, y];
+    }
+    for (let k = 4; k <= 64; k += 4) if (bos(x, y - k)) return [x, y - k];
+    return [x, y];
   },
 
   // ---- Toplanabilirler ve ödüller ----
@@ -93,10 +122,12 @@ Object.assign(OyunSahnesi.prototype, {
     return s;
   },
 
-  // Sandık / taş ortak gövde ayarı: alt kenara hizalı sabit kutu (görsel değişse de aynı)
+  // Sandık / taş ortak gövde ayarı: alt kenara hizalı sabit kutu (görsel değişse de aynı).
+  // gommeD: görsel gövdenin bu kadar px altına çizilir (yerde zemin payı, taş üstünde perspektif payı); gövde yerinde kalır.
   kutuGovdesi(s) {
-    const w = s.govdeW / s.scaleX, h = s.govdeH / s.scaleY;
-    s.body.setSize(w, h, false).setOffset((s.frame.width - w) / 2, s.frame.height - h);
+    const w = s.govdeW / s.scaleX, h = s.govdeH / s.scaleY, k = (s.gommeD || 0) / s.scaleY;
+    s.setOrigin(0.5, 1 - k / s.frame.height);
+    s.body.setSize(w, h, false).setOffset((s.frame.width - w) / 2, s.frame.height - h - k);
     s.body.pushable = false;   // oyuncu çarparak itemez; itme / çekme kodla
     s.body.setDragX(900);
     s.setMaxVelocity(400, CONFIG.fizik.maxDusme);
@@ -156,6 +187,21 @@ Object.assign(OyunSahnesi.prototype, {
     if (sabit) { s.sabit = true; s.body.setAllowGravity(false).setImmovable(true); }
     else this.tasUyut(s);
     return s;
+  },
+
+  // Her sandık / taş: altında başka taş / sandık varsa onun üst kenar payına oturur, yoksa zemine gömülür.
+  // Üstteki alttakinin önünde çizilir.
+  gommeGuncelle() {
+    const T = this.L.karo, ust = new Map(), liste = this.sandiklar.getChildren().filter(s => s.active && s.body && s.body.enable);
+    liste.forEach(s => ust.set(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.top / T), s));
+    liste.sort((a, b) => b.body.bottom - a.body.bottom).forEach(s => {
+      const alt = ust.get(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.bottom / T));
+      const d = alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3 ? (alt.gommeD || 0) + CONFIG.ustUsteGomme : this.zeminGomme;
+      if (s.gommeD === d) return;
+      s.gommeD = d;
+      s.setDepth(2 + d / 1000);
+      this.kutuGovdesi(s);
+    });
   },
 
   tasUyut(s) {

@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.68 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.69 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -53,8 +53,10 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 
 ## Görseller
 - **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+) — 1. bölüm; `a` açık gri taş, `k` koyu taş, `m` mor kristal (biraz karartılmış) — 2. bölüm. Yeni bölgelerde arka plan karoları dolgunun en fazla %60'ı parlaklıkta (`ARKA_ORAN`). Bölümün `bolgeler: [[satır, önek], …]` alanı hangi satırdan itibaren hangi bölgenin döşeneceğini söyler. Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
-- **Şelale** `[x, w, y0, y1, önde]`: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. `önde=1`: oyuncunun ve zeminin önünde çizilir — ardındaki gizli zemin ve içine giren oyuncu görünmez. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
+- **Şelale** `[x, w, y0, y1, önde]`: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. `önde=1`: oyuncunun ve zeminin önünde çizilir — ardındaki gizli zemin ve içine giren oyuncu görünmez; taşa taşmaz (tavanın altından çıkar, alttaki zeminin hizasında kesilir). Yan yana şelaleler farklı evrede akar. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
 - **Sarmaşık / zincir**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`. Bölümde `tirmanma: 'zincir'` varsa zincir çizilir (`nesne/zincir.png`). Zeminde dururken ↑ ile tutunulur.
+- **Zemine oturma**: oyuncu, sandık ve taşlar zemin çizgisinin `zeminGomme` px altına çizilir (bölüm alanı; 1. bölüm 2, 2. bölüm 6) — çim / taş kenarını örter. Üst üste taş / kasa: üstteki, alttakinin üst kenarına `CONFIG.ustUsteGomme` (4 px) gömülür ve önünde çizilir (`gommeGuncelle`). Gövdeler yerinde kalır, sadece görsel kayar.
+- **Elmas yerleşimi**: elmas / özel ödül zemine, taşa ya da sandığa değiyorsa açılışta en yakın boş yere (sola / sağa, sonra yukarı) kayar (`bosYer`).
 - **Sahte duvar** `sahte: [x, y, w, h]`: taş gibi döşenir ama çarpışması yok; karoları oyuncunun önünde ayrı katmanda, oyuncu içine girince %25'e saydamlaşır (gizli oda).
 - **Oyuncu**: `oyuncu.png` (176×141 hücre) + `oyuncu2.png` (240×220: asılma, itme, duruma göre darbe kareleri, ölüm). Kare numaraları `BootSahnesi.oyuncuAnimasyonlari`.
 - **Düşmanlar** `assets/dusman/<tip>.png` şerit, animasyon kareleri ve görünür boy `ASSETLER.dusman`; tümü `CONFIG.dusmanOlcek` (0.9).

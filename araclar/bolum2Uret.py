@@ -63,7 +63,7 @@ BASLA = (24, A2)
 bos(8, 20, 15, 59)
 bos(2, 30, 7, 39)
 tas(2, A2, 12, A2)                                     # zeminin ucu da şelalenin içinde kalır (kenarda duran görünmez)
-selale(8, 6, 20, A3, onde=1)
+for c in (8, 10, 12): selale(c, 2, 20, A3, onde=1)          # yan yana 3 şelale
 sahte(2, 30, 7, 39)
 gizli(5, A2 - 1)
 sandik(3, A2, 'yasam'); ozel('buyuk', 6, A2); elmasSira(4, 7, A2, 1, 2.2)
@@ -401,7 +401,7 @@ s += 'const LEVEL2 = {\n'
 s += "  ad: '2. Bölüm - Mor Derinlikler',\n"
 s += f'  genislik: {W * T},\n  yukseklik: {H * T},\n  karo: {T},\n'
 s += f'  baslangic: [{BASLA[0] * T + 16},{BASLA[1] * T}],\n  cikis: [{CIKIS[0] * T + 16},{CIKIS[1] * T}],\n'
-s += "  tirmanma: 'zincir',\n"
+s += "  tirmanma: 'zincir',\n  zeminGomme: 6,\n"
 s += "  bolgeler: [[0,'a'],[66,'k'],[132,'m']],\n"
 s += "  alfabe: '" + alf + "',\n"
 B = bloklar()

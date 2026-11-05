@@ -7,6 +7,7 @@ const LEVEL2 = {
   baslangic: [784,1280],
   cikis: [7472,5504],
   tirmanma: 'zincir',
+  zeminGomme: 6,
   bolgeler: [[0,'a'],[66,'k'],[132,'m']],
   alfabe: '!"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
   bloklar: [
@@ -971,7 +972,9 @@ const LEVEL2 = {
   ],
   // [x, w, y0, y1, önde] önde=1: oyuncunun önünde (arkası görünmez)
   selaleler: [
-    [256,192,640,1920,1],
+    [256,64,640,1920,1],
+    [320,64,640,1920,1],
+    [384,64,640,1920,1],
     [5952,96,768,1312,0],
     [3776,96,2880,3392,0],
     [5120,128,4992,5568,0],
