@@ -490,7 +490,11 @@ Object.assign(OyunSahnesi.prototype, {
     else if (this.inisZaman > 0) a = 'in';
     else if (this.itiyor) { a = 'it'; durdur = Math.abs(b.velocity.x) <= 10; }
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
-    else a = 'dur';
+    else {   // ayakta bekleme; 5 sn'den uzun beklerse sabırsızca ayak vurur
+      this.durSure = (this.durSure || 0) + this.game.loop.delta / 1000;
+      a = this.durSure > 5 ? 'ayakVur' : 'dur';
+    }
+    if (a !== 'dur' && a !== 'ayakVur') this.durSure = 0;
     if (!p.anims.currentAnim || p.anims.currentAnim.key !== a) p.play(a);
     this.adimSesi(a, durdur);
     this.gorselOlcek(CONFIG.oyuncu.animOlcek[a] || 1);
