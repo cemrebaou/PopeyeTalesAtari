@@ -147,11 +147,10 @@ tk = gifKare('oyuncu_takla.gif')   # 3–11 havada dönüş
 print('takla', ekle([tk[0]] + tk[3:12], [101] + list(range(102, 111)), True, ortadan=True))
 bosalt(101)
 for i in range(10, 15): bosalt(i)
-# v0.80: iki baston vuruşu (oyuncu_vur1.gif, oyuncu_vur2.gif) sırayla; bekleme kareleri (ilk 3 ve sonuncu) alınmaz.
+# v0.83: baston vuruşu (oyuncu_vur.gif, tek çeşit): 0 (bekleme) ve 7 (dönüş) alınmaz, 1–6 kullanılır.
 # Ölçek: ilk karedeki (ayakta) boy = duruş boyu; hiza: ilk karenin şapka ortası, ayaklar ayak çizgisinde.
-for n, ad in enumerate(['oyuncu_vur1.gif', 'oyuncu_vur2.gif']):
-    v = gif(ad); y0, y1, _, _ = kutu(v[0]); o = durBoy / (y1 - y0 + 1); hx = sapka(v[0])
-    for k, a in enumerate(v[3:7]): koy(111 + n * 4 + k, a, o, hx, kutu(a)[1])
+v = gif('oyuncu_vur.gif'); y0, y1, _, _ = kutu(v[0]); o = durBoy / (y1 - y0 + 1); hx = sapka(v[0])
+for k, a in enumerate(v[1:7]): koy(111 + k, a, o, hx, kutu(a)[1])
 for i in range(24, 29): bosalt(i)
 # v0.81: kanca uzatma + çekme (oyuncu_cek.gif): 1–3 uzat, 4–11 geri çek; 0 (bekleme) alınmaz. Ölçek/hiza vuruşla aynı.
 v = gif('oyuncu_cek.gif'); y0, y1, _, _ = kutu(v[0]); o = durBoy / (y1 - y0 + 1); hx = sapka(v[0])
@@ -162,7 +161,7 @@ y0, y1, _, _ = kutu(v[0]); o = egBoy / (y1 - y0 + 1); hx = sapka(v[0])
 for k, a in enumerate(v): koy(130 + k, a, o, hx, kutu(a)[1])
 # Sıkıştır: sadece kullanılan kareler, animasyon sırasıyla 8 sütunlu sayfaya; kare listesi ASSETLER.oyuncu'ya
 ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [95, 96, 97], 'dus': [98], 'in': [100], 'takla': range(102, 111),
-        'sersem': [15, 16, 17], 'vur': range(111, 115), 'vur2': range(115, 119), 'tirman': range(66, 74), 'uzat': range(119, 122), 'cek': range(122, 130),
+        'sersem': [15, 16, 17], 'vur': range(111, 117), 'tirman': range(66, 74), 'uzat': range(119, 122), 'cek': range(122, 130),
         'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egilDur': [130], 'egil': range(131, 138)}
 S2 = 8; sira = [i for v in ANIM.values() for i in v]; yeniNo = {}
 sayfa = np.zeros((H * (-(-len(sira) // S2)), W * S2, 4), np.uint8)

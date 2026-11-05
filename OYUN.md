@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.82 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.83 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -136,4 +136,4 @@ Birden çok çeşidi olan sesler (para1–5, zipla1–3, adim1–3, boss1–13 �
 - Sol alttaki sürüm / bölüm yazısı
 
 ## Oyuncu
-Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat çözünürlükte (oyun hep küçültür, büyütmez → net); `oyuncu2.png` 6 sütun, hücre 480×440. Eski kaynağı olmayan kareler (zıplama, düşme, iniş, sersem, vuruş, kanca uzatma, çekme) sadece 2 kat büyütüldü, yeni görsel gelince değiştirilecek. (v0.76'da %10 büyütüldü; çarpışma gövdesi aynı). Zıplama / düşme / iniş `oyuncu_zipla.gif`, çift zıplama taklası `oyuncu_takla.gif` (v0.79). Baston vuruşu iki çeşit, sırayla: `oyuncu_vur1.gif` / `oyuncu_vur2.gif` (bekleme kareleri hariç 4'er kare, v0.80). Kanca uzatma (3) + çekme (8) `oyuncu_cek.gif` (v0.81). Eğik: durunca `egilDur` (GIF 1. kare), yürürken 2.–8. kareler döngü `oyuncu_egil.gif` (v0.82). Ayakta 5 sn'den uzun beklerse sabırsızca ayak vurur (`ayakVur`).
+Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat çözünürlükte (oyun hep küçültür, büyütmez → net); `oyuncu2.png` 6 sütun, hücre 480×440. Eski kaynağı olmayan kareler (zıplama, düşme, iniş, sersem, vuruş, kanca uzatma, çekme) sadece 2 kat büyütüldü, yeni görsel gelince değiştirilecek. (v0.76'da %10 büyütüldü; çarpışma gövdesi aynı). Zıplama / düşme / iniş `oyuncu_zipla.gif`, çift zıplama taklası `oyuncu_takla.gif` (v0.79). Baston vuruşu `oyuncu_vur.gif` (bekleme ve dönüş kareleri hariç 6 kare, v0.83). Kanca uzatma (3) + çekme (8) `oyuncu_cek.gif` (v0.81). Eğik: durunca `egilDur` (GIF 1. kare), yürürken 2.–8. kareler döngü `oyuncu_egil.gif` (v0.82). Ayakta 5 sn'den uzun beklerse sabırsızca ayak vurur (`ayakVur`).
