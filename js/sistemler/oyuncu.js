@@ -151,6 +151,14 @@ Object.assign(OyunSahnesi.prototype, {
       this.ziplaTampon = 0; this.coyote = 0; this.ziplarken = true; this.egilKilit = false;
       this.zipSes();
     }
+    // Çift zıplama: havadayken (ilk zıplamadan ya da düşerken) bir kez daha zıpla → takla atar
+    else if (!cekiyor && !yerde && k.ziplaBas && !this.ciftZipladi && this.coyote <= 0 && this.knock <= 0 && !this.pogoModu) {
+      b.setVelocityY(F.ziplama * 0.85);
+      this.ciftZipladi = true; this.taklaZaman = 0.55; this.ziplarken = true; this.ziplaTampon = 0;
+      this.zipSes();
+    }
+    if (yerde || this.tirmaniyor || this.asili) { this.ciftZipladi = false; this.taklaZaman = 0; }
+    if (this.taklaZaman > 0) this.taklaZaman -= dt;
     if (this.ziplarken && !k.zipla && b.velocity.y < -200) { b.setVelocityY(b.velocity.y * 0.5); this.ziplarken = false; }
     if (yerde && b.velocity.y >= 0) this.ziplarken = false;
 
@@ -485,6 +493,7 @@ Object.assign(OyunSahnesi.prototype, {
     else if (this.cekDurum === 'cek') { a = 'cek'; durdur = b.velocity.x === 0; }
     else if (this.saldiriZaman > 0) a = 'vur';
     else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
+    else if (!yerde && this.taklaZaman > 0) a = 'takla';
     else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
     else if (this.egik) { a = 'egil'; durdur = Math.abs(b.velocity.x) <= 10; }
     else if (this.inisZaman > 0) a = 'in';

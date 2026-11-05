@@ -63,6 +63,7 @@ class BootSahnesi extends Phaser.Scene {
       ['kos',      OA.kos,      13, -1],
       ['zipla',    OA.zipla,    14, 0],   // çömel → kalk → tepe
       ['dus',      OA.dus,      1,  0],
+      ['takla',    OA.takla,    17, 0],   // çift zıplamada havada dönüş
       ['in',       OA.in,       1,  0],   // yere iniş (toz)
       ['sersem',   OA.sersem,   10, -1],  // yerde ayaktayken hasar
       ['vur',      OA.vur,      22, 0],   // baston vuruşu

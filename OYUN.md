@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.78 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.79 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -33,7 +33,7 @@ Oyun `file://` ile değil bir web adresinden açılmalı (GitHub Pages, raw.gith
 |---|---|---|
 | ← → (A/D) | sol: ◀ ▶ | yürü |
 | ↓ (S) basılı | sol: ▼ (aç/kapa, basılı görünür) | eğil; 1 karelik aralıklardan sadece eğilerek geçilir. İleri basarken önünde 1 karelik geçit varsa otomatik eğilir. Zıplayınca kapanır. Sarmaşıkta ▼ basılı = aşağı in |
-| SPACE / Z (↑ de) | sağ: ZIPLA | zıpla (basılı tut = yüksek); sarmaşıktan atla |
+| SPACE / Z (↑ de) | sağ: ZIPLA | zıpla (basılı tut = yüksek); havada bir kez daha = çift zıplama (takla, ilk zıplamanın %85'i); sarmaşıktan atla |
 | ↑ (W) | sağ: ▲ (ZIPLA'nın üstü) | sarmaşığa tırman |
 | X / K / J | sağ: VUR | ilk basış her zaman baston vuruşu · basılı kalırsa vuruş bitince öndeki sandık/taşa kanca, geri yürüyerek çek · havada 0.15 sn basılı = pogo (bırakana kadar seker) |
 | C / L basılı | — | doğrudan çek |
@@ -136,4 +136,4 @@ Birden çok çeşidi olan sesler (para1–5, zipla1–3, adim1–3, boss1–13 �
 - Sol alttaki sürüm / bölüm yazısı
 
 ## Oyuncu
-Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat çözünürlükte (oyun hep küçültür, büyütmez → net); `oyuncu2.png` 6 sütun, hücre 480×440. Eski kaynağı olmayan kareler (zıplama, düşme, iniş, sersem, vuruş, kanca uzatma, çekme) sadece 2 kat büyütüldü, yeni görsel gelince değiştirilecek. (v0.76'da %10 büyütüldü; çarpışma gövdesi aynı). Ayakta 5 sn'den uzun beklerse sabırsızca ayak vurur (`ayakVur`).
+Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat çözünürlükte (oyun hep küçültür, büyütmez → net); `oyuncu2.png` 6 sütun, hücre 480×440. Eski kaynağı olmayan kareler (zıplama, düşme, iniş, sersem, vuruş, kanca uzatma, çekme) sadece 2 kat büyütüldü, yeni görsel gelince değiştirilecek. (v0.76'da %10 büyütüldü; çarpışma gövdesi aynı). Zıplama / düşme / iniş `oyuncu_zipla.gif`, çift zıplama taklası `oyuncu_takla.gif` (v0.79). Ayakta 5 sn'den uzun beklerse sabırsızca ayak vurur (`ayakVur`).

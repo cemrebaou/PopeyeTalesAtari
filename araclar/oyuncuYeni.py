@@ -17,7 +17,7 @@ exec(temizle_kod.replace("KOK + '/assets/kaynak/' + ad", "KOK + '/assets/kaynak/
 
 _t = Image.open(KOK + '/assets/kaynak/oyuncu_taban.png').convert('RGBA')
 taban = np.array(_t.resize((_t.width * K, _t.height * K), Image.LANCZOS))   # eski kareler (kaynağı yok) 2 kat
-out = np.zeros((H * 10, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
+out = np.zeros((H * 12, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
 def hucre(i): return (i // SUT) * H, (i % SUT) * W
 def eski(i):
     y, x = hucre(i); return taban[y:y + H, x:x + W]
@@ -118,8 +118,37 @@ print('ayakVur', anim(ayak, [0, 1, 2, 3], range(74, 74 + len(ayak)), True), len(
 kos = gif('oyuncu_kos.gif')
 print('kos', anim(kos, [4, 5, 6, 7, 8, 9], range(82, 82 + len(kos)), True), len(kos))
 for i in range(4, 10): bosalt(i)
+# v0.79: zıplama (oyuncu_zipla.gif: dur, çömel, kalk, tepe, düş, iniş …) ve çift zıplama taklası (oyuncu_takla.gif).
+# Her kare ayrı kırpılır; ölçek ilk (ayakta) karenin boyu = duruş boyu. Yerdekiler ayak çizgisine, havadakiler
+# ayakta gövde ortasına hizalanır (yükseklik oyunda fizikle verilir, karedeki iniş-çıkış atılır).
+def gifKare(ad):
+    im = Image.open(KOK + '/assets/kaynak/' + ad); fr = []
+    for f in ImageSequence.Iterator(im):
+        a = lekesiz(np.array(f.convert('RGBA')))
+        y0, y1, x0, x1 = kutu(a); fr.append(a[y0:y1 + 1, x0:x1 + 1])
+    return fr
+durBoy = max(kutu(eski(i))[1] - kutu(eski(i))[0] + 1 for i in [0, 1, 2, 3])
+HEDEF_X = np.mean([sapka(eski(i)) for i in [0, 1, 2, 3]])
+def ekle(kareler, hedefler, havada, ortadan=False):
+    o = durBoy / kareler[0].shape[0]
+    for i, k in zip(hedefler, kareler):
+        a = k['a'] if isinstance(k, dict) else k
+        hx = a.shape[1] / 2 if ortadan else sapka(a)
+        if havada: alt = a.shape[0] / 2 + kareler[0].shape[0] / 2 - 1   # merkez → ayakta gövde ortası
+        else: alt = a.shape[0] - 1
+        koy(i, a, o, hx, alt)
+    return o
+zp = gifKare('oyuncu_zipla.gif')   # 0 dur 1 çömel 2 kalk 3 tepe 4 tepe 5 düş 6 iniş 7 dur
+ekle([zp[0], zp[1]], [94, 95], False)                 # 95: çömel (kalkış)
+ekle([zp[0], zp[2], zp[3], zp[4]], [99, 96, 97, 98], True)
+ekle([zp[0], zp[6]], [99, 100], False)                # 100: iniş
+bosalt(99)
+tk = gifKare('oyuncu_takla.gif')   # 3–11 havada dönüş
+print('takla', ekle([tk[0]] + tk[3:12], [101] + list(range(102, 111)), True, ortadan=True))
+bosalt(101)
+for i in range(10, 15): bosalt(i)
 # Sıkıştır: sadece kullanılan kareler, animasyon sırasıyla 8 sütunlu sayfaya; kare listesi ASSETLER.oyuncu'ya
-ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [10, 11, 12], 'dus': [13], 'in': [14],
+ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [95, 96, 97], 'dus': [98], 'in': [100], 'takla': range(102, 111),
         'sersem': [15, 16, 17], 'vur': range(24, 29), 'tirman': range(66, 74), 'uzat': [41, 42, 43], 'cek': range(44, 49),
         'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egil': range(53, 58)}
 S2 = 8; sira = [i for v in ANIM.values() for i in v]; yeniNo = {}

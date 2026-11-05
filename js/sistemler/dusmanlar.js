@@ -23,7 +23,7 @@ const DUSMAN_TIP = {
   yarasa:     [26, 20, 2, 0, true]      // uçar, oyuncunun yanına gelip ses dalgası atar
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
-const DUSMAN_GOMME = { kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 5, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
+const DUSMAN_GOMME = { yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 5, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
 
 Object.assign(OyunSahnesi.prototype, {
 
