@@ -21,7 +21,16 @@ def temizle(dosya):
     im[dis] = 0
     im = im.astype(np.uint8)
     return im, im[:, :, 3] > 60
-KAYNAK = {'1': temizle('dusman_seti.png'), '2': temizle('dusman_seti2.png')}   # v0.52: 2 = maymun, köpek, patron yeni görseller
+KAYNAK = {'1': temizle('dusman_seti.png'), '2': temizle('dusman_seti2.png'),   # v0.52: 2 = maymun, köpek, patron yeni görseller
+          '3': temizle('dusman_seti3.png')}                                        # v0.70: 2. bölüm: kedi, domuz, kertenkele
+# Kertenkelenin üfleme okunu (8. kare, borunun ucunda) ayrı mermi olarak kes, kareden sil
+_im3, _A3 = KAYNAK['3']
+OK_KUTU = (725, 768, 1296, 1350)   # y0, y1, x0, x1
+_ok = _im3[OK_KUTU[0]:OK_KUTU[1], OK_KUTU[2]:OK_KUTU[3]].copy()
+_ys, _xs = np.where(_ok[:, :, 3] > 30)
+_ok = _ok[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
+_im3[OK_KUTU[0]:OK_KUTU[1], OK_KUTU[2]:OK_KUTU[3]] = 0
+_A3[OK_KUTU[0]:OK_KUTU[1], OK_KUTU[2]:OK_KUTU[3]] = False
 im, A = KAYNAK['1']
 
 def parcalar(y0, y1, bol=()):
@@ -60,6 +69,10 @@ DUS = {
   'maymun':   (192, 301, 15, (), {'yuru': [0,1,2,3,4,5], 'dur': [0], 'at': [6,7,8,9,10], 'ol': [11,12,13]}, 14, 38, '2'),
   'kopek':    (416, 529, 13, (2,), {'yuru': [0,1,2,3,4,5], 'at': [6,7,8,9], 'ol': [10,11]}, 12, 40, '2'),
   'boss':     (631, 812, 10, {4: 3}, {'yuru': [0,1,2,3], 'saldir': [4,5,6,7], 'ol': [8,9]}, None, 84, '2'),
+  # v0.70: kaynak 3 (dusman_seti3.png) — ölüm karesi yok, oyunda devrilip söner
+  'kedi':       (170, 324, 10, {6: 4}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [6]}, None, 46, '3'),
+  'domuz':      (366, 579, 10, {5: 2}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [7]}, None, 58, '3'),
+  'kertenkele': (682, 844, 10, {5: 3}, {'yuru': [0,1,2,3,4,5], 'at': [6,7,8], 'dur': [9], 'ol': [8]}, None, 40, '3'),
 }
 # Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
 EK = {}   # v0.27'deki maymun yürüme eki v0.52'de yeni sayfaya geçti
@@ -84,7 +97,13 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
     serit = Image.new('RGBA', (W * len(kareler), H), (0, 0, 0, 0))
     for k, i in enumerate(kareler):
         x0, x1 = seg[i]
-        parca = Image.fromarray(im[y0:y1, x0:x1])
+        pa = im[y0:y1, x0:x1].copy()
+        if kay and kay[0] == '3':   # v0.70: komşu kareden kalan küçük kırpıntılar (kenara değen) silinir
+            lab, nl = ndimage.label(pa[:, :, 3] > 30)
+            for li in range(1, nl + 1):
+                m = lab == li; xs = np.where(m.any(0))[0]
+                if m.sum() < 1500 and (xs[0] <= 1 or xs[-1] >= pa.shape[1] - 2): pa[m] = 0
+        parca = Image.fromarray(pa)
         serit.paste(parca, (k * W + (W - (x1 - x0)) // 2, 0))
     yeniNo = {i: k for k, i in enumerate(kareler)}
     ekNo = []
@@ -108,6 +127,9 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
             serit.paste(f, (no * W + (W - f.width) // 2, alt - f.height), f)
             ekNo.append(no)
     serit.save(KOK + '/assets/dusman/' + ad + '.png', optimize=True)
+    if ad == 'kertenkele':
+        Image.fromarray(_ok).save(KOK + '/assets/dusman/ok.png', optimize=True)
+        meta['ok'] = {'w': int(_ok.shape[1]), 'h': int(_ok.shape[0]), 'gen': 24}
     meta[ad] = {'w': W, 'h': H, 'ayak': int(alt), 'ust': int(ust), 'boy': boy,
                 'anim': {k: [yeniNo[i] for i in v] for k, v in an.items()}}
     if ekNo: meta[ad]['anim'][EK[ad][1]] = ekNo

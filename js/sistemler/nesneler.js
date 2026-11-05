@@ -196,7 +196,9 @@ Object.assign(OyunSahnesi.prototype, {
     liste.forEach(s => ust.set(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.top / T), s));
     liste.sort((a, b) => b.body.bottom - a.body.bottom).forEach(s => {
       const alt = ust.get(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.bottom / T));
-      const d = alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3 ? (alt.gommeD || 0) + CONFIG.ustUsteGomme : this.zeminGomme;
+      const taban = alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3 ? (alt.gommeTaban || 0) + CONFIG.ustUsteGomme : this.zeminGomme;
+      s.gommeTaban = taban;
+      const d = taban - (s.kirTas && s.tur !== 'kasa' ? CONFIG.tasYukari : 0);   // taşlar kasalardan biraz yukarıda durur
       if (s.gommeD === d) return;
       s.gommeD = d;
       s.setDepth(2 + d / 1000);

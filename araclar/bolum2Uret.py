@@ -114,7 +114,7 @@ elmasSira(185, 190, A2 + 2, 2)
 # Bastonla asılma bacası → A1–A2 arasındaki gizli oyuk (yakut)
 asilmaBacasi(196, A2, 24, 19)
 bos(193, 19, 198, 21)
-ozel('kizil', 194, 22); elmasSira(195, 198, 22, 1, 0.6); gizli(195, 21)
+sandik(193, 22, 'yasam'); ozel('buyuk', 195, 22); ozel('kizil', 197, 22, 0.6); gizli(195, 21)
 ipucu(203, 31, 'Zıpla, duvara doğru bas:\nbastonla asılırsın.\nDuvardan duvara zıpla!')
 bayrak(205, A2)
 kasa(209, A2); kasa(210, A2)
@@ -189,7 +189,7 @@ kasa(126, K2); kasa(127, K2); kasa(127, K2, ust=1)
 # Bastonla asılma bacası → K1–K2 arasındaki gizli oyuk (mavi elmas)
 asilmaBacasi(134, K2, 90, 85)
 bos(131, 85, 136, 87)
-ozel('buyuk', 132, 88); elmas(133, 88); gizli(132, 87)
+sandik(131, 88, 'kalp'); ozel('buyuk', 133, 88); gizli(132, 87)
 # Kontrol noktası, alçak tünel (eğilerek geçilir), kasalar
 bayrak(95, K2)
 tas(68, 90, 85, 104); elmasSira(68, 85, K2, 2)
@@ -210,7 +210,7 @@ tas(129, 70, 131, 80); kapiTas(130, K1, 3)
 sandik(124, K1, 'buyuk'); elmasSira(121, 127, K1, 3, 1)
 # Sahte duvarlı gizli oda (K1 sol uçtaki "duvar")
 bos(110, 74, 119, 83); sahte(110, 74, 119, 83)
-sandik(112, K1, 'yasam'); elmasSira(114, 118, K1, 2, 1.5); gizli(114, K1 - 1)
+sandik(112, K1, 'yasam'); ozel('buyuk', 117, K1); elmasSira(114, 118, K1, 2, 1.5); gizli(114, K1 - 1)
 # --- K1 sol yan yol (30–98): 93 zinciriyle
 bos(30, 70, 98, 83)
 delik(93, K1, 89); zincir(93, 72, K2)
@@ -260,7 +260,7 @@ kir(118, M2)
 tas(128, 167, 135, 167); sandik(133, 167, 'kizil'); elmasSira(129, 131, 167, 1)
 asilmaBacasi(142, M2, 156, 151)
 bos(139, 151, 144, 153)
-ozel('buyuk', 140, 154); elmas(141, 154); gizli(140, 153)
+sandik(139, 154, 'kalp'); ozel('buyuk', 141, 154); gizli(140, 153)
 elmasSira(112, 126, M2, 2)
 # Arka şelale, havuz, yüzen platformlar
 selale(160, 4, 156, M2 + 2)
@@ -287,7 +287,7 @@ elmasSira(84, 100, M1, 2); elmasSira(108, 122, M1, 2)
 tas(125, 136, 127, 146); kapiTas(126, M1, 3)
 sandik(134, M1, 'buyuk'); elmasSira(129, 139, M1, 2)
 bos(141, 140, 150, 149); sahte(141, 140, 150, 149)      # sahte duvarlı gizli oda (M1 sağ uç)
-sandik(148, M1, 'yasam'); ozel('kizil', 145, M1); elmasSira(142, 146, M1, 2, 1.5); gizli(145, M1 - 1)
+sandik(148, M1, 'yasam'); ozel('kizil', 145, M1); ozel('buyuk', 143, M1); elmasSira(142, 146, M1, 2, 1.5); gizli(145, M1 - 1)
 # --- M3 alt yan yol (150–236): 196 ve 216 zincirleriyle
 bos(150, 178, 236, 191)
 elmasSira(152, 194, M3, 3); elmasSira(199, 234, M3, 3)
@@ -373,6 +373,55 @@ tas(214, 136, 216, 146); kapiTas(215, M1, 3)
 sandik(233, M1, 'buyuk'); elmasSira(218, 231, M1, 3, 1)
 elmasSira(160, 178, M1, 4); elmasSira(183, 198, M1, 3)
 
+# ======================================================================= düşmanlar (v0.70)
+# Zemin parçalarına (en az 7 karo, üstü 2 karo boş, diken / delik / taş yok) dağıtılır; başlangıç, kontrol noktası,
+# zincir dibi, çıkış, gizli odalar ve iniş mağaraları boş kalır. Kat başına ağırlıklı tür: A kedi, K domuz, M kertenkele.
+import random
+random.seed(7)
+DUS = []
+dikenH = set()
+for x, y, w in DIK:
+    for c in range(x // T - 1, (x + w) // T + 1): dikenH.add((y // T, c))
+tasH = set((y // T, x // T) for x, y, *_ in TAS)
+def yasak(c, rf):
+    x, y = c * T + 16, rf * T
+    if abs(c - BASLA[0]) < 12 and abs(rf - BASLA[1]) < 4: return True
+    if abs(c - CIKIS[0]) < 8 and abs(rf - CIKIS[1]) < 4: return True
+    if any(abs(x - kx) < 7 * T and abs(y - ky) < 4 * T for kx, ky in KON): return True
+    if any(abs(x - zx) < 3 * T and zy - 2 * T <= y <= zy + zh + 2 * T for zx, zy, zh in ZIN): return True
+    if any(sx - 2 * T <= x <= sx + sw + 2 * T and sy <= y <= sy + sh + T for sx, sy, sw, sh in SAH): return True
+    if any(abs(x - gx) < 8 * T and abs(y - gy) < 4 * T for gx, gy in GIZ): return True
+    if 214 <= c <= 237 and 24 <= rf <= 106: return True          # büyük iniş mağarası
+    if 4 <= c <= 25 and 90 <= rf <= 172: return True             # sol iniş mağarası
+    if c <= 15 and rf <= 60: return True                         # şelale gizemi
+    return False
+parcalar_ = []
+for rf in range(3, H):
+    c = 0
+    while c < W:
+        ok = lambda c: g[rf][c] and not g[rf - 1][c] and not g[rf - 2][c] and (rf, c) not in dikenH \
+            and (rf - 1, c) not in tasH and not yasak(c, rf)
+        if ok(c):
+            s0 = c
+            while c < W and ok(c): c += 1
+            if c - s0 >= 7: parcalar_.append((rf, s0, c - 1))
+        else: c += 1
+AGIRLIK = {'a': [('kedi', 6), ('kertenkele', 3), ('domuz', 1)],
+           'k': [('domuz', 5), ('kedi', 3), ('kertenkele', 2)],
+           'm': [('kertenkele', 5), ('kedi', 3), ('domuz', 2)]}
+random.shuffle(parcalar_)
+secilen = []
+for rf, c0, c1 in sorted(parcalar_, key=lambda p: -(p[2] - p[1])):
+    cx = (c0 + c1) // 2
+    if any(abs(cx - sx) < 20 and abs(rf - sr) < 6 for sr, sx in secilen): continue
+    secilen.append((rf, cx))
+    bol = 'a' if rf < 66 else 'k' if rf < 132 else 'm'
+    turler = [t for t, a in AGIRLIK[bol] for _ in range(a)]
+    tip = random.choice(turler)
+    if tip == 'domuz' and c1 - c0 < 9: tip = 'kedi' if bol == 'a' else 'kertenkele'
+    DUS.append({'tip': tip, 'x': cx * T + 16, 'y': rf * T})
+DUS.sort(key=lambda d: (d['y'], d['x']))
+
 # ======================================================================= çıktı
 def bloklar():
     # yatay şeritler; aynı şerit alt satırda da varsa dikey birleşir
@@ -409,7 +458,7 @@ s += satir('bloklar', B)
 s += satir('dikenler', DIK) + satir('sarmasiklar', ZIN) + satir('sandiklar', SAN) + satir('elmaslar', E)
 s += satir('ozeller', OZ) + '  kayalar: [\n\n  ],\n'
 s += '  // [x, y (sol üst), tür, sabit, geçit]\n' + satir('kirTaslar', TAS)
-s += satir('kontrol', KON) + satir('ipuclari', IPU) + '  dusmanlar: [\n\n  ],\n'
+s += satir('kontrol', KON) + satir('ipuclari', IPU) + satir('dusmanlar', DUS)
 s += satir('gizliler', GIZ)
 s += '  // [x, y, w, h] sahte duvar: taş görünür, çarpışmasız gizli oda\n' + satir('sahte', SAH)
 s += '  // [x, w, y0, y1, önde] önde=1: oyuncunun önünde (arkası görünmez)\n' + satir('selaleler', SEL)
@@ -418,4 +467,5 @@ open(KOK + '/js/veri/level2.js', 'w', encoding='utf8').write(s)
 # kaba önizleme (scratch): her karakter 1 karo
 open('/tmp/claude-0/-home-claude/85164cd8-761e-5dc1-8ca5-a447e90ed51c/scratchpad/l2.txt', 'w').write(
     '\n'.join(''.join('#' if v else '.' for v in row) for row in g))
+print('düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('kedi', 'domuz', 'kertenkele')})
 print('blok', len(B), 'elmas', len(E), 'özel', len(OZ), 'sandık', len(SAN), 'taş', len(TAS), 'zincir', len(ZIN))

@@ -1,6 +1,7 @@
 // Düşmanlar: yaratma, devriye, ateş edenler (maymun, mızraklı köpek), uçanlar (arı, örümcek), patron, mermiler, hasar ve ölüm.
-const YURUYEN = ['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek'];
-const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan' };
+const YURUYEN = ['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek', 'kedi', 'domuz', 'kertenkele'];
+const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan',
+  kedi: 'olKopek', domuz: 'olBoss', kertenkele: 'olYilan' };
 // tip: [gövde g, gövde y, can, hız, uçan]
 const DUSMAN_TIP = {
   boss:     [56, 60, CONFIG.patron.can, 0, false],
@@ -10,7 +11,11 @@ const DUSMAN_TIP = {
   maymun:   [24, 28, 1, 40, false],
   kopek:    [26, 30, 2, 40, false],
   ari:      [20, 20, 1, 0, true],
-  orumcek:  [22, 22, 1, 0, true]
+  orumcek:  [22, 22, 1, 0, true],
+  // 2. bölüm
+  kedi:       [24, 38, 3, 70, false],   // yakına gelince bıçakla atılır
+  domuz:      [34, 46, 5, 35, false],   // yakına gelince gürzle vurur
+  kertenkele: [22, 28, 2, 45, false]    // üfleme okuyla atar
 };
 
 Object.assign(OyunSahnesi.prototype, {
@@ -33,7 +38,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (e.tip === 'boss') {
       Object.assign(d, { aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1 });
       d.setFlipX(true);
-    } else if (e.tip === 'maymun' || e.tip === 'kopek') {
+    } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele') {
       d.atesBekle = 1 + Math.random(); d.hazir = 0;
     } else if (e.tip === 'ari') {
       Object.assign(d, { baslangicX: e.x, baslangicY: e.y, faz: Math.random() * 6, kovala: false });
@@ -88,7 +93,8 @@ Object.assign(OyunSahnesi.prototype, {
       switch (d.tip) {
         case 'gul': case 'yilan': this.devriye(d, dt); break;
         case 'yuvarlak': this.kirpiGuncelle(d, dt); break;
-        case 'maymun': case 'kopek': this.atesEden(d, dt); break;
+        case 'maymun': case 'kopek': case 'kertenkele': this.atesEden(d, dt); break;
+        case 'kedi': case 'domuz': this.yakinSaldiri(d, dt); break;
         case 'ari': this.ariGuncelle(d, time); break;
         case 'orumcek': this.orumcekGuncelle(d, time); break;
         case 'boss': this.bossGuncelle(d, dt); break;
@@ -149,6 +155,37 @@ Object.assign(OyunSahnesi.prototype, {
     }
   },
 
+  // Kedi / domuz: oyuncu aynı zeminde yakına gelince döner ve saldırır. Kedi bıçakla ileri atılır, domuz gürzü indirir;
+  // vuruş anında önündeki menzildeyse oyuncu hasar alır. Sonra kısa dinlenme.
+  yakinSaldiri(d, dt) {
+    const p = this.player, b = d.body, dx = p.x - d.x, kedi = d.tip === 'kedi';
+    if (d.saldiri > 0) {
+      d.saldiri -= dt;
+      b.setVelocityX(kedi && d.saldiri > 0.12 && d.saldiri < 0.36 ? d.yon * 240 : 0);
+      if (!d.vurdu && d.saldiri < (kedi ? 0.25 : 0.22)) {
+        d.vurdu = true;
+        const on = (p.x - d.x) * d.yon;
+        if (!this.durum.olu && on > -10 && on < (kedi ? 52 : 70) && Math.abs(p.body.bottom - b.bottom) < 40) this.oyuncuHasar(d.x);
+        if (!kedi) this.cameras.main.shake(90, 0.004);
+      }
+      if (d.saldiri <= 0) { d.dinlen = kedi ? 1 : 1.5; this.dusmanAnim(d, 'dur'); }
+      return;
+    }
+    if (d.dinlen > 0) { d.dinlen -= dt; b.setVelocityX(0); return; }
+    const ayni = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && p.x >= d.minX - 24 && p.x <= d.maxX + 24;
+    if (ayni && Math.abs(dx) < (kedi ? 120 : 80)) {
+      d.yon = Math.sign(dx) || 1;
+      d.setFlipX(d.yon < 0);
+      d.saldiri = kedi ? 0.48 : 0.6;
+      d.vurdu = false;
+      d.play('d_' + d.ad + '_saldir');
+      this.ses(kedi ? 'bastonSalla' : 'bastonVur');
+      return;
+    }
+    this.devriye(d, dt);
+    this.dusmanAnim(d, 'yuru');
+  },
+
   // Arı: kamera görüş alanına girince kovalar (girerken sesi başlar, çıkınca / ölünce kesilir); yoksa yerinde süzülür
   ariGuncelle(d, time) {
     const p = this.player, b = d.body, dx = p.x - d.x, dy = p.y - d.y;
@@ -178,14 +215,14 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   mermiAt(d, yon) {
-    const kopek = d.tip === 'kopek', ad = kopek ? 'mizrak' : 'atesTopu', M = ASSETLER.dusman[ad];
-    if (kopek) this.ses('mizrak');
+    const kopek = d.tip === 'kopek', ok = d.tip === 'kertenkele', ad = kopek ? 'mizrak' : ok ? 'ok' : 'atesTopu', M = ASSETLER.dusman[ad];
+    if (kopek || ok) this.ses('mizrak');
     else { this.atesSira = !this.atesSira; this.ses(this.atesSira ? 'ates1' : 'ates2'); }
-    const m = this.mermiler.create(d.x + yon * 18, d.y - (kopek ? 18 : 20), ad).setDepth(7);
+    const m = this.mermiler.create(d.x + yon * (ok ? 24 : 18), d.y - (kopek ? 18 : ok ? 17 : 20), ad).setDepth(7);
     m.setDisplaySize(M.gen, M.gen * M.h / M.w).setFlipX(yon < 0);
     m.body.setAllowGravity(false);
     m.body.setSize(M.w * 0.7, M.h * 0.6, true);
-    m.setVelocityX(yon * (kopek ? 280 : 210));
+    m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : 210));
     m.omur = 2.6;
   },
 
@@ -313,6 +350,12 @@ Object.assign(OyunSahnesi.prototype, {
     d.body.setVelocity(0, 0);
     d.body.enable = false;
     d.play('d_' + d.ad + '_ol');
+    if (ASSETLER.dusman[d.ad].anim.ol.length === 1) {   // ölüm karesi olmayanlar: devrilip söner
+      const yon = d.flipX ? 1 : -1;
+      this.tweens.add({ targets: d, angle: yon * 80, y: d.y + 4, alpha: 0, duration: 520, ease: 'Quad.easeIn',
+        onComplete: () => { d.destroy(); if (bitince) bitince(); } });
+      return;
+    }
     d.once('animationcomplete', () => this.tweens.add({
       targets: d, alpha: 0, duration: 300, onComplete: () => { d.destroy(); if (bitince) bitince(); }
     }));

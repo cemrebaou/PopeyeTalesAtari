@@ -259,13 +259,14 @@ Object.assign(OyunSahnesi.prototype, {
       if (this.cekZaman > 0) return;
       if (!this.cekSandik || !this.cekSandik.active) { this.cekBirak(); return; }
       this.cekDurum = 'cek';
+      if (this.cekSandik.kirTas) this.tasUyandir(this.cekSandik);   // uyuyan taş / kasa fizikle hareket etsin
       this.ses('cekTakil');
       this.cekMesafe = Math.max(0, this.cekBosluk(this.cekSandik));
       return;
     }
     // 'cek': sadece geri yürünür, nesne aynı mesafede peşinden gelir
     const s = this.cekSandik;
-    if (!s || !s.active || !yerdeMi(s.body)) { this.cekBirak(); return; }
+    if (!s || !s.active || !(yerdeMi(s.body) || Math.abs(s.body.velocity.y) < 20)) { this.cekBirak(); return; }
     b.setVelocityX((this.bakis > 0 ? k.sol : k.sag) ? -this.bakis * C.hiz : 0);
     const fark = this.cekBosluk(s) - this.cekMesafe;
     if (fark > C.menzil) { this.cekBirak(); return; }

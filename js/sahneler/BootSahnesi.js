@@ -89,7 +89,7 @@ class BootSahnesi extends Phaser.Scene {
 
   // Düşmanlar: d_<ad>_<anim>. Patronun saldırısı üç parçaya bölünür: hazır (2 kare) → atıl → dinlen
   dusmanAnimasyonlari() {
-    const HIZ = { yuru: 10, uc: 16, bekle: 4, dur: 1, at: 10, ol: 12 };
+    const HIZ = { yuru: 10, uc: 16, bekle: 4, dur: 1, at: 10, ol: 12, saldir: 7 };
     const DONGU = { yuru: true, uc: true, bekle: true, dur: true };
     Object.entries(ASSETLER.dusman).forEach(([ad, D]) => {
       if (!D.anim) return;
