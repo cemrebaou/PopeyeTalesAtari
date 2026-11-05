@@ -1,8 +1,8 @@
 // Otomatik üretilen görsel verileri (araclar/*.py yazar, elle düzenlenmez). tile/tileset: bolgeKaro.py · obje: nesne görsellerinin kaynak boyutları (px)
 const ASSETLER = {
- "tile": {"pTL": 0, "pTM": 1, "pTR": 2, "pFL": 3, "pFM": 4, "pFR": 5, "pB0": 6, "pB1": 7, "pB2": 8, "cTL": 9, "cTM": 10, "cTR": 11, "cFL": 12, "cFM": 13, "cFR": 14, "cB0": 15, "cB1": 16, "cB2": 17, "dTL": 18, "dTM": 19, "dTR": 20, "dFL": 21, "dFM": 22, "dFR": 23, "dB0": 24, "dB1": 25, "dB2": 26},
+ "tile": {"pTL": 0, "pTM": 1, "pTR": 2, "pFL": 3, "pFM": 4, "pFR": 5, "pB0": 6, "pB1": 7, "pB2": 8, "cTL": 9, "cTM": 10, "cTR": 11, "cFL": 12, "cFM": 13, "cFR": 14, "cB0": 15, "cB1": 16, "cB2": 17, "dTL": 18, "dTM": 19, "dTR": 20, "dFL": 21, "dFM": 22, "dFR": 23, "dB0": 24, "dB1": 25, "dB2": 26, "aTL": 27, "aTM": 28, "aTR": 29, "aFL": 30, "aFM": 31, "aFR": 32, "aB0": 33, "aB1": 34, "aB2": 35, "kTL": 36, "kTM": 37, "kTR": 38, "kFL": 39, "kFM": 40, "kFR": 41, "kB0": 42, "kB1": 43, "kB2": 44, "mTL": 45, "mTM": 46, "mTR": 47, "mFL": 48, "mFM": 49, "mFR": 50, "mB0": 51, "mB1": 52, "mB2": 53},
  "tileset": {"boyut": 128, "extrude": 2, "kolon": 9},
- "obje": {"diken": {"w": 134, "h": 73}, "sarmasik0": {"w": 61, "h": 205}, "sarmasik1": {"w": 63, "h": 205}, "sarmasik2": {"w": 65, "h": 206}, "sandik": {"w": 127, "h": 111}, "sandikAcik": {"w": 132, "h": 133}, "kapi": {"w": 141, "h": 154}, "kapiAcik": {"w": 172, "h": 158}, "bayrak0": {"w": 92, "h": 156}, "bayrak1": {"w": 142, "h": 157}}
+ "obje": {"diken": {"w": 134, "h": 73}, "zincir": {"w": 33, "h": 198}, "sarmasik0": {"w": 61, "h": 205}, "sarmasik1": {"w": 63, "h": 205}, "sarmasik2": {"w": 65, "h": 206}, "sandik": {"w": 127, "h": 111}, "sandikAcik": {"w": 132, "h": 133}, "kapi": {"w": 141, "h": 154}, "kapiAcik": {"w": 172, "h": 158}, "bayrak0": {"w": 92, "h": 156}, "bayrak1": {"w": 142, "h": 157}}
 };
 
 

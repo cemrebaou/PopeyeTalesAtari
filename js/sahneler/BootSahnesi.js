@@ -10,6 +10,7 @@ class BootSahnesi extends Phaser.Scene {
     L.image('selaleOrta', 'assets/karo/selaleOrta.png');
     // Nesneler (sandık, kapı, bayrak, diken, sarmaşık) — boyutları ASSETLER.obje
     Object.keys(A.obje).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
+    L.image('zincir', 'assets/nesne/zincir.png');
     L.spritesheet('kirTas', 'assets/nesne/kirTas.png', { frameWidth: 128, frameHeight: 128 });
     L.spritesheet('kirParca', 'assets/nesne/kirParca.png', { frameWidth: ASSETLER.kirParca.huc, frameHeight: ASSETLER.kirParca.huc });
     L.image('tane', 'assets/nesne/tane.png');
@@ -45,6 +46,7 @@ class BootSahnesi extends Phaser.Scene {
     this.oyuncuAnimasyonlari();
     this.toplananAnimasyonlari();
     this.dusmanAnimasyonlari();
+    this.registry.set('bolum', ilkBolum);
     this.scene.start('Game');
   }
 

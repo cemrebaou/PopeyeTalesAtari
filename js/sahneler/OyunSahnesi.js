@@ -6,7 +6,8 @@ class OyunSahnesi extends Phaser.Scene {
 
   create() {
     sesleriYukle(this);
-    const L = LEVEL1;
+    this.bolumNo = this.registry.get('bolum') || 0;   // BOLUMLER sırası (main.js)
+    const L = BOLUMLER[this.bolumNo];
     this.L = L;
     this.dunyaG = L.genislik;
     this.dunyaY = L.yukseklik;
@@ -27,6 +28,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.seviyeKur();
     this.oyuncuKur();
     this.carpismalariKur();
+    if (!L.boss) this.kapiAc(true);   // patronsuz bölüm: çıkış kapısı baştan açık
     this.girdiKur();
     this.kameraAyarla();
     this.scale.on('resize', this.kameraAyarla, this);
@@ -84,7 +86,8 @@ class OyunSahnesi extends Phaser.Scene {
 
     // Karo katmanları (arka plan çarpışmasız) ve şelaleler
     this.karoKatmani(L.arka, -5);
-    this.karoKatmani(L.on, 1);
+    this.anaKatman = this.karoKatmani(L.on, 1);
+    this.sahteDuvarlarKur();
     this.selaleCiz();
 
     // Katı zemin: görünmez çarpışma gövdeleri + ızgara (devriye alanı, sarmaşık tavanı için)
@@ -108,7 +111,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.nesneleriKur();   // nesneler.js: kontrol noktaları, toplanabilirler, sandıklar, taşlar, kapı, gizli yerler
     L.ipuclari.forEach(([x, y, yazi]) => harfYazi(this, yazi, 11, 'sol').setPosition(x, y).setDepth(4));
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
-    this.dusmanYarat({ tip: 'boss', x: L.boss[0], y: L.boss[1] });
+    if (L.boss) this.dusmanYarat({ tip: 'boss', x: L.boss[0], y: L.boss[1] });
   }
 
   // Karo katmanı: seviye verisindeki karakter satırları → tilemap (128 px kaynak, 32 px gösterim)
@@ -124,12 +127,37 @@ class OyunSahnesi extends Phaser.Scene {
     return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
   }
 
-  // Şelaleler: dikeyde kesintisiz doku, aşağı akar. Arka planın önünde, zeminin arkasında; uçları zemine 16 px girer.
+  // Sahte duvarlar [x, y, w, h]: taş gibi görünür ama çarpışması yoktur (gizli oda). Karoları oyuncunun önünde ayrı
+  // katmanda çizilir; oyuncu içine girince saydamlaşır, çıkınca yeniden taş olur.
+  sahteDuvarlarKur() {
+    const L = this.L, T = L.karo, bos = L.alfabe[0];
+    this.sahteler = (L.sahte || []).map(([x, y, w, h]) => {
+      const c0 = x / T, r0 = y / T, c1 = (x + w) / T, r1 = (y + h) / T;
+      const veri = L.on.map((satir, r) => r < r0 || r >= r1 ? bos.repeat(satir.length)
+        : Array.from(satir, (ch, c) => c >= c0 && c < c1 ? ch : bos).join(''));
+      for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) this.anaKatman.removeTileAt(c, r);
+      return { kat: this.karoKatmani(veri, 11), rect: new Phaser.Geom.Rectangle(x - 6, y - 6, w + 12, h + 12), ici: false };
+    });
+  }
+
+  sahteGuncelle() {
+    const p = this.player;
+    this.sahteler.forEach(s => {
+      const ici = s.rect.contains(p.x, p.y - 20);
+      if (ici === s.ici) return;
+      s.ici = ici;
+      this.tweens.killTweensOf(s.kat);
+      this.tweens.add({ targets: s.kat, alpha: ici ? 0.25 : 1, duration: 250 });
+    });
+  }
+
+  // Şelaleler [x, w, y0, y1, onde]: dikeyde kesintisiz doku, aşağı akar. Arka planın önünde, zeminin arkasında; uçları zemine 16 px girer.
+  // onde=1: oyuncunun ve zeminin önünde çizilir — arkasındaki gizli zemin ve içine giren oyuncu görünmez.
   selaleCiz() {
     const tex = this.textures.get('selaleOrta').getSourceImage();
-    this.selaleler = (this.L.selaleler || []).map(([x, w, y0, y1]) => {
+    this.selaleler = (this.L.selaleler || []).map(([x, w, y0, y1, onde]) => {
       const s = w / tex.width;
-      return this.add.tileSprite(x, y0 - 16, w, y1 - y0 + 32, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(0.5);
+      return this.add.tileSprite(x, y0 - 16, w, y1 - y0 + 32, 'selaleOrta').setOrigin(0, 0).setTileScale(s, s).setDepth(onde ? 11 : 0.5);
     });
   }
 
@@ -144,11 +172,11 @@ class OyunSahnesi extends Phaser.Scene {
   }
 
   // Sarmaşıklar: [x, y (üst), h] tırmanma alanı. Görsel üstteki ilk taşın altından başlar, taşın 8 px içine girer,
-  // zeminin arkasında çizilir; tam parça sayısıyla döşenir (son yaprak yarım kalmaz).
+  // zeminin arkasında çizilir; tam parça sayısıyla döşenir (son yaprak yarım kalmaz). L.tirmanma 'zincir' ise zincir çizilir.
   sarmasiklariKur() {
-    const T = this.L.karo, gen = 21;
+    const T = this.L.karo, zincir = this.L.tirmanma === 'zincir', gen = zincir ? 14 : 21;
     this.L.sarmasiklar.forEach(([x, y, h], i) => {
-      const ad = 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], sx = gen / O.w;
+      const ad = zincir ? 'zincir' : 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], sx = gen / O.w;
       const c = Math.floor(x / T);
       let r = Math.floor((y - 1) / T), k = 0;
       while (r >= 0 && !this.izgara[r][c] && k < 12) { r--; k++; }
@@ -203,11 +231,17 @@ class OyunSahnesi extends Phaser.Scene {
     const kb = this.input.keyboard;
     this.keys = kb.addKeys({
       sol: 'LEFT', sag: 'RIGHT', yukari: 'UP', asagi: 'DOWN', a: 'A', d: 'D', w: 'W', s: 'S',
-      zipla: 'SPACE', z: 'Z', saldir: 'X', k: 'K', cek: 'C', l: 'L'
+      zipla: 'SPACE', z: 'Z', saldir: 'X', k: 'K', j: 'J', cek: 'C', l: 'L'
     });
     kb.addCapture('SPACE,UP,DOWN,LEFT,RIGHT');
     kb.on('keydown-R', () => this.scene.restart());
     kb.on('keydown-P', () => this.haritaDegistir());
+    // 1, 2, … → o bölümü yükle (bilgisayarda)
+    ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'].slice(0, BOLUMLER.length).forEach((ad, i) => {
+      const ac = () => { this.registry.set('bolum', i); this.scene.restart(); };
+      kb.on('keydown-' + ad, ac);
+      kb.on('keydown-NUMPAD_' + ad, ac);
+    });
   }
 
   // ---- Döngü ----
@@ -221,6 +255,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.sandikDusmeGuncelle();
     this.kontrolNoktalariGuncelle();
     this.gizlilerGuncelle();
+    this.sahteGuncelle();
     this.selaleGuncelle(dt);
   }
 

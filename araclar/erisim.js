@@ -1,10 +1,11 @@
 // Bölüm erişilebilirlik kontrolü — kullanım (repo klasöründe):
-//   node araclar/erisim.js          → rahat zıplamayla (havada tam hızın %65'i, pogo yok) ulaşılamayan önemli yerleri listeler
+//   node araclar/erisim.js [level2]  → (varsayılan level1) rahat zıplamayla (havada tam hızın %65'i, pogo yok) ulaşılamayan önemli yerleri listeler
 //   node araclar/erisim.js --coz    → ulaşılamayan yer kalmayana kadar ara kaya önerir (level1.js → kayalar'a eklenir)
 // Model: gövde 18x30 px (eğik geçişleri de kapsasın diye; ayakta gövde 42 px, 1 karelik aralıklardan eğilerek geçilir), Arcade benzeri 60 Hz adımlar, ızgara çarpışması, zıplama 625, yerçekimi 1400, sarmaşığa tutunma.
 // Kayalar, taşlar, kırılır taşlar (kristal, yosun ve tahta kasalar hariç: kırılıp geçilir), bloklar ve basamaklar dahil edilir (takozlar kırılabildiği için geçilebilir sayılır). Önemli yerler: patron, çıkış, kontrol noktaları, sandıklar, elmaslar, özel eşyalar.
 const fs=require('fs'),path=require('path');
-const L=new Function(fs.readFileSync(path.join(__dirname,'..','js','veri','level1.js'),'utf8')+';return LEVEL1;')();const T=32,W=L.genislik/T,H=L.yukseklik/T;
+const BOLUM=process.argv.slice(2).find(a=>!a.startsWith('--'))||'level1';
+const L=new Function(fs.readFileSync(path.join(__dirname,'..','js','veri',BOLUM+'.js'),'utf8')+';return '+BOLUM.toUpperCase()+';')();const T=32,W=L.genislik/T,H=L.yukseklik/T;
 const BW=18,BH=30,dt=1/60,G=1400;
 const temel=[...Array(H)].map(()=>new Uint8Array(W));
 for(const [x,y,w,h] of L.bloklar.concat(L.basamaklar||[],(L.kayalar||[]).concat(L.taslar||[],(L.kirTaslar||[]).filter(k=>k[2]!=='kristal'&&k[2]!=='yosun'&&k[2]!=='kasa'&&!k[4])).map(([x,y])=>[x,y,32,32])))for(let r=y/T;r<(y+h)/T;r++)for(let c=x/T;c<(x+w)/T;c++)temel[r][c]=1;
@@ -27,7 +28,11 @@ function degerlendir(kayalar,hiz,vys){
   for(const s of segs){const top=s.r*T-BH;
     for(const [x,d] of [[s.c0*T,-1],[(s.c1+1)*T-BW,1]]){
       for(const vx of hiz){for(const vy of vys)add(s.id,at(x,top,d*vx,vy,true));add(s.id,at(x+d*(BW+1),top,d*vx,0,true));}
-      for(const vy of vys)add(s.id,at(x,top,0,vy,true));}}
+      for(const vy of vys)add(s.id,at(x,top,0,vy,true));}
+    // zeminin içinden de (her 2 karoda bir) iki yöne zıplama: üstteki yüzen platformlara
+    for(let c=s.c0+1;c<s.c1;c+=2)for(const d of [-1,1])for(const vx of hiz)for(const vy of vys)add(s.id,at(c*T+(T-BW)/2,top,d*vx,vy,true));}
+  // zeminde dururken sarmaşığa / zincire ↑ ile tutunulur (alt ucu zemine değiyorsa)
+  for(const v of vinesAll)for(const s of segs)if(s.r*T>=v.y0&&s.r*T<=v.y1+8&&v.c>=s.c0&&v.c<=s.c1)E[s.id].add(segs.length+v.id);
   for(const v of vinesAll){const u=segs.length+v.id,cx=(v.x0+v.x1)/2-BW/2;
     for(let y=v.y0;y<=v.y1-BH+40;y+=16){for(const d of [-1,1]){for(const f of hiz)add(u,at(cx,y,d*f*0.7,-500,true));}add(u,at(cx,y,0,0,false));}
     for(const d of [-1,0,1])for(const f of hiz)add(u,at(cx,v.y0-BH+10,d*f,-260,true));}
@@ -35,7 +40,7 @@ function degerlendir(kayalar,hiz,vys){
   const st=segAt(L.baslangic[0],L.baslangic[1]).id;const R=new Set([st]),q=[st];
   while(q.length){const u=q.shift();for(const v of E[u])if(!R.has(v)){R.add(v);q.push(v);}}
   const hedefler=[];const ekle=(ad,px,py,w)=>{const s=segAt(px,py);if(s)hedefler.push({ad,s,w});};
-  L.kontrol.forEach(([x,y])=>ekle('kontrol',x,y,10));ekle('patron',L.boss[0],L.boss[1],30);ekle('cikis',L.cikis[0],L.cikis[1],30);
+  L.kontrol.forEach(([x,y])=>ekle('kontrol',x,y,10));if(L.boss)ekle('patron',L.boss[0],L.boss[1],30);ekle('cikis',L.cikis[0],L.cikis[1],30);
   L.sandiklar.forEach(([x,y])=>ekle('sandik',x,y,3));L.elmaslar.forEach(([x,y])=>ekle('elmas',x,y+30,1));L.ozeller.forEach(([t,x,y])=>ekle(t,x,y+30,3));
   let hs=0;const eksik=[];for(const h of hedefler){if(R.has(h.s.id))hs+=h.w;else eksik.push(h);}
   const kayaSet=new Set(kayalar.map(([c,r])=>r+','+c));

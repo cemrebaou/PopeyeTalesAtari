@@ -69,7 +69,7 @@ Object.assign(OyunSahnesi.prototype, {
     const K = this.keys, T = this.touch;
     const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
     const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // klavyede ↑ de zıplatır
-    const saldir = K.saldir.isDown || K.k.isDown || T.saldir;
+    const saldir = K.saldir.isDown || K.k.isDown || K.j.isDown || T.saldir;
     const cek = K.cek.isDown || K.l.isDown;                      // klavyede doğrudan çekme (dokunmatikte VUR basılı)
     const asagiKlavye = K.asagi.isDown || K.s.isDown;
     const k = {
@@ -88,22 +88,17 @@ Object.assign(OyunSahnesi.prototype, {
     return k;
   },
 
-  // VUR tuşu tek başına üç iş yapar: dokun = vur; sandık/taş önünde 0.18 sn basılı = kanca/çek; havada 0.15 sn basılı = pogo
+  // VUR tuşu tek başına üç iş yapar: ilk basış HER ZAMAN vuruş; basılı kalırsa (vuruş bitince) öndeki sandığa/taşa
+  // kanca atılır ve çekilir (ikinci vuruş olmaz); havada 0.15 sn basılı = pogo
   vurIsle(k, yerde, dt) {
     const tut = k.saldir;
-    if (k.saldirBas) {
-      this.vurSure = 0;
-      this.vurBekle = yerde && !this.cekDurum && !!this.cekHedefBul();
-      if (this.vurBekle) k.saldirBas = false;   // bırakılırsa vurur, basılı kalırsa çeker
-    }
+    if (k.saldirBas) { this.vurSure = 0; this.vurCek = false; }
     if (tut) this.vurSure = (this.vurSure || 0) + dt;
     let cekBas = false;
-    if (this.vurBekle) {
-      if (!tut) { this.vurBekle = false; k.saldirBas = true; }
-      else if (this.vurSure >= 0.18) { this.vurBekle = false; this.vurCek = true; cekBas = true; }
-    }
+    if (tut && !this.vurCek && !this.vurPogo && yerde && !this.cekDurum
+      && this.vurSure >= CONFIG.oyuncu.saldiriSure + 0.04 && this.cekHedefBul()) { this.vurCek = true; cekBas = true; }
     if (!tut) this.vurCek = false;
-    this.vurPogo = tut && !this.vurBekle && !this.vurCek && (this.vurPogo || (!yerde && this.vurSure >= 0.15));
+    this.vurPogo = tut && !this.vurCek && (this.vurPogo || (!yerde && this.vurSure >= 0.15));
     if (this.vurPogo) this.saldiriZaman = 0;
     k.cek = k.cek || this.vurCek;
     k.cekBas = k.cekBas || cekBas;

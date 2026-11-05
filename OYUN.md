@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.67 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.68 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -10,6 +10,7 @@ js/
   ayarlar.js               CONFIG (tüm sayılar), SESLER (yüklenen sesler), KIRTAS (taş türleri)
   veri/assetlar.js         görsel verileri — araclar/*.py üretir, elle düzenlenmez
   veri/level1.js           1. bölüm verisi (koordinatlar piksel, ızgara 32 px)
+  veri/level2.js           2. bölüm verisi (araclar/bolum2Uret.py üretir)
   cekirdek/yardimci.js     yerdeMi, govdeRect, ses (sesCal / sesBaslat / sesDurdur), tam ekran, harfYazi, gorselYazi
   sahneler/BootSahnesi.js  yükleme çubuğu + görseller + tüm animasyon tanımları (sesler oyun açılınca arka planda: sesleriYukle)
   sahneler/OyunSahnesi.js  seviye kurulumu, kamera (P: tüm harita), çarpışmalar, klavye, ana döngü, şelale
@@ -18,7 +19,7 @@ js/
   sistemler/nesneler.js    toplanabilirler ve ödüller, sandık, kırılır taşlar, kontrol noktası, gizli yer, çıkış
   sistemler/efektler.js    uçan yazılar, parçacıklar, puan, bölüm sonu, arayüz köprüsü
   sahneler/ArayuzSahnesi.js HUD, dokunmatik tuşlar, tam ekran tuşu, bitiş ekranı
-  main.js                  Phaser oyununu başlatır, ekran boyutlama
+  main.js                  BOLUMLER listesi, ?bolum=N, Phaser oyununu başlatır, ekran boyutlama
 assets/
   karo/ oyuncu/ dusman/ nesne/ ui/ harf/ ses/   oyunun kullandığı dosyalar
   kaynak/                  kullanıcının gönderdiği ham sayfalar (araçların girdisi, oyun yüklemez)
@@ -34,10 +35,11 @@ Oyun `file://` ile değil bir web adresinden açılmalı (GitHub Pages, raw.gith
 | ↓ (S) basılı | sol: ▼ (aç/kapa, basılı görünür) | eğil; 1 karelik aralıklardan sadece eğilerek geçilir. İleri basarken önünde 1 karelik geçit varsa otomatik eğilir. Zıplayınca kapanır. Sarmaşıkta ▼ basılı = aşağı in |
 | SPACE / Z (↑ de) | sağ: ZIPLA | zıpla (basılı tut = yüksek); sarmaşıktan atla |
 | ↑ (W) | sağ: ▲ (ZIPLA'nın üstü) | sarmaşığa tırman |
-| X / K | sağ: VUR | dokun = baston vuruşu · sandık/taş önünde 0.18 sn basılı = kanca, geri yürüyerek çek · havada 0.15 sn basılı = pogo (bırakana kadar seker) |
+| X / K / J | sağ: VUR | ilk basış her zaman baston vuruşu · basılı kalırsa vuruş bitince öndeki sandık/taşa kanca, geri yürüyerek çek · havada 0.15 sn basılı = pogo (bırakana kadar seker) |
 | C / L basılı | — | doğrudan çek |
 | F | Tam ekran tuşu | tam ekran + telefonda yatay kilit |
 | R / P | — | bölümü yeniden başlat / tüm harita (kamera sabit) |
+| 1 / 2 | — | 1. / 2. bölümü yükle (bilgisayarda). Adreste `?bolum=2` ile de doğrudan açılır |
 
 Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizası) ve en yakındakine değer; **açık sandığa** vurunca vuruş yönünde 2 karo yavaşlayarak kayar. Havada bir sarmaşığa ilk değişte kendiliğinden tutunur; atladığı sarmaşığa (ondan çıkana kadar) ancak ↑ ile tekrar tutunur. Yürürken önündeki sandık/taşı **iter**; havada düşerken duvara doğru basılıysa ve baston kancası yandaki taşa değiyorsa **bastonla asılır** (zıpla → duvardan sıçrar; ters yön / ↓ / duvar biterse bırakır; alttan kafa girince asılmaz). Kafa tavana çarpınca geri düşer.
 
@@ -50,9 +52,10 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - Puan: elmas 10, yakut 50, mavi elmas 100, altın para 5, çapalı altın 25, küçük elmas (tane) 15, kalp fazlası 50, düşman 20, patron 500.
 
 ## Görseller
-- **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+). Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
-- **Şelale**: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
-- **Sarmaşık**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`.
+- **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+) — 1. bölüm; `a` açık gri taş, `k` koyu taş, `m` mor kristal (biraz karartılmış) — 2. bölüm. Yeni bölgelerde arka plan karoları dolgunun en fazla %60'ı parlaklıkta (`ARKA_ORAN`). Bölümün `bolgeler: [[satır, önek], …]` alanı hangi satırdan itibaren hangi bölgenin döşeneceğini söyler. Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
+- **Şelale** `[x, w, y0, y1, önde]`: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. `önde=1`: oyuncunun ve zeminin önünde çizilir — ardındaki gizli zemin ve içine giren oyuncu görünmez. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
+- **Sarmaşık / zincir**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`. Bölümde `tirmanma: 'zincir'` varsa zincir çizilir (`nesne/zincir.png`). Zeminde dururken ↑ ile tutunulur.
+- **Sahte duvar** `sahte: [x, y, w, h]`: taş gibi döşenir ama çarpışması yok; karoları oyuncunun önünde ayrı katmanda, oyuncu içine girince %25'e saydamlaşır (gizli oda).
 - **Oyuncu**: `oyuncu.png` (176×141 hücre) + `oyuncu2.png` (240×220: asılma, itme, duruma göre darbe kareleri, ölüm). Kare numaraları `BootSahnesi.oyuncuAnimasyonlari`.
 - **Düşmanlar** `assets/dusman/<tip>.png` şerit, animasyon kareleri ve görünür boy `ASSETLER.dusman`; tümü `CONFIG.dusmanOlcek` (0.9).
 - **Arayüz**: kalpler, yaşam şapkası, elmas/altın ikonları, rakamlar, 6 dokunmatik tuş (normal / basılı), taş panel. **Harfler**: Türkçe büyük/küçük, Q, noktalama, semboller (`harfYazi`, `{zipla}` gibi işaretler tuş görseli olur).
@@ -87,13 +90,21 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 Unity projesindeki `SampleScene`'den aktarıldı (1 Unity birimi = 48 px). Dünya 5440 × 4544 px (170 × 142 karo), çok katlı: başlangıç sol altta, ortada sarmaşıklı bloklar ve arılar, üstte koridorlar, en üstte patron ve çıkış, altta yeraltı.
 `level1.js` alanları: `bloklar` (çarpışma), `kayalar` (ara kaya), `dikenler`, `sarmasiklar`, `sandiklar`, `elmaslar`, `ozeller`, `kirTaslar`, `kontrol`, `ipuclari`, `dusmanlar`, `gizliler`, `selaleler`, `on` / `arka` (zeminDose.py üretir).
 
+## 2. Bölüm — Mor Derinlikler
+Dünya 7680 × 6336 px (240 × 198 karo); oynanır alan 1. bölümün 2 katı. Düşman yok (şimdilik), patron yok — çıkış kapısı baştan açık. Tırmanma zincirle.
+Üç kat: üst **açık gri taş** (kırılır taşı `gri`), orta **koyu taş** (`koyu`), alt **mor kristal** (`mor`, ayrıca `kristal` taşlardan küçük elmas). Her katta üç koridor (üst / ana / alt), zincir, delik ve iniş mağaralarıyla bağlı. Tahta kasalar her katta.
+Ana yol: üst kat ana koridor (sağa) → sağdaki büyük iniş mağarası → orta kat (sola) → soldaki iniş mağarası → alt kat (sağa) → kapı. Kontrol noktası 7.
+Gizemler: üst kat en solda şelale — içine atlayan görünmez zemine basar, sola yürüyünce sahte duvarlı oda; sahte duvarlı odalar (orta kat üst koridor solu, alt kat üst koridor sağı); bastonla duvardan duvara asılarak çıkılan 3 baca; pogo ile çıkılan yüksek çıkıntılar; itilir taşla çıkılan raflar; kırılır taş kapılar.
+Üretim: `python3 araclar/bolum2Uret.py && python3 araclar/zeminDose.py level2 && node araclar/erisim.js level2`. Erişim denetiminde ulaşılamayan olarak kalanlar bilinçli beceri ödülleri (baca, pogo, taş itme).
+
 ## Araçlar (`araclar/`)
 Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `bash araclar/hepsiniUret.sh`.
 | Araç | Ne yapar |
 |---|---|
-| `bolgeKaro.py` | `kaynak/bolge_*.png` → `karo/tileset.png` + `ASSETLER.tile` |
-| `zeminDose.py` | `level1.js` → `on` / `arka` karo ızgaraları (bloklar değişince çalıştır) |
-| `erisim.js` | önemli yerlere rahat zıplamayla ulaşılıyor mu (`--coz`: çözüm için kaya önerir) |
+| `bolgeKaro.py` | `kaynak/bolge_*.png` (6 bölge) → `karo/tileset.png` + `ASSETLER.tile` |
+| `zeminDose.py [level2]` | bölüm dosyası → `on` / `arka` karo ızgaraları (bloklar değişince çalıştır; sahte duvarlar taş döşenir) |
+| `bolum2Uret.py` | 2. bölümü (`level2.js`) baştan yazar; sonra zeminDose.py level2 |
+| `erisim.js [level2]` | önemli yerlere rahat zıplamayla ulaşılıyor mu (zemin içinden zıplama, zeminden zincire tutunma dahil; `--coz`: çözüm için kaya önerir) |
 | `oyuncuEk.py` | `kaynak/oyuncu_ek.png` vb. → `oyuncu/oyuncu2.png` |
 | `dusmanKes.py` | `kaynak/dusman_seti*.png` → `dusman/*.png` + `ASSETLER.dusman` |
 | `toplananKes.py` | `kaynak/toplanan_seti.png` → `nesne/toplanan.png` + `ASSETLER.toplanan` |

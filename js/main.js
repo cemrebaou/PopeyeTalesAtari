@@ -4,6 +4,10 @@ const DPR = Math.min(window.devicePixelRatio || 1, 2);
 const ekranW = () => Math.max(1, Math.round(window.innerWidth * DPR));
 const ekranH = () => Math.max(1, Math.round(window.innerHeight * DPR));
 
+// Bölümler sırayla; adres çubuğunda ?bolum=2 ile doğrudan o bölüm açılır
+const BOLUMLER = [LEVEL1, LEVEL2];
+const ilkBolum = Math.min(BOLUMLER.length, Math.max(1, parseInt(new URLSearchParams(location.search).get('bolum')) || 1)) - 1;
+
 const oyun = new Phaser.Game({
   type: Phaser.AUTO,
   width: ekranW(),

@@ -301,14 +301,18 @@ Object.assign(OyunSahnesi.prototype, {
 
   // Patron yenilince: ödül sandığı çıkar, kapı açılır, kapıdan girince bölüm biter
   cikisAc(bossX, bossY) {
-    this.ses('kapiAcil');
     this.sandikYarat(bossX, bossY, 'buyuk');
+    this.kapiAc(false);
+  },
+
+  kapiAc(sessiz) {
+    if (!sessiz) this.ses('kapiAcil');
     const k = this.kapi;
     k.setTexture('kapiAcik').setOrigin(0.41, 1);
     this.boyutla(k, 'kapiAcik', { h: 72 });
     const cikis = this.add.zone(k.x - 20, k.y - 64, 40, 64).setOrigin(0, 0);
     this.physics.add.existing(cikis, true);
     this.physics.add.overlap(this.player, cikis, () => this.bolumBitti());
-    this.popup(k.x, k.y - 100, 'Kapı açıldı!');
+    if (!sessiz) this.popup(k.x, k.y - 100, 'Kapı açıldı!');
   }
 });

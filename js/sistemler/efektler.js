@@ -68,8 +68,10 @@ Object.assign(OyunSahnesi.prototype, {
     S.bitti = true;
     this.ses('kazanma');
     this.player.body.setVelocity(0, 0).setAllowGravity(false);
-    this.bitisGoster('1. BÖLÜM TAMAMLANDI!',
-      'Puan: ' + S.puan + '\nElmas: ' + S.elmas + '/' + S.elmasToplam + '\n\nDokun: tekrar oyna');
+    const no = this.bolumNo, sonraki = no + 1 < BOLUMLER.length;
+    this.registry.set('bolum', sonraki ? no + 1 : no);   // dokununca sonraki bölüm açılır
+    this.bitisGoster((no + 1) + '. BÖLÜM TAMAMLANDI!',
+      'Puan: ' + S.puan + '\nElmas: ' + S.elmas + '/' + S.elmasToplam + '\n\nDokun: ' + (sonraki ? 'sonraki bölüm' : 'tekrar oyna'));
   },
 
   oyunBitti() {

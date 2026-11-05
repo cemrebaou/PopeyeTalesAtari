@@ -13,4 +13,7 @@ python3 araclar/kirParcaKes.py
 python3 araclar/uiKes.py
 python3 araclar/harfKes.py      # uiKes'ten sonra (rakamları ui'dan alır)
 python3 araclar/harfAtlas.py    # harfKes'ten sonra: harfleri tek atlasa toplar
+python3 araclar/bolum2Uret.py
+python3 araclar/zeminDose.py level2
 node araclar/erisim.js | tail -1
+node araclar/erisim.js level2 | tail -1
