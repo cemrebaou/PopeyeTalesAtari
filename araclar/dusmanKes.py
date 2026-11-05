@@ -172,6 +172,12 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
         Image.fromarray(_buyu).save(KOK + '/assets/dusman/buyu.png', optimize=True)
         meta['buyu'] = {'w': int(_buyu.shape[1]), 'h': int(_buyu.shape[0]), 'gen': 34}
     if ad == 'yarasa':
+        # v0.75: ses dalgası artık ayrı görselden (kaynak/yarasa_dalga.png); yoksa sayfadan kesileni kullan
+        import os
+        if os.path.exists(KOK + '/assets/kaynak/yarasa_dalga.png'):
+            _d = np.array(Image.open(KOK + '/assets/kaynak/yarasa_dalga.png').convert('RGBA'))
+            _d[_d[:, :, 3] < 30] = 0
+            _ys, _xs = np.where(_d[:, :, 3] > 0); _dalga = _d[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
         Image.fromarray(_dalga).save(KOK + '/assets/dusman/dalga.png', optimize=True)
         meta['dalga'] = {'w': int(_dalga.shape[1]), 'h': int(_dalga.shape[0]), 'gen': 30}
     meta[ad] = {'w': W, 'h': H, 'ayak': int(alt), 'ust': int(ust), 'boy': boy,

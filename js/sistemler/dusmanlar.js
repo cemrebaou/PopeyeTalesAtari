@@ -23,7 +23,7 @@ const DUSMAN_TIP = {
   yarasa:     [26, 20, 2, 0, true]      // uçar, oyuncunun yanına gelip ses dalgası atar
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
-const DUSMAN_GOMME = { kedi: 7, domuz: 7, kertenkele: 7, golem: 7, bitki: 7, fici: 7, buyucu: 7 };
+const DUSMAN_GOMME = { kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 5, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -37,6 +37,7 @@ Object.assign(OyunSahnesi.prototype, {
     const bw = bw0 * O / s, bh = bh0 * O / s;
     const gom = (DUSMAN_GOMME[e.tip] || 0) * O / s / O;   // görsel px → kare px
     const oy = (ucan ? (D.ust + D.ayak) / 2 : D.ayak) - gom;
+    if (e.tip !== 'boss' && e.tip !== 'orumcek') e = { ...e, x: this.dusmanBosX(e.x, e.y, bw0 * O, bh0 * O, ucan) };
     const y = e.tip === 'orumcek' ? e.tavan + 20 : e.y;
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
     d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
@@ -60,6 +61,23 @@ Object.assign(OyunSahnesi.prototype, {
     return d;
   },
 
+  // Düşman taşın / sandığın / zeminin içinde doğmasın: gövdesi dolu kareye değiyorsa aynı zeminde en yakın boş yere
+  // (sola / sağa 8 px adımlarla, 8 karoya kadar) kayar. Yürüyenlerde yeni yerin altında zemin olmalı.
+  dusmanBosX(x, y, w, h, ucan) {
+    const T = this.L.karo, D = this.dolu, G = this.izgara;
+    const dolu = (r, c) => !D[r] || D[r][c] === undefined || D[r][c];
+    const bos = px => {
+      const x0 = px - w / 2, y0 = ucan ? y - h / 2 : y - h, y1 = ucan ? y + h / 2 : y - 1;
+      for (let r = Math.floor(y0 / T); r <= Math.floor(y1 / T); r++)
+        for (let c = Math.floor(x0 / T); c <= Math.floor((x0 + w - 1) / T); c++) if (dolu(r, c)) return false;
+      if (!ucan) { const r = Math.floor((y + 1) / T); for (const c of [Math.floor(x0 / T), Math.floor((x0 + w - 1) / T)]) if (!G[r] || !G[r][c]) return false; }
+      return true;
+    };
+    if (bos(x)) return x;
+    for (let k = 8; k <= 8 * T; k += 8) { if (bos(x - k)) return x - k; if (bos(x + k)) return x + k; }
+    return x;
+  },
+
   // Yürüyen düşmanın alanı: bastığı zemin parçası (duvar, uçurum ya da dikene kadar); alan dışına asla çıkmaz
   devriyeAlani(d, e) {
     const T = this.L.karo, G = this.izgara, W = G[0].length, H = G.length;
@@ -67,7 +85,7 @@ Object.assign(OyunSahnesi.prototype, {
     let r = Math.floor((e.y + 1) / T);
     while (r < H && !G[r][c]) r++;
     if (r >= H) return;
-    const ok = cc => cc >= 0 && cc < W && G[r][cc] && !G[r - 1][cc] && !this.dikenHucre.has(r + ',' + cc);
+    const ok = cc => cc >= 0 && cc < W && G[r][cc] && !G[r - 1][cc] && !this.dolu[r - 1][cc] && !this.dikenHucre.has(r + ',' + cc);
     if (!ok(c)) return;
     let a = c, z = c;
     while (ok(a - 1)) a--;
@@ -154,7 +172,7 @@ Object.assign(OyunSahnesi.prototype, {
     }
     d.atesBekle -= dt;
     const ayniZemin = yerdeMi(p.body) && Math.abs(p.body.bottom - b.bottom) < 8;
-    if (Math.abs(dx) < 420 && ayniZemin && !this.durum.olu) {
+    if (Math.abs(dx) < CONFIG.atisMenzil * 32 && ayniZemin && !this.durum.olu) {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
       b.setVelocityX(0);
@@ -229,7 +247,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (d.hazir > 0) { d.hazir -= dt; if (d.hazir <= 0) this.zehirAt(d); return; }
     d.atesBekle -= dt;
     const gor = !this.durum.olu && this.cameras.main.worldView.contains(d.x, d.y - 20)
-      && Math.abs(dx) < 7 * 32 + 16 && dy > -140 && dy < 80;
+      && Math.abs(dx) < 6 * 32 + 16 && dy > -140 && dy < 80;
     if (gor) {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
@@ -238,11 +256,13 @@ Object.assign(OyunSahnesi.prototype, {
     if (!(d.anims.isPlaying && d.anims.currentAnim.key === 'd_bitki_at')) this.dusmanAnim(d, 'bekle');
   },
 
-  // Zehir: oyuncunun olduğu yere (en çok 7 karo) eğimli tükürük gibi düşer; yere ya da oyuncuya çarpınca zehirVur sesi
+  // Zehir: ağzından hafif yukarı çıkar, alçak bir yayla önündeki 5. karoya düşer; yere ya da oyuncuya çarpınca zehirVur sesi
   zehirAt(d) {
-    const M = ASSETLER.dusman.zehir, p = this.player, yon = d.yon;
-    const uzak = Phaser.Math.Clamp(Math.abs(p.x - d.x) - 16, 40, 7 * 32), vy = -380, t = 2 * -vy / CONFIG.fizik.yercekimi;
-    const m = this.mermiler.create(d.x + yon * 18, d.y - 30, 'zehir').setDepth(7);
+    const M = ASSETLER.dusman.zehir, yon = d.yon, g = CONFIG.fizik.yercekimi;
+    const agizY = d.y - 20, h = d.y - agizY, vy = -200;
+    const t = (-vy + Math.sqrt(vy * vy + 2 * g * h)) / g;     // ağızdan zemine iniş süresi
+    const uzak = 5 * 32 - 18;
+    const m = this.mermiler.create(d.x + yon * 18, agizY, 'zehir').setDepth(7);
     m.setDisplaySize(M.gen, M.gen * M.h / M.w);
     m.body.setAllowGravity(true);
     m.body.setSize(M.w * 0.4, M.h * 0.6, true);
@@ -270,16 +290,19 @@ Object.assign(OyunSahnesi.prototype, {
       T.rotation += d.yon * d.hizX * dt / (75 * s);
       const uc = (d.yon > 0 && d.x >= d.maxX - 1) || (d.yon < 0 && d.x <= d.minX + 1)
         || (b.blocked.right && d.yon > 0) || (b.blocked.left && d.yon < 0);
-      if (uc || (d.sure -= dt) <= 0) { this.ficiDon(d, false); d.yon = -d.yon; d.donus = 0; d.sonYon = d.yon; }
+      if (uc || (d.sure -= dt) <= 0) {
+        this.ficiDon(d, false); d.yon = -d.yon;
+        d.dinlen = Phaser.Math.Clamp((d.maxX - d.minX) / d.hiz / 2, 1, 4);   // bir turun dörtte biri kadar yürür
+      }
       return;
     }
     this.devriye(d, dt);
     this.dusmanAnim(d, 'yuru');
     d.setFlipX(d.yon < 0);
-    if (d.yon !== d.sonYon) { d.donus++; d.sonYon = d.yon; }
+    if (d.dinlen > 0) d.dinlen -= dt;
     const gor = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && Math.abs(dx) < 300
       && p.x >= d.minX - 24 && p.x <= d.maxX + 24 && this.cameras.main.worldView.contains(d.x, d.y - 10);
-    if (gor && d.donus >= 2) {
+    if (gor && !(d.dinlen > 0)) {
       d.durum = 'hazir'; d.sure = 0.5; d.yon = Math.sign(dx) || 1; d.setFlipX(d.yon < 0);
       this.dusmanAnim(d, 'hazir');
     }
@@ -318,7 +341,7 @@ Object.assign(OyunSahnesi.prototype, {
       hx = p.x + (dx > 0 ? -150 : 150); hy = p.y - 34 + Math.sin(time * 0.004 + d.faz) * 12;
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
-      if (gorus && d.atesBekle <= 0 && Math.abs(dy) < 40 && Math.abs(dx) < 280) {
+      if (gorus && d.atesBekle <= 0 && Math.abs(dy) < 40 && Math.abs(dx) < CONFIG.atisMenzil * 32) {
         d.saldiri = 0.45; d.atti = false; d.atesBekle = 2.2;
         d.play('d_yarasa_saldir');
         return;
@@ -353,12 +376,13 @@ Object.assign(OyunSahnesi.prototype, {
     m.body.setSize(M.w * 0.7, M.h * 0.6, true);
     m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : yar ? 230 : buy ? 200 : 210));
     m.omur = 2.6;
+    m.baslaX = m.x;
   },
 
   updateMermiler(dt) {
     this.mermiler.getChildren().slice().forEach(m => {
       if (m.zehir) m.rotation = Math.atan2(m.body.velocity.y, m.body.velocity.x);   // zehir uçuş yönüne bakar
-      if ((m.omur -= dt) <= 0) m.destroy();
+      if ((m.omur -= dt) <= 0 || (m.baslaX !== undefined && Math.abs(m.x - m.baslaX) > CONFIG.mermiMenzil * 32)) m.destroy();
     });
   },
 
@@ -417,7 +441,8 @@ Object.assign(OyunSahnesi.prototype, {
   bossSes(zorla) {
     if (!zorla && this.bossSesObj && this.bossSesObj.isPlaying) return;
     this.bossSesObj = sesDurdur(this.bossSesObj);
-    this.bossSesObj = sesBaslat(this, 'boss' + Phaser.Math.Between(1, 13));
+    this.bossSira = (this.bossSira || 0) % 13 + 1;   // boss1 … boss13 sırayla
+    this.bossSesObj = sesBaslat(this, 'boss' + this.bossSira);
   },
 
   bossYen(d) {

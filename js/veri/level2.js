@@ -8,6 +8,7 @@ const LEVEL2 = {
   cikis: [7472,5504],
   tirmanma: 'zincir',
   zeminGomme: 6,
+  tasZeminYukari: 0,
   bolgeler: [[0,'a'],[66,'k'],[132,'m']],
   alfabe: '!"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
   bloklar: [

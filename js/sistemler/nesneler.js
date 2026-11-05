@@ -69,7 +69,7 @@ Object.assign(OyunSahnesi.prototype, {
   elmasAl(e) {
     if (!e.active) return;
     e.disableBody(true, true);
-    this.ses('para' + Phaser.Math.Between(1, 5));
+    this.sesSira('para', 5);
     this.durum.elmas++;
     this.durum.puan += CONFIG.puan.elmas;
     this.hudGuncelle();
@@ -198,7 +198,9 @@ Object.assign(OyunSahnesi.prototype, {
       const alt = ust.get(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.bottom / T));
       const taban = alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3 ? (alt.gommeTaban || 0) + CONFIG.ustUsteGomme : this.zeminGomme;
       s.gommeTaban = taban;
-      const d = taban - (s.kirTas && s.tur !== 'kasa' ? CONFIG.tasYukari : 0);   // taşlar kasalardan biraz yukarıda durur
+      // taşlar (kasa hariç): yerde tasZeminYukari, başka taş / kasa üstünde tasUstuYukari kadar yukarıda
+      const tas = s.kirTas && s.tur !== 'kasa', ustte = taban !== this.zeminGomme;
+      const d = taban - (!tas ? 0 : ustte ? CONFIG.tasUstuYukari : (this.L.tasZeminYukari ?? CONFIG.tasYukari));
       if (s.gommeD === d) return;
       s.gommeD = d;
       s.setDepth(2 + d / 1000);
@@ -312,6 +314,7 @@ Object.assign(OyunSahnesi.prototype, {
       t.body.setBounce(0.35, 0.35).setDragX(160);
       t.body.mass = 0.01;
       t.alinir = this.time.now + 300;   // hemen toplanmasın, saçıldığı görünsün
+      this.time.delayedCall(i * 70, () => this.ses('elmasDus', { volume: 0.7 }));   // her elmas çıkar çıkmaz bir kez
     }
   },
 

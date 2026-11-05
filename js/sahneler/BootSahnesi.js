@@ -94,14 +94,15 @@ class BootSahnesi extends Phaser.Scene {
     Object.entries(ASSETLER.dusman).forEach(([ad, D]) => {
       if (!D.anim) return;
       const ekle = (k, kareler, fps, tekrar) => this.anims.create({
-        key: 'd_' + ad + '_' + k, frames: kareler.map(frame => ({ key: 'd_' + ad, frame })), frameRate: fps, repeat: tekrar ? -1 : 0
+        key: 'd_' + ad + '_' + k, frames: kareler.map(frame => ({ key: 'd_' + ad, frame })), frameRate: fps, repeat: tekrar ? -1 : 0,
+        yoyo: ad === 'bitki' && k === 'bekle'   // bitki duruşu ileri-geri, akıcı
       });
       Object.entries(D.anim).forEach(([k, kareler]) => {
         if (ad === 'boss' && k === 'saldir') {
           ekle('hazir', kareler.slice(0, 2), 4, false);
           ekle('atil', [kareler[2]], 1, false);
           ekle('dinlen', [kareler[3]], 1, false);
-        } else ekle(k, kareler, HIZ[k] || 10, DONGU[k]);
+        } else ekle(k, kareler, ad === 'bitki' && k === 'bekle' ? 8 : HIZ[k] || 10, DONGU[k]);
       });
     });
   }

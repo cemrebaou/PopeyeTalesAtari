@@ -45,6 +45,12 @@ class OyunSahnesi extends Phaser.Scene {
 
   // Tek seferlik ses (yardimci.js → sesCal)
   ses(ad, ayar) { sesCal(this, ad, ayar); }
+  // ön1, ön2 … önN sırayla çalar, sondan sonra başa döner
+  sesSira(on, n, ayar) {
+    this.sesSayac = this.sesSayac || {};
+    this.sesSayac[on] = (this.sesSayac[on] || 0) % n + 1;
+    this.ses(on + this.sesSayac[on], ayar);
+  }
 
   // ---- Kamera ----
   // Ekranı tam doldurur; yakınlık ekran yüksekliğine göre. Harita modunda (P) tüm dünya, kamera sabit.
@@ -238,9 +244,8 @@ class OyunSahnesi extends Phaser.Scene {
     F.overlap(P, this.ozeller, null, (p, o) => { this.ozelAl(o); return false; });
     F.overlap(P, this.taneler, null, (p, t) => { this.taneAl(t); return false; });
     // kristal taştan dökülen her elmas yere ilk değdiğinde bir kez elmasDus çalar
-    const taneDus = (t) => { if (!t.dustu && t.body.blocked.down) { t.dustu = true; this.ses('elmasDus', { volume: 0.7 }); } };
-    F.collider(this.taneler, this.solids, taneDus);
-    F.collider(this.taneler, this.sandiklar, taneDus);
+    F.collider(this.taneler, this.solids);
+    F.collider(this.taneler, this.sandiklar);
   }
 
   // ---- Klavye ----
@@ -253,6 +258,14 @@ class OyunSahnesi extends Phaser.Scene {
     kb.addCapture('SPACE,UP,DOWN,LEFT,RIGHT');
     kb.on('keydown-R', () => this.scene.restart());
     kb.on('keydown-P', () => this.haritaDegistir());
+    // GELİŞTİRME (yayından önce silinecek): harita modunda (P) tıklanan yere ışınlan, normal kameraya dön
+    this.input.on('pointerdown', ptr => {
+      if (!this.haritaModu) return;
+      const w = ptr.positionToCamera(this.cameras.main);
+      this.player.body.reset(w.x, w.y);
+      this.player.body.setVelocity(0, 0);
+      this.haritaDegistir();
+    });
     // 1, 2, … → o bölümü yükle (bilgisayarda)
     ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'].slice(0, BOLUMLER.length).forEach((ad, i) => {
       const ac = () => { this.registry.set('bolum', i); this.scene.restart(); };

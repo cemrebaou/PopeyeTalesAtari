@@ -366,8 +366,7 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   zipSes() {
-    this.zipNo = ((this.zipNo || 0) % 6) + 1;
-    this.ses('zipla' + this.zipNo);
+    this.sesSira('zipla', 3);
   },
 
   // ---- Sarmaşık ----

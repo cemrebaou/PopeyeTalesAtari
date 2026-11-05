@@ -470,7 +470,7 @@ s += 'const LEVEL2 = {\n'
 s += "  ad: '2. Bölüm - Mor Derinlikler',\n"
 s += f'  genislik: {W * T},\n  yukseklik: {H * T},\n  karo: {T},\n'
 s += f'  baslangic: [{BASLA[0] * T + 16},{BASLA[1] * T}],\n  cikis: [{CIKIS[0] * T + 16},{CIKIS[1] * T}],\n'
-s += "  tirmanma: 'zincir',\n  zeminGomme: 6,\n"
+s += "  tirmanma: 'zincir',\n  zeminGomme: 6,\n  tasZeminYukari: 0,\n"
 s += "  bolgeler: [[0,'a'],[66,'k'],[132,'m']],\n"
 s += "  alfabe: '" + alf + "',\n"
 B = bloklar()

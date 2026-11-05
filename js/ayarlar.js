@@ -1,9 +1,12 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.74',
+  surum: 'v0.75',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   ustUsteGomme: 4,
-  tasYukari: 3,         // kırılır taşlar (kasa hariç) bu kadar yukarıda çizilir      // üst üste taş / kasa: üstteki, alttakinin üst kenar (perspektif) payına oturur (px)
+  tasYukari: 3,         // kırılır taşlar (kasa hariç) yerde bu kadar yukarıda çizilir (bölümde tasZeminYukari varsa o)
+  tasUstuYukari: 5,     // taş başka taş / kasa üstündeyken bu kadar yukarıda
+  mermiMenzil: 8,       // düz atılan düşman mermileri bu kadar karo gidip kaybolur
+  atisMenzil: 9,        // düşmanlar en çok bu kadar karo uzaktan ateş eder      // üst üste taş / kasa: üstteki, alttakinin üst kenar (perspektif) payına oturur (px)
   dusmanOlcek: 0.9,     // tüm düşmanlar (görsel + gövde)
   selaleHiz: 140,       // şelale suyunun aşağı akış hızı (px/sn)
   selaleDuyma: 420,     // şelale sesi kadrajın bu kadar dışından duyulmaya başlar (px)
@@ -57,7 +60,7 @@ const CONFIG = {
 // girince) dosyaları gelince buraya eklenir.
 const SES_KLASOR = {
   popeye: ['bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
-    'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6', 'olum', 'tamKaybet'],
+    'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'olum', 'tamKaybet'],
   elmaslar: ['para1', 'para2', 'para3', 'para4', 'para5', 'elmas', 'elmasDus', 'altin', 'capaAltin', 'kizilElmas', 'buyukElmas',
     'yasam', 'can'],
   cevre: ['gizli', 'bayrak', 'sandikDus', 'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale'],
