@@ -9,12 +9,14 @@ import numpy as np
 from PIL import Image, ImageSequence
 from scipy import ndimage
 KOK = __file__.rsplit('/araclar/', 1)[0]
-W, H, AY, SUT = 176, 141, 125, 10
+K = 2   # v0.78: yüksek çözünürlük — hücreler eskinin 2 katı (oyun küçültür, büyütmez)
+W, H, AY, SUT = 176 * K, 141 * K, 125 * K, 10
 src = open(KOK + '/araclar/dusmanKes.py').read()
 temizle_kod = src[src.index('def temizle'):src.index('KAYNAK = {')]
 exec(temizle_kod.replace("KOK + '/assets/kaynak/' + ad", "KOK + '/assets/kaynak/' + ad"))
 
-taban = np.array(Image.open(KOK + '/assets/kaynak/oyuncu_taban.png').convert('RGBA'))
+_t = Image.open(KOK + '/assets/kaynak/oyuncu_taban.png').convert('RGBA')
+taban = np.array(_t.resize((_t.width * K, _t.height * K), Image.LANCZOS))   # eski kareler (kaynağı yok) 2 kat
 out = np.zeros((H * 10, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
 def hucre(i): return (i // SUT) * H, (i % SUT) * W
 def eski(i):
@@ -23,7 +25,7 @@ def kutu(a):
     b = a[:, :, 3] > 150; ys = np.where(b.any(1))[0]; xs = np.where(b.any(0))[0]
     return ys[0], ys[-1], xs[0], xs[-1]
 def sapka(a):   # en üst 25 satırın yatay ortası
-    b = a[:, :, 3] > 150; t = np.where(b.any(1))[0][0]; xs = np.where(b[t:t + 25].any(0))[0]
+    b = a[:, :, 3] > 150; t = np.where(b.any(1))[0][0]; xs = np.where(b[t:t + 25 * K].any(0))[0]
     return (xs[0] + xs[-1]) / 2
 def lekesiz(a, en=150):
     a = a.copy(); a[a[:, :, 3] < 40] = 0
@@ -116,4 +118,20 @@ print('ayakVur', anim(ayak, [0, 1, 2, 3], range(74, 74 + len(ayak)), True), len(
 kos = gif('oyuncu_kos.gif')
 print('kos', anim(kos, [4, 5, 6, 7, 8, 9], range(82, 82 + len(kos)), True), len(kos))
 for i in range(4, 10): bosalt(i)
-Image.fromarray(out).save(KOK + '/assets/oyuncu/oyuncu.png', optimize=True)
+# Sıkıştır: sadece kullanılan kareler, animasyon sırasıyla 8 sütunlu sayfaya; kare listesi ASSETLER.oyuncu'ya
+ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [10, 11, 12], 'dus': [13], 'in': [14],
+        'sersem': [15, 16, 17], 'vur': range(24, 29), 'tirman': range(66, 74), 'uzat': [41, 42, 43], 'cek': range(44, 49),
+        'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egil': range(53, 58)}
+S2 = 8; sira = [i for v in ANIM.values() for i in v]; yeniNo = {}
+sayfa = np.zeros((H * (-(-len(sira) // S2)), W * S2, 4), np.uint8)
+for n, i in enumerate(sira):
+    yeniNo[i] = n; y, x = hucre(i)
+    sayfa[(n // S2) * H:(n // S2 + 1) * H, (n % S2) * W:(n % S2 + 1) * W] = out[y:y + H, x:x + W]
+Image.fromarray(sayfa).save(KOK + '/assets/oyuncu/oyuncu.png', optimize=True)
+import json, re
+ap = KOK + '/js/veri/assetlar.js'; t = open(ap, encoding='utf8').read()
+t = re.sub(r'\n// Oyuncu kareleri.*?;\n', '\n', t, flags=re.S)
+t += '// Oyuncu kareleri (araclar/oyuncuYeni.py): hücre ve animasyon → kare numaraları (assets/oyuncu/oyuncu.png)\nASSETLER.oyuncu = ' + json.dumps(
+    {'kare': {'w': W, 'h': H, 'ayakY': AY, 'ayakBoy': 117 * K}, 'anim': {k: [yeniNo[i] for i in v] for k, v in ANIM.items()}}) + ';\n'
+open(ap, 'w', encoding='utf8').write(t)
+print('sayfa', sayfa.shape)

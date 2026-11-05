@@ -16,7 +16,7 @@ class BootSahnesi extends Phaser.Scene {
     L.image('tane', 'assets/nesne/tane.png');
     L.spritesheet('toplanan', 'assets/nesne/toplanan.png', { frameWidth: A.toplanan.w, frameHeight: A.toplanan.h });
     // Oyuncu
-    const K1 = CONFIG.oyuncu.kare, K2 = CONFIG.oyuncu.kare2;
+    const K1 = ASSETLER.oyuncu.kare, K2 = CONFIG.oyuncu.kare2;
     L.spritesheet('oyuncu', 'assets/oyuncu/oyuncu.png', { frameWidth: K1.w, frameHeight: K1.h });
     L.spritesheet('oyuncu2', 'assets/oyuncu/oyuncu2.png', { frameWidth: K2.w, frameHeight: K2.h });
     // Düşmanlar (her biri yatay şerit) ve mermiler
@@ -55,21 +55,23 @@ class BootSahnesi extends Phaser.Scene {
     const tanimla = (doku, liste) => liste.forEach(([key, kareler, frameRate, repeat]) =>
       this.anims.create({ key, frames: kareler.map(frame => ({ key: doku, frame })), frameRate, repeat }));
     // assets/oyuncu/oyuncu.png
+    // assets/oyuncu/oyuncu.png (araclar/oyuncuYeni.py) — kare numaraları ASSETLER.oyuncu.anim'den
+    const OA = ASSETLER.oyuncu.anim;
     tanimla('oyuncu', [
-      ['dur',      aralik(60, 65), 7,  -1],  // bekleme (v0.76 araclar/oyuncuYeni.py)
-      ['ayakVur',  aralik(74, 81), 10, -1],  // uzun beklemede ayak vurma
-      ['kos',      aralik(82, 93), 13, -1],
-      ['zipla',    [10, 11, 12],   14, 0],   // çömel → kalk → tepe
-      ['dus',      [13],           1,  0],
-      ['in',       [14],           1,  0],   // yere iniş (toz)
-      ['sersem',   aralik(15, 17), 10, -1],  // yerde ayaktayken hasar
-      ['vur',      aralik(24, 28), 22, 0],   // baston vuruşu
-      ['tirman',   aralik(66, 73), 8,  -1],
-      ['uzat',     [41, 42, 43],   14, 0],   // baston kancası uzatma
-      ['cek',      aralik(44, 48), 10, -1],
-      ['pogoHava', [49],           1,  0],
-      ['pogoSek',  [50, 51, 52],   14, 0],   // değme anı (kıvılcım) → sekme
-      ['egil',     aralik(53, 57), 10, -1]
+      ['dur',      OA.dur,      7,  -1],  // bekleme
+      ['ayakVur',  OA.ayakVur,  10, -1],  // uzun beklemede ayak vurma
+      ['kos',      OA.kos,      13, -1],
+      ['zipla',    OA.zipla,    14, 0],   // çömel → kalk → tepe
+      ['dus',      OA.dus,      1,  0],
+      ['in',       OA.in,       1,  0],   // yere iniş (toz)
+      ['sersem',   OA.sersem,   10, -1],  // yerde ayaktayken hasar
+      ['vur',      OA.vur,      22, 0],   // baston vuruşu
+      ['tirman',   OA.tirman,   8,  -1],
+      ['uzat',     OA.uzat,     14, 0],   // baston kancası uzatma
+      ['cek',      OA.cek,      10, -1],
+      ['pogoHava', OA.pogoHava, 1,  0],
+      ['pogoSek',  OA.pogoSek,  14, 0],   // değme anı (kıvılcım) → sekme
+      ['egil',     OA.egil,     10, -1]
     ]);
     // assets/oyuncu/oyuncu2.png (araclar/oyuncuEk.py)
     tanimla('oyuncu2', [

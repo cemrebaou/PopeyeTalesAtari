@@ -7,7 +7,9 @@
 import numpy as np
 from PIL import Image
 KOK = __file__.rsplit('/araclar/', 1)[0]
-W, H, AY, OLCEK = 240, 220, 200, 0.57
+K = 2   # v0.78: yüksek çözünürlük (hücre 2 kat)
+W, H, AY, OLCEK = 240 * K, 220 * K, 200 * K, 0.57 * K
+SUT = 6   # 6 sütun (sayfa 4096 px'i aşmasın)
 C = W // 2   # v0.40: hücre 240 geniş (itme karesi gövdenin arkasına taşabilsin), şapka/gövde ortası x=C
 def yukle(p):
     im = np.array(Image.open(KOK + '/assets/kaynak/' + p).convert('RGBA')); im[im[:, :, 3] < 60] = 0; return im
@@ -32,7 +34,7 @@ for x0, x1 in [(47, 247), (285, 482), (518, 710), (744, 937), (974, 1166), (1205
     kareler.append((kes(im, 49, 358, x0, x1), 0))
 for i in range(6):
     kareler.append((kes(im, 425, 665, itKes[i], itKes[i + 1]), 0))
-for (x0, x1), alt in zip([(36, 234), (294, 493), (540, 755), (820, 1114), (1140, 1395)], [0, 0, 20, 0, 0]):
+for (x0, x1), alt in zip([(36, 234), (294, 493), (540, 755), (820, 1114), (1140, 1395)], [0, 0, 20 * K, 0, 0]):
     kareler.append((kes(im, 710, 1042, x0, x1), alt))
 ek = yukle('oyuncu_asiliHasar.png'); ek = kes(ek, 0, ek.shape[0], 0, ek.shape[1])
 asiliBoy = kareler[0][0].shape[0]
@@ -42,7 +44,7 @@ ol = yukle('oyuncu_olum.png'); OA = ol[:, :, 3] > 150
 for x0, x1 in [(18, 236), (245, 466), (472, 698), (708, 936), (944, 1175), (1182, 1423)]:
     kareler.append((kes(ol, 0, ol.shape[0], x0, x1), 0))
 ORTALI = set(range(18, 24))
-out = Image.new('RGBA', (W * 10, H * 3), (0, 0, 0, 0))
+out = Image.new('RGBA', (W * SUT, H * 4), (0, 0, 0, 0))
 # v0.36: asılma kareleri (0–5, 17) bastona göre hizalanır → baston her karede aynı yerde sabit, gövde sallanır.
 # Hedef: en uzun asılma karesinin ayağı ayak çizgisinde, baston sağ ucu x=KANCA_X.
 def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
@@ -50,9 +52,9 @@ def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
     return t, np.where(b[t:t + 14].any(0))[0][-1]
 ASILI = [0, 1, 2, 3, 4, 5, 17]
 ITME = [6, 7, 8, 9, 10, 11, 16]
-ON_KENAR = C + 9 / (66.21 / 117 * 0.77) + 2   # boy (CONFIG.oyuncu.boy) ve itme ölçeği (animOlcek.it) değişirse güncelle   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
+ON_KENAR = C + 9 / (66.21 / (117 * K) * 0.77) + 2 * K   # boy (CONFIG.oyuncu.boy) ve itme ölçeği (animOlcek.it) değişirse güncelle   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
 ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
-KANCA_X = C + 38   # v0.43: baston ucu gövdenin ~5.5 px önünde (v0.38'deki ~10.6 px'ten 5 px geri) → kanca taşın içine girer
+KANCA_X = C + 38 * K   # v0.43: baston ucu gövdenin ~5.5 px önünde (v0.38'deki ~10.6 px'ten 5 px geri) → kanca taşın içine girer
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
     o = OLCEK * (k[2] if len(k) > 2 else 1)
@@ -77,6 +79,6 @@ for n, k in enumerate(kareler):
         for i, v in enumerate(boy):
             if v < 40: c[lab == i + 1] = 0
     cell = Image.fromarray(c)
-    out.paste(cell, ((n % 10) * W, (n // 10) * H))
+    out.paste(cell, ((n % SUT) * W, (n // SUT) * H))
 out.save(KOK + '/assets/oyuncu/oyuncu2.png', optimize=True)
 print(len(kareler), 'kare')
