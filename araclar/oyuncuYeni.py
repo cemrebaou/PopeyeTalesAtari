@@ -17,7 +17,7 @@ exec(temizle_kod.replace("KOK + '/assets/kaynak/' + ad", "KOK + '/assets/kaynak/
 
 _t = Image.open(KOK + '/assets/kaynak/oyuncu_taban.png').convert('RGBA')
 taban = np.array(_t.resize((_t.width * K, _t.height * K), Image.LANCZOS))   # eski kareler (kaynağı yok) 2 kat
-out = np.zeros((H * 13, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
+out = np.zeros((H * 14, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
 def hucre(i): return (i // SUT) * H, (i % SUT) * W
 def eski(i):
     y, x = hucre(i); return taban[y:y + H, x:x + W]
@@ -156,10 +156,14 @@ for i in range(24, 29): bosalt(i)
 # v0.81: kanca uzatma + çekme (oyuncu_cek.gif): 1–3 uzat, 4–11 geri çek; 0 (bekleme) alınmaz. Ölçek/hiza vuruşla aynı.
 v = gif('oyuncu_cek.gif'); y0, y1, _, _ = kutu(v[0]); o = durBoy / (y1 - y0 + 1); hx = sapka(v[0])
 for k, a in enumerate(v[1:12]): koy(119 + k, a, o, hx, kutu(a)[1])
+# v0.82: eğik yürüme (oyuncu_egil.gif): 0 = eğik dururken, 1–7 yürürken döngü. Boy eski eğik karelerle aynı.
+v = gif('oyuncu_egil.gif'); egBoy = max(kutu(eski(i))[1] - kutu(eski(i))[0] + 1 for i in range(53, 58))
+y0, y1, _, _ = kutu(v[0]); o = egBoy / (y1 - y0 + 1); hx = sapka(v[0])
+for k, a in enumerate(v): koy(130 + k, a, o, hx, kutu(a)[1])
 # Sıkıştır: sadece kullanılan kareler, animasyon sırasıyla 8 sütunlu sayfaya; kare listesi ASSETLER.oyuncu'ya
 ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [95, 96, 97], 'dus': [98], 'in': [100], 'takla': range(102, 111),
         'sersem': [15, 16, 17], 'vur': range(111, 115), 'vur2': range(115, 119), 'tirman': range(66, 74), 'uzat': range(119, 122), 'cek': range(122, 130),
-        'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egil': range(53, 58)}
+        'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egilDur': [130], 'egil': range(131, 138)}
 S2 = 8; sira = [i for v in ANIM.values() for i in v]; yeniNo = {}
 sayfa = np.zeros((H * (-(-len(sira) // S2)), W * S2, 4), np.uint8)
 for n, i in enumerate(sira):

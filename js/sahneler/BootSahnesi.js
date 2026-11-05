@@ -73,7 +73,8 @@ class BootSahnesi extends Phaser.Scene {
       ['cek',      OA.cek,      10, -1],
       ['pogoHava', OA.pogoHava, 1,  0],
       ['pogoSek',  OA.pogoSek,  14, 0],   // değme anı (kıvılcım) → sekme
-      ['egil',     OA.egil,     10, -1]
+      ['egilDur',  OA.egilDur,  1,  0],   // eğik dururken
+      ['egil',     OA.egil,     10, -1]   // eğik yürürken döngü
     ]);
     // assets/oyuncu/oyuncu2.png (araclar/oyuncuEk.py)
     tanimla('oyuncu2', [

@@ -497,7 +497,7 @@ Object.assign(OyunSahnesi.prototype, {
     else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
     else if (!yerde && this.taklaZaman > 0) a = 'takla';
     else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
-    else if (this.egik) { a = 'egil'; durdur = Math.abs(b.velocity.x) <= 10; }
+    else if (this.egik) a = Math.abs(b.velocity.x) > 10 ? 'egil' : 'egilDur';
     else if (this.inisZaman > 0) a = 'in';
     else if (this.itiyor) { a = 'it'; durdur = Math.abs(b.velocity.x) <= 10; }
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
