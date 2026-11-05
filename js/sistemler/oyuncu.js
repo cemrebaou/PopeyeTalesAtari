@@ -414,13 +414,13 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   // ---- Hasar, ölüm ----
-  oyuncuHasar(kaynakX) {
+  oyuncuHasar(kaynakX, miktar = 1) {
     const S = this.durum, p = this.player, b = p.body;
     if (this.dokunulmaz > 0 || S.olu || S.bitti) return;
     // Darbe karesi o anki duruma göre (yerde ayakta → sersem)
     this.hasarAnim = this.asili ? 'h_asili' : this.tirmaniyor ? 'h_tirman' : this.cekDurum ? 'h_cek'
       : this.itiyor ? 'h_it' : this.egik ? 'h_egil' : !yerdeMi(b) ? 'h_hava' : null;
-    S.can--;
+    S.can = Math.max(0, S.can - miktar);
     this.hudGuncelle();
     this.hareketleriBirak();
     if (S.can <= 0) { this.oyuncuOl(); return; }

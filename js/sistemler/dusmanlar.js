@@ -1,7 +1,7 @@
 // Düşmanlar: yaratma, devriye, ateş edenler (maymun, mızraklı köpek), uçanlar (arı, örümcek), patron, mermiler, hasar ve ölüm.
-const YURUYEN = ['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek', 'kedi', 'domuz', 'kertenkele'];
+const YURUYEN = ['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek', 'kedi', 'domuz', 'kertenkele', 'golem', 'fici', 'buyucu'];
 const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan',
-  kedi: 'olKopek', yarasa: 'olAri', domuz: 'olBoss', kertenkele: 'olYilan' };
+  kedi: 'olKopek', yarasa: 'olAri', golem: 'olBoss', bitki: 'olGul', fici: 'olYuvarlak', buyucu: 'olMaymun', domuz: 'olBoss', kertenkele: 'olYilan' };
 // tip: [gövde g, gövde y, can, hız, uçan]
 const DUSMAN_TIP = {
   boss:     [56, 60, CONFIG.patron.can, 0, false],
@@ -13,13 +13,17 @@ const DUSMAN_TIP = {
   ari:      [20, 20, 1, 0, true],
   orumcek:  [22, 22, 1, 0, true],
   // 2. bölüm
-  kedi:       [24, 38, 3, 70, false],   // yakına gelince bıçakla atılır
-  domuz:      [34, 46, 5, 35, false],   // yakına gelince gürzle vurur
-  kertenkele: [22, 28, 2, 45, false],   // üfleme okuyla atar
+  kedi:       [24, 38, 2, 70, false],   // yakına gelince bıçakla atılır
+  domuz:      [34, 46, 3, 35, false],   // yakına gelince gürzle vurur
+  kertenkele: [22, 28, 1, 45, false],   // üfleme okuyla atar
+  golem:      [36, 50, 4, 30, false],   // mor bölge: yakına gelince yumruk
+  bitki:      [26, 34, 1, 0, false],    // üst bölge: yerinde durur, eğimli zehir tükürür (7 karo)
+  fici:       [30, 32, 2, 50, false],   // görünce top olup dönerek atılır (dönerken vurulmaz)
+  buyucu:     [24, 38, 1, 40, false],   // yavaşça büyü hazırlar, 2 can götüren büyü atar
   yarasa:     [26, 20, 2, 0, true]      // uçar, oyuncunun yanına gelip ses dalgası atar
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
-const DUSMAN_GOMME = { kedi: 7, domuz: 7, kertenkele: 7 };
+const DUSMAN_GOMME = { kedi: 7, domuz: 7, kertenkele: 7, golem: 7, bitki: 7, fici: 7, buyucu: 7 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -42,7 +46,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (e.tip === 'boss') {
       Object.assign(d, { aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1 });
       d.setFlipX(true);
-    } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele') {
+    } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele' || e.tip === 'buyucu' || e.tip === 'bitki') {
       d.atesBekle = 1 + Math.random(); d.hazir = 0;
     } else if (e.tip === 'ari' || e.tip === 'yarasa') {
       Object.assign(d, { baslangicX: e.x, baslangicY: e.y, faz: Math.random() * 6, kovala: false, atesBekle: 1.5, saldiri: 0 });
@@ -50,7 +54,8 @@ Object.assign(OyunSahnesi.prototype, {
       Object.assign(d, { tavan: e.tavan, ustY: e.tavan + 24, altY: Math.max(e.alt, e.tavan + 60), faz: Math.random() * 6 });
     }
     if (YURUYEN.includes(e.tip)) this.devriyeAlani(d, e);
-    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur' }[e.tip] || 'yuru');
+    if (e.tip === 'fici') Object.assign(d, { durum: 'yuru', donus: 2, sonYon: 1 });
+    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur', bitki: 'bekle' }[e.tip] || 'yuru');
     if (e.tip === 'boss') d.anims.pause();
     return d;
   },
@@ -97,8 +102,10 @@ Object.assign(OyunSahnesi.prototype, {
       switch (d.tip) {
         case 'gul': case 'yilan': this.devriye(d, dt); break;
         case 'yuvarlak': this.kirpiGuncelle(d, dt); break;
-        case 'maymun': case 'kopek': case 'kertenkele': this.atesEden(d, dt); break;
-        case 'kedi': case 'domuz': this.yakinSaldiri(d, dt); break;
+        case 'maymun': case 'kopek': case 'kertenkele': case 'buyucu': this.atesEden(d, dt); break;
+        case 'kedi': case 'domuz': case 'golem': this.yakinSaldiri(d, dt); break;
+        case 'bitki': this.bitkiGuncelle(d, dt); break;
+        case 'fici': this.ficiGuncelle(d, dt); break;
         case 'ari': this.ariGuncelle(d, time); break;
         case 'yarasa': this.yarasaGuncelle(d, time, dt); break;
         case 'orumcek': this.orumcekGuncelle(d, time); break;
@@ -142,7 +149,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (d.hazir > 0) {
       d.hazir -= dt;
       b.setVelocityX(0);
-      if (d.hazir <= 0) { this.mermiAt(d, d.yon); d.atesBekle = d.tip === 'kopek' ? 1.8 : 2.4; }
+      if (d.hazir <= 0) { this.mermiAt(d, d.yon); d.atesBekle = { kopek: 1.8, buyucu: 2.6 }[d.tip] || 2.4; }
       return;
     }
     d.atesBekle -= dt;
@@ -151,7 +158,11 @@ Object.assign(OyunSahnesi.prototype, {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
       b.setVelocityX(0);
-      if (d.atesBekle <= 0) { d.hazir = 0.4; d.play('d_' + d.ad + '_at'); }
+      if (d.atesBekle <= 0) {
+        // kertenkele: oku taşıyan kare (2.) görünürken atar · büyücü: asalı kareler yavaşça, sonunda atar
+        d.hazir = { kertenkele: 0.12, buyucu: 1.25 }[d.tip] || 0.4;
+        d.play('d_' + d.ad + (d.tip === 'buyucu' ? '_buyu' : '_at'));
+      }
       else if (d.tip === 'kopek') { this.dusmanAnim(d, 'yuru'); d.anims.pause(); }
       else this.dusmanAnim(d, 'dur');
     } else {
@@ -163,14 +174,14 @@ Object.assign(OyunSahnesi.prototype, {
   // Kedi / domuz: oyuncu aynı zeminde yakına gelince döner ve saldırır. Kedi bıçakla ileri atılır, domuz gürzü indirir;
   // vuruş anında önündeki menzildeyse oyuncu hasar alır. Sonra kısa dinlenme.
   yakinSaldiri(d, dt) {
-    const p = this.player, b = d.body, dx = p.x - d.x, kedi = d.tip === 'kedi';
+    const p = this.player, b = d.body, dx = p.x - d.x, kedi = d.tip === 'kedi', golem = d.tip === 'golem';
     if (d.saldiri > 0) {
       d.saldiri -= dt;
       b.setVelocityX(kedi && d.saldiri > 0.12 && d.saldiri < 0.36 ? d.yon * 240 : 0);
       if (!d.vurdu && d.saldiri < (kedi ? 0.25 : 0.22)) {
         d.vurdu = true;
         const on = (p.x - d.x) * d.yon;
-        if (!this.durum.olu && on > -10 && on < (kedi ? 52 : 70) && Math.abs(p.body.bottom - b.bottom) < 40) this.oyuncuHasar(d.x);
+        if (!this.durum.olu && on > -10 && on < (kedi ? 52 : golem ? 76 : 70) && Math.abs(p.body.bottom - b.bottom) < 40) this.oyuncuHasar(d.x);
         if (!kedi) this.cameras.main.shake(90, 0.004);
       }
       if (d.saldiri <= 0) { d.dinlen = kedi ? 1 : 1.5; this.dusmanAnim(d, 'dur'); }
@@ -181,7 +192,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (ayni && Math.abs(dx) < (kedi ? 120 : 80)) {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
-      d.saldiri = kedi ? 0.48 : 0.6;
+      d.saldiri = kedi ? 0.48 : golem ? 0.7 : 0.6;
       d.vurdu = false;
       d.play('d_' + d.ad + '_saldir');
       this.ses(kedi ? 'bastonSalla' : 'bastonVur');
@@ -209,6 +220,83 @@ Object.assign(OyunSahnesi.prototype, {
       b.setVelocity((hx - d.x) * 2, (hy - d.y) * 2);
     }
     d.setFlipX(b.velocity.x < 0);
+  },
+
+  // Bitki: yerinde durur, oyuncuya döner; 7 karo içinde ve görüşteyse ağzını açıp eğimli zehir tükürür (2.2 sn arayla)
+  bitkiGuncelle(d, dt) {
+    const p = this.player, b = d.body, dx = p.x - d.x, dy = p.body.bottom - b.bottom;
+    b.setVelocityX(0);
+    if (d.hazir > 0) { d.hazir -= dt; if (d.hazir <= 0) this.zehirAt(d); return; }
+    d.atesBekle -= dt;
+    const gor = !this.durum.olu && this.cameras.main.worldView.contains(d.x, d.y - 20)
+      && Math.abs(dx) < 7 * 32 + 16 && dy > -140 && dy < 80;
+    if (gor) {
+      d.yon = Math.sign(dx) || 1;
+      d.setFlipX(d.yon < 0);
+      if (d.atesBekle <= 0) { d.hazir = 0.2; d.atesBekle = 2.2; d.play('d_bitki_at'); return; }
+    }
+    if (!(d.anims.isPlaying && d.anims.currentAnim.key === 'd_bitki_at')) this.dusmanAnim(d, 'bekle');
+  },
+
+  // Zehir: oyuncunun olduğu yere (en çok 7 karo) eğimli tükürük gibi düşer; yere ya da oyuncuya çarpınca zehirVur sesi
+  zehirAt(d) {
+    const M = ASSETLER.dusman.zehir, p = this.player, yon = d.yon;
+    const uzak = Phaser.Math.Clamp(Math.abs(p.x - d.x) - 16, 40, 7 * 32), vy = -380, t = 2 * -vy / CONFIG.fizik.yercekimi;
+    const m = this.mermiler.create(d.x + yon * 18, d.y - 30, 'zehir').setDepth(7);
+    m.setDisplaySize(M.gen, M.gen * M.h / M.w);
+    m.body.setAllowGravity(true);
+    m.body.setSize(M.w * 0.4, M.h * 0.6, true);
+    m.setVelocity(yon * uzak / t, vy);
+    m.zehir = true; m.omur = 2.6;
+    this.ses('zehirAt');
+  },
+
+  // Fıçı: aynı zeminde oyuncuyu görünce durur, kurulur (0.5 sn), sonra top olup oyuncuya doğru yavaş yavaş hızlanarak
+  // dönerek atılır; zemininin ucuna varınca durur, bir tur (iki dönüş) yürür, sonra yeniden atılabilir.
+  // Dönerken vurulmaz, üstünden pogo da işlemez — değen oyuncu hasar alır.
+  ficiGuncelle(d, dt) {
+    const p = this.player, b = d.body, dx = p.x - d.x;
+    if (d.durum === 'hazir') {
+      b.setVelocityX(0);
+      d.x += Math.sin(this.time.now * 0.08) * 0.6;   // titreme
+      if ((d.sure -= dt) <= 0) this.ficiDon(d, true, Math.sign(dx) || d.yon);
+      return;
+    }
+    if (d.durum === 'don') {
+      d.hizX = Math.min(d.hizX + 300 * dt, 290);
+      b.setVelocityX(d.yon * d.hizX);
+      const T = d.topImg, s = d.scaleX;
+      T.setPosition(d.x, d.y + DUSMAN_GOMME.fici - (168 - 87) * s);
+      T.rotation += d.yon * d.hizX * dt / (75 * s);
+      const uc = (d.yon > 0 && d.x >= d.maxX - 1) || (d.yon < 0 && d.x <= d.minX + 1)
+        || (b.blocked.right && d.yon > 0) || (b.blocked.left && d.yon < 0);
+      if (uc || (d.sure -= dt) <= 0) { this.ficiDon(d, false); d.yon = -d.yon; d.donus = 0; d.sonYon = d.yon; }
+      return;
+    }
+    this.devriye(d, dt);
+    this.dusmanAnim(d, 'yuru');
+    d.setFlipX(d.yon < 0);
+    if (d.yon !== d.sonYon) { d.donus++; d.sonYon = d.yon; }
+    const gor = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && Math.abs(dx) < 300
+      && p.x >= d.minX - 24 && p.x <= d.maxX + 24 && this.cameras.main.worldView.contains(d.x, d.y - 10);
+    if (gor && d.donus >= 2) {
+      d.durum = 'hazir'; d.sure = 0.5; d.yon = Math.sign(dx) || 1; d.setFlipX(d.yon < 0);
+      this.dusmanAnim(d, 'hazir');
+    }
+  },
+
+  ficiDon(d, basla, yon) {
+    if (basla) {
+      d.durum = 'don'; d.yon = yon; d.hizX = 0; d.sure = 4;
+      if (!d.topImg) d.topImg = this.add.image(0, 0, 'd_fici', 6).setOrigin(91 / 184, 87 / 168).setDepth(6);
+      d.topImg.setScale(d.scaleX).setFlipX(yon < 0).setVisible(true).setRotation(0);
+      d.setVisible(false);
+      this.ses('kaydir1');
+    } else {
+      d.durum = 'yuru';
+      if (d.topImg) d.topImg.setVisible(false);
+      d.setVisible(true);
+    }
   },
 
   // Yarasa: görüş alanına girince oyuncunun 150 px yanına, biraz üstüne uçar; aynı hizadaysa durup ses dalgası atar
@@ -252,21 +340,26 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   mermiAt(d, yon) {
-    const kopek = d.tip === 'kopek', ok = d.tip === 'kertenkele', yar = d.tip === 'yarasa';
-    const ad = kopek ? 'mizrak' : ok ? 'ok' : yar ? 'dalga' : 'atesTopu', M = ASSETLER.dusman[ad];
+    const kopek = d.tip === 'kopek', ok = d.tip === 'kertenkele', yar = d.tip === 'yarasa', buy = d.tip === 'buyucu';
+    const ad = kopek ? 'mizrak' : ok ? 'ok' : yar ? 'dalga' : buy ? 'buyu' : 'atesTopu', M = ASSETLER.dusman[ad];
     if (kopek || ok) this.ses('mizrak');
     else if (yar) this.ses('olAri', { volume: 0.5, rate: 1.6 });
+    else if (buy) this.ses('gizli', { volume: 0.6, rate: 1.4 });
     else { this.atesSira = !this.atesSira; this.ses(this.atesSira ? 'ates1' : 'ates2'); }
-    const m = this.mermiler.create(d.x + yon * (ok ? 24 : yar ? 26 : 18), yar ? d.y + 4 : d.y - (kopek ? 18 : ok ? 17 : 20), ad).setDepth(7);
+    const m = this.mermiler.create(d.x + yon * (ok ? 24 : yar ? 26 : buy ? 22 : 18), yar ? d.y + 4 : d.y - (kopek ? 18 : ok ? 20 : buy ? 26 : 20), ad).setDepth(7);
+    if (buy) m.hasar = 2;
     m.setDisplaySize(M.gen, M.gen * M.h / M.w).setFlipX(yon < 0);
     m.body.setAllowGravity(false);
     m.body.setSize(M.w * 0.7, M.h * 0.6, true);
-    m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : yar ? 230 : 210));
+    m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : yar ? 230 : buy ? 200 : 210));
     m.omur = 2.6;
   },
 
   updateMermiler(dt) {
-    this.mermiler.getChildren().slice().forEach(m => { if ((m.omur -= dt) <= 0) m.destroy(); });
+    this.mermiler.getChildren().slice().forEach(m => {
+      if (m.zehir) m.rotation = Math.atan2(m.body.velocity.y, m.body.velocity.x);   // zehir uçuş yönüne bakar
+      if ((m.omur -= dt) <= 0) m.destroy();
+    });
   },
 
   // ---- Patron: yürü → hazırlan (sarı) → atıl → dinlen; yarı canın altında hızlanır ve zıplayarak atılır ----
@@ -340,7 +433,8 @@ Object.assign(OyunSahnesi.prototype, {
   dusmanTemas(p, d) {
     if (!d.active || d.oldu || this.durum.olu) return;
     const b = p.body;
-    if (this.pogoModu && b.velocity.y > 50 && (b.bottom - d.body.top) < 22) {   // pogo ile üstten
+    const donuyor = d.tip === 'fici' && d.durum === 'don';
+    if (!donuyor && this.pogoModu && b.velocity.y > 50 && (b.bottom - d.body.top) < 22) {   // pogo ile üstten
       this.dusmanHasar(d, 1);
       this.pogoZipla();
       return;
@@ -360,6 +454,7 @@ Object.assign(OyunSahnesi.prototype, {
       if (d.hp <= 0) this.bossYen(d);
       return true;
     }
+    if (d.tip === 'fici' && d.durum === 'don') return false;   // dönerken vurulmaz
     d.hp -= n;
     if (d.hp <= 0) {
       d.oldu = true;
@@ -384,6 +479,7 @@ Object.assign(OyunSahnesi.prototype, {
   // Ölüm: ses, gövde kapanır, parçalanma animasyonu, solup kaybolur
   dusmanOlum(d, bitince) {
     d.sesObj = sesDurdur(d.sesObj);
+    if (d.topImg) { d.topImg.destroy(); d.topImg = null; d.setVisible(true); }
     if (OLUM_SESI[d.tip]) this.ses(OLUM_SESI[d.tip]);
     d.clearTint();
     d.body.setVelocity(0, 0);

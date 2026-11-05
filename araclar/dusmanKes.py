@@ -22,7 +22,8 @@ def temizle(dosya):
     im = im.astype(np.uint8)
     return im, im[:, :, 3] > 60
 KAYNAK = {'1': temizle('dusman_seti.png'), '2': temizle('dusman_seti2.png'),   # v0.52: 2 = maymun, köpek, patron yeni görseller
-          '3': temizle('dusman_seti3.png'), '4': temizle('dusman_seti4.png')}   # v0.71: 4 = yarasa                                        # v0.70: 2. bölüm: kedi, domuz, kertenkele
+          '3': temizle('dusman_seti3.png'), '4': temizle('dusman_seti4.png'),
+          '5': temizle('dusman_seti5.png'), '6': temizle('dusman_seti6.png')}   # v0.72: 5 = golem, bitki · 6 = fıçı, büyücü   # v0.71: 4 = yarasa                                        # v0.70: 2. bölüm: kedi, domuz, kertenkele
 # Kertenkelenin üfleme okunu (8. kare, borunun ucunda) ayrı mermi olarak kes, kareden sil
 _im3, _A3 = KAYNAK['3']
 OK_KUTU = (725, 768, 1296, 1350)   # y0, y1, x0, x1
@@ -39,6 +40,22 @@ _ys, _xs = np.where(_dalga[:, :, 3] > 30)
 _dalga = _dalga[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
 _im4[DALGA_KUTU[0]:DALGA_KUTU[1], DALGA_KUTU[2]:DALGA_KUTU[3]] = 0
 _A4[DALGA_KUTU[0]:DALGA_KUTU[1], DALGA_KUTU[2]:DALGA_KUTU[3]] = False
+# v0.72: ayrı mermiler (zehir, büyü) kutudan kesilip kaynaktan silinir
+def mermiKes(k, y0, y1, x0, x1):
+    im_, A_ = KAYNAK[k]
+    m = im_[y0:y1, x0:x1].copy(); ys, xs = np.where(m[:, :, 3] > 30)
+    m = m[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    im_[y0:y1, x0:x1] = 0; A_[y0:y1, x0:x1] = False
+    return m
+_zehir = mermiKes('5', 540, 640, 1700, 1870)
+_buyu = mermiKes('6', 520, 680, 1925, 2100)
+# Fıçı: 2. satırdaki (hazırlan, top) kareler 1. satırın sağına, alt çizgileri hizalı tek şeride
+_im6, _A6 = KAYNAK['6']
+_s1, _s2 = _im6[20:188], _im6[247:403]
+_h = max(_s1.shape[0], _s2.shape[0]); _w = _im6.shape[1]
+_f = np.zeros((_h, _w * 2, 4), np.uint8)
+_f[_h - _s1.shape[0]:, :_w] = _s1; _f[_h - _s2.shape[0]:, _w:] = _s2
+KAYNAK['6f'] = (_f, _f[:, :, 3] > 30)
 im, A = KAYNAK['1']
 
 def parcalar(y0, y1, bol=()):
@@ -81,6 +98,10 @@ DUS = {
   'kedi':       (170, 324, 10, {6: 4}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [6]}, None, 46, '3'),
   'domuz':      (366, 579, 10, {5: 2}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [7]}, None, 58, '3'),
   'yarasa':     (0, 307, 9, {3: 2, 6: 2}, {'uc': [0,1,2,3,4,5], 'saldir': [6,7,8], 'ol': [8]}, None, 40, '4'),
+  'golem':      (11, 250, 10, {2: 4, 4: 3}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8,9], 'dur': [0], 'ol': [7]}, None, 62, '5'),
+  'bitki':      (296, 476, 10, {0: 5}, {'bekle': [0,1,2,3,4,5], 'at': [6,7,8,9], 'ol': [8]}, None, 50, '5'),
+  'fici':       (0, 168, 7, (), {'yuru': [0,1,2,3,4], 'hazir': [5], 'top': [6], 'ol': [5]}, None, 38, '6f'),
+  'buyucu':     (456, 677, 9, {5: 2, 6: 2}, {'yuru': [0,1,2,3], 'buyu': [4,5,6,7,8], 'dur': [4], 'ol': [6]}, None, 44, '6'),
   'kertenkele': (682, 844, 10, {5: 3}, {'yuru': [0,1,2,3,4,5], 'at': [6,7,8], 'dur': [9], 'ol': [8]}, None, 40, '3'),
 }
 # Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
@@ -112,7 +133,7 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
             if nl > 1:
                 bo = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1))
                 pa[(lab > 0) & (lab != int(np.argmax(bo)) + 1)] = 0
-        if kay and kay[0] == '3':   # v0.70: komşu kareden kalan küçük kırpıntılar (kenara değen) silinir
+        if kay and kay[0] in '356':   # v0.70: komşu kareden kalan küçük kırpıntılar (kenara değen) silinir
             lab, nl = ndimage.label(pa[:, :, 3] > 30)
             for li in range(1, nl + 1):
                 m = lab == li; xs = np.where(m.any(0))[0]
@@ -144,6 +165,12 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
     if ad == 'kertenkele':
         Image.fromarray(_ok).save(KOK + '/assets/dusman/ok.png', optimize=True)
         meta['ok'] = {'w': int(_ok.shape[1]), 'h': int(_ok.shape[0]), 'gen': 24}
+    if ad == 'bitki':
+        Image.fromarray(_zehir).save(KOK + '/assets/dusman/zehir.png', optimize=True)
+        meta['zehir'] = {'w': int(_zehir.shape[1]), 'h': int(_zehir.shape[0]), 'gen': 26}
+    if ad == 'buyucu':
+        Image.fromarray(_buyu).save(KOK + '/assets/dusman/buyu.png', optimize=True)
+        meta['buyu'] = {'w': int(_buyu.shape[1]), 'h': int(_buyu.shape[0]), 'gen': 34}
     if ad == 'yarasa':
         Image.fromarray(_dalga).save(KOK + '/assets/dusman/dalga.png', optimize=True)
         meta['dalga'] = {'w': int(_dalga.shape[1]), 'h': int(_dalga.shape[0]), 'gen': 30}

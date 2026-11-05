@@ -128,6 +128,16 @@ class OyunSahnesi extends Phaser.Scene {
     return map.createLayer(0, ts, 0, 0).setScale(L.karo / A.boyut).setDepth(derinlik);
   }
 
+  zehirPatla(m) {
+    if (!m.active) return;
+    this.ses('zehirVur');
+    for (let i = 0; i < 6; i++) {
+      const k = this.add.circle(m.x, m.y, Phaser.Math.Between(2, 4), 0x8fe03a).setDepth(8);
+      this.tweens.add({ targets: k, x: m.x + Phaser.Math.Between(-22, 22), y: m.y - Phaser.Math.Between(4, 18), alpha: 0,
+        duration: 320, onComplete: () => k.destroy() });
+    }
+  }
+
   // Sahte duvarlar [x, y, w, h]: taş gibi görünür ama çarpışması yoktur (gizli oda). Karoları oyuncunun önünde ayrı
   // katmanda çizilir; oyuncu içine girince saydamlaşır, çıkınca yeniden taş olur.
   sahteDuvarlarKur() {
@@ -214,12 +224,13 @@ class OyunSahnesi extends Phaser.Scene {
       }
       return yerdeki(d);
     });
-    F.overlap(this.mermiler, this.solids, (m) => m.destroy());
+    F.overlap(this.mermiler, this.solids, (m) => { if (m.zehir) this.zehirPatla(m); m.destroy(); });
     F.overlap(P, this.mermiler, (p, m) => {
       if (!m.active) return;
-      const kaynakX = m.x - m.body.velocity.x;   // destroy'dan önce oku
+      const kaynakX = m.x - m.body.velocity.x, hasar = m.hasar || 1;   // destroy'dan önce oku
+      if (m.zehir) this.zehirPatla(m);
       m.destroy();
-      this.oyuncuHasar(kaynakX);
+      this.oyuncuHasar(kaynakX, hasar);
     });
     F.overlap(P, this.dusmanlar, (p, d) => this.dusmanTemas(p, d));
     // Toplanabilirler katı değil: işlem geri çağrısında alınır ve false döner → değme bilgisi (yerde / kafa çarpma) oluşmaz

@@ -406,9 +406,9 @@ for rf in range(3, H):
             while c < W and ok(c): c += 1
             if c - s0 >= 7: parcalar_.append((rf, s0, c - 1))
         else: c += 1
-AGIRLIK = {'a': [('kedi', 6), ('kertenkele', 3), ('domuz', 1)],
-           'k': [('domuz', 5), ('kedi', 3), ('kertenkele', 2)],
-           'm': [('kertenkele', 5), ('kedi', 3), ('domuz', 2)]}
+AGIRLIK = {'a': [('kedi', 4), ('kertenkele', 2), ('domuz', 1), ('bitki', 3), ('fici', 1)],      # bitki sadece üstte
+           'k': [('domuz', 4), ('kedi', 2), ('kertenkele', 2), ('fici', 3), ('buyucu', 2)],
+           'm': [('golem', 4), ('kertenkele', 2), ('buyucu', 2), ('kedi', 1), ('fici', 1)]}   # golem sadece morda
 random.shuffle(parcalar_)
 secilen = []
 for rf, c0, c1 in sorted(parcalar_, key=lambda p: -(p[2] - p[1])):
@@ -418,7 +418,7 @@ for rf, c0, c1 in sorted(parcalar_, key=lambda p: -(p[2] - p[1])):
     bol = 'a' if rf < 66 else 'k' if rf < 132 else 'm'
     turler = [t for t, a in AGIRLIK[bol] for _ in range(a)]
     tip = random.choice(turler)
-    if tip == 'domuz' and c1 - c0 < 9: tip = 'kedi' if bol == 'a' else 'kertenkele'
+    if tip in ('domuz', 'golem', 'fici') and c1 - c0 < 9: tip = 'kedi' if bol == 'a' else 'kertenkele'
     DUS.append({'tip': tip, 'x': cx * T + 16, 'y': rf * T})
 # Yarasalar (v0.71): koridorların ve iniş mağaralarının havasında, zeminin ~5 karo üstünde, etrafı 5×5 boş
 YARASA = []
@@ -487,5 +487,5 @@ open(KOK + '/js/veri/level2.js', 'w', encoding='utf8').write(s)
 # kaba önizleme (scratch): her karakter 1 karo
 open('/tmp/claude-0/-home-claude/85164cd8-761e-5dc1-8ca5-a447e90ed51c/scratchpad/l2.txt', 'w').write(
     '\n'.join(''.join('#' if v else '.' for v in row) for row in g))
-print('düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('kedi', 'domuz', 'kertenkele', 'yarasa')})
+print('düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('kedi', 'domuz', 'kertenkele', 'yarasa', 'golem', 'bitki', 'fici', 'buyucu')})
 print('blok', len(B), 'elmas', len(E), 'özel', len(OZ), 'sandık', len(SAN), 'taş', len(TAS), 'zincir', len(ZIN))

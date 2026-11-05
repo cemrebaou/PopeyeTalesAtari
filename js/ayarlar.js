@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.71',
+  surum: 'v0.72',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   ustUsteGomme: 4,
   tasYukari: 3,         // kırılır taşlar (kasa hariç) bu kadar yukarıda çizilir      // üst üste taş / kasa: üstteki, alttakinin üst kenar (perspektif) payına oturur (px)
@@ -63,7 +63,7 @@ const SESLER = [
   'elmas', 'para1', 'para2', 'para3', 'para4', 'para5', 'capaAltin', 'kizilElmas', 'buyukElmas', 'can', 'gizli', 'bayrak', 'sandikDus',
   'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale',
   // düşmanlar
-  'ates1', 'ates2', 'mizrak', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
+  'ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
   'olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13',
   // arayüz
   'tik'
