@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.70 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.71 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -85,8 +85,9 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 | kedi (2. bölüm) | 3 | devriye (70); oyuncu aynı zeminde 120 px'e gelince bıçakla ileri atılır (52 px menzil), 1 sn dinlenir |
 | domuz (2. bölüm) | 5 | devriye (35); 80 px'te gürzü indirir (70 px menzil, sarsıntı), 1.5 sn dinlenir |
 | kertenkele (2. bölüm) | 2 | maymun gibi: aynı zemindeyse üfleme okunu atar (`ok.png`, 260 px/sn) |
+| yarasa (2. bölüm) | 2 | uçar; görünce oyuncunun 150 px yanına, biraz üstüne gelir; aynı hizadaysa durup ses dalgası atar (`dalga.png`, 230 px/sn, 2.2 sn arayla); 560 px uzaklaşınca evine döner |
 | boss | 4 | 520 px'te uyanır; yürü → hazırlan → atıl → dinlen; yarı canın altında hızlanır, zıplayarak atılır; rastgele patron sesleri |
-- Ölüm karesi olmayanlar (2. bölüm) devrilip söner. 2. bölüm düşmanları `bolum2Uret.py` ile zemin parçalarına dağıtılır (A katında çoğu kedi, K'de domuz, M'de kertenkele; başlangıç, kontrol noktası, zincir dibi, gizli oda ve iniş mağaraları boş).
+- Kedi, domuz ve kertenkelenin ayakları zemin çizgisinin 7 px altına çizilir (`DUSMAN_GOMME`). Ölüm karesi olmayanlar (2. bölüm) devrilip söner. Yarasalar koridor ve iniş mağaralarının havasına dağıtılır. 2. bölüm düşmanları `bolum2Uret.py` ile zemin parçalarına dağıtılır (A katında çoğu kedi, K'de domuz, M'de kertenkele; başlangıç, kontrol noktası, zincir dibi, gizli oda ve iniş mağaraları boş).
 - Yürüyenler bastıkları zemin parçasının (duvar / uçurum / dikene kadar) iki ucu arasında gider, asla düşmez; duvara çarpınca döner (0.35 sn tekrar dönmez → titreme yok).
 - Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar; mermiler sandık / taş / kasaların içinden geçer.
 
@@ -98,7 +99,7 @@ Unity projesindeki `SampleScene`'den aktarıldı (1 Unity birimi = 48 px). Düny
 `level1.js` alanları: `bloklar` (çarpışma), `kayalar` (ara kaya), `dikenler`, `sarmasiklar`, `sandiklar`, `elmaslar`, `ozeller`, `kirTaslar`, `kontrol`, `ipuclari`, `dusmanlar`, `gizliler`, `selaleler`, `on` / `arka` (zeminDose.py üretir).
 
 ## 2. Bölüm — Mor Derinlikler
-Dünya 7680 × 6336 px (240 × 198 karo); oynanır alan 1. bölümün 2 katı. 46 düşman (kedi, domuz, kertenkele), patron yok — çıkış kapısı baştan açık. Tırmanma zincirle.
+Dünya 7680 × 6336 px (240 × 198 karo); oynanır alan 1. bölümün 2 katı. 62 düşman (21 kedi, 9 domuz, 16 kertenkele, 16 yarasa), patron yok — çıkış kapısı baştan açık. Tırmanma zincirle.
 Üç kat: üst **açık gri taş** (kırılır taşı `gri`), orta **koyu taş** (`koyu`), alt **mor kristal** (`mor`, ayrıca `kristal` taşlardan küçük elmas). Her katta üç koridor (üst / ana / alt), zincir, delik ve iniş mağaralarıyla bağlı. Tahta kasalar her katta.
 Ana yol: üst kat ana koridor (sağa) → sağdaki büyük iniş mağarası → orta kat (sola) → soldaki iniş mağarası → alt kat (sağa) → kapı. Kontrol noktası 7.
 Gizemler: üst kat en solda şelale — içine atlayan görünmez zemine basar, sola yürüyünce sahte duvarlı oda; sahte duvarlı odalar (orta kat üst koridor solu, alt kat üst koridor sağı); bastonla duvardan duvara asılarak çıkılan 3 baca; pogo ile çıkılan yüksek çıkıntılar; itilir taşla çıkılan raflar; kırılır taş kapılar.
@@ -113,7 +114,7 @@ Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `b
 | `bolum2Uret.py` | 2. bölümü (`level2.js`) baştan yazar; sonra zeminDose.py level2 |
 | `erisim.js [level2]` | önemli yerlere rahat zıplamayla ulaşılıyor mu (zemin içinden zıplama, zeminden zincire tutunma dahil; `--coz`: çözüm için kaya önerir) |
 | `oyuncuEk.py` | `kaynak/oyuncu_ek.png` vb. → `oyuncu/oyuncu2.png` |
-| `dusmanKes.py` | `kaynak/dusman_seti*.png` → `dusman/*.png` + `ASSETLER.dusman` (seti3: kedi, domuz, kertenkele + ayrı kesilen üfleme oku) |
+| `dusmanKes.py` | `kaynak/dusman_seti*.png` → `dusman/*.png` + `ASSETLER.dusman` (seti3: kedi, domuz, kertenkele + ayrı kesilen üfleme oku; seti4: yarasa + ayrı kesilen ses dalgası) |
 | `toplananKes.py` | `kaynak/toplanan_seti.png` → `nesne/toplanan.png` + `ASSETLER.toplanan` |
 | `kirTasKes.py` | `kaynak/kirilir_taslar.png` → `nesne/kirTas.png` |
 | `uiKes.py` | `kaynak/ui_seti.png`, `ui_ek.png` → `ui/*.png` + `ASSETLER.ui` |

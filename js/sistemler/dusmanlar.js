@@ -1,7 +1,7 @@
 // Düşmanlar: yaratma, devriye, ateş edenler (maymun, mızraklı köpek), uçanlar (arı, örümcek), patron, mermiler, hasar ve ölüm.
 const YURUYEN = ['gul', 'yilan', 'yuvarlak', 'maymun', 'kopek', 'kedi', 'domuz', 'kertenkele'];
 const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: 'olGul', yuvarlak: 'olYuvarlak', ari: 'olAri', orumcek: 'olOrumcek', yilan: 'olYilan',
-  kedi: 'olKopek', domuz: 'olBoss', kertenkele: 'olYilan' };
+  kedi: 'olKopek', yarasa: 'olAri', domuz: 'olBoss', kertenkele: 'olYilan' };
 // tip: [gövde g, gövde y, can, hız, uçan]
 const DUSMAN_TIP = {
   boss:     [56, 60, CONFIG.patron.can, 0, false],
@@ -15,8 +15,11 @@ const DUSMAN_TIP = {
   // 2. bölüm
   kedi:       [24, 38, 3, 70, false],   // yakına gelince bıçakla atılır
   domuz:      [34, 46, 5, 35, false],   // yakına gelince gürzle vurur
-  kertenkele: [22, 28, 2, 45, false]    // üfleme okuyla atar
+  kertenkele: [22, 28, 2, 45, false],   // üfleme okuyla atar
+  yarasa:     [26, 20, 2, 0, true]      // uçar, oyuncunun yanına gelip ses dalgası atar
 };
+// Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
+const DUSMAN_GOMME = { kedi: 7, domuz: 7, kertenkele: 7 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -28,10 +31,11 @@ Object.assign(OyunSahnesi.prototype, {
     // Görsel ASSETLER.dusman[tip] şeridinden, görünür boya ölçekli; gövde ayak çizgisinde (uçanlarda merkezde) ortalı
     const O = CONFIG.dusmanOlcek, D = ASSETLER.dusman[e.tip], s = D.boy * O / (D.ayak - D.ust);
     const bw = bw0 * O / s, bh = bh0 * O / s;
-    const oy = ucan ? (D.ust + D.ayak) / 2 : D.ayak;
+    const gom = (DUSMAN_GOMME[e.tip] || 0) * O / s / O;   // görsel px → kare px
+    const oy = (ucan ? (D.ust + D.ayak) / 2 : D.ayak) - gom;
     const y = e.tip === 'orumcek' ? e.tavan + 20 : e.y;
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
-    d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh);
+    d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
     Object.assign(d, { ad: e.tip, tip: e.tip, hp, hiz, oldu: false, yon: 1 });
     if (ucan) d.body.setAllowGravity(false);
 
@@ -40,13 +44,13 @@ Object.assign(OyunSahnesi.prototype, {
       d.setFlipX(true);
     } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele') {
       d.atesBekle = 1 + Math.random(); d.hazir = 0;
-    } else if (e.tip === 'ari') {
-      Object.assign(d, { baslangicX: e.x, baslangicY: e.y, faz: Math.random() * 6, kovala: false });
+    } else if (e.tip === 'ari' || e.tip === 'yarasa') {
+      Object.assign(d, { baslangicX: e.x, baslangicY: e.y, faz: Math.random() * 6, kovala: false, atesBekle: 1.5, saldiri: 0 });
     } else if (e.tip === 'orumcek') {
       Object.assign(d, { tavan: e.tavan, ustY: e.tavan + 24, altY: Math.max(e.alt, e.tavan + 60), faz: Math.random() * 6 });
     }
     if (YURUYEN.includes(e.tip)) this.devriyeAlani(d, e);
-    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', orumcek: 'bekle', maymun: 'dur' }[e.tip] || 'yuru');
+    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur' }[e.tip] || 'yuru');
     if (e.tip === 'boss') d.anims.pause();
     return d;
   },
@@ -96,6 +100,7 @@ Object.assign(OyunSahnesi.prototype, {
         case 'maymun': case 'kopek': case 'kertenkele': this.atesEden(d, dt); break;
         case 'kedi': case 'domuz': this.yakinSaldiri(d, dt); break;
         case 'ari': this.ariGuncelle(d, time); break;
+        case 'yarasa': this.yarasaGuncelle(d, time, dt); break;
         case 'orumcek': this.orumcekGuncelle(d, time); break;
         case 'boss': this.bossGuncelle(d, dt); break;
       }
@@ -206,6 +211,38 @@ Object.assign(OyunSahnesi.prototype, {
     d.setFlipX(b.velocity.x < 0);
   },
 
+  // Yarasa: görüş alanına girince oyuncunun 150 px yanına, biraz üstüne uçar; aynı hizadaysa durup ses dalgası atar
+  // (2.2 sn arayla). 560 px uzaklaşınca evine döner, orada süzülür.
+  yarasaGuncelle(d, time, dt) {
+    const p = this.player, b = d.body, dx = p.x - d.x, dy = (p.y - 30) - d.y;
+    const gorus = this.cameras.main.worldView.contains(d.x, d.y);
+    if (gorus && !this.durum.olu) d.kovala = true;
+    else if (Math.hypot(dx, dy) > 560) d.kovala = false;
+    d.atesBekle -= dt;
+    if (d.saldiri > 0) {
+      d.saldiri -= dt; b.setVelocity(0, 0);
+      if (!d.atti && d.saldiri < 0.15) { d.atti = true; this.mermiAt(d, d.yon); }
+      if (d.saldiri <= 0) this.dusmanAnim(d, 'uc');
+      return;
+    }
+    let hx, hy;
+    if (d.kovala) {
+      hx = p.x + (dx > 0 ? -150 : 150); hy = p.y - 34 + Math.sin(time * 0.004 + d.faz) * 12;
+      d.yon = Math.sign(dx) || 1;
+      d.setFlipX(d.yon < 0);
+      if (gorus && d.atesBekle <= 0 && Math.abs(dy) < 40 && Math.abs(dx) < 280) {
+        d.saldiri = 0.45; d.atti = false; d.atesBekle = 2.2;
+        d.play('d_yarasa_saldir');
+        return;
+      }
+    } else {
+      hx = d.baslangicX + Math.sin(time * 0.0014 + d.faz) * 60;
+      hy = d.baslangicY + Math.sin(time * 0.003 + d.faz) * 20;
+      d.setFlipX(b.velocity.x < 0);
+    }
+    b.setVelocity(Phaser.Math.Clamp((hx - d.x) * 1.6, -115, 115), Phaser.Math.Clamp((hy - d.y) * 1.6, -95, 95));
+  },
+
   // Örümcek: tavandan ipiyle inip çıkar
   orumcekGuncelle(d, time) {
     const t = (Math.sin(time * 0.0014 + d.faz) + 1) / 2;
@@ -215,14 +252,16 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   mermiAt(d, yon) {
-    const kopek = d.tip === 'kopek', ok = d.tip === 'kertenkele', ad = kopek ? 'mizrak' : ok ? 'ok' : 'atesTopu', M = ASSETLER.dusman[ad];
+    const kopek = d.tip === 'kopek', ok = d.tip === 'kertenkele', yar = d.tip === 'yarasa';
+    const ad = kopek ? 'mizrak' : ok ? 'ok' : yar ? 'dalga' : 'atesTopu', M = ASSETLER.dusman[ad];
     if (kopek || ok) this.ses('mizrak');
+    else if (yar) this.ses('olAri', { volume: 0.5, rate: 1.6 });
     else { this.atesSira = !this.atesSira; this.ses(this.atesSira ? 'ates1' : 'ates2'); }
-    const m = this.mermiler.create(d.x + yon * (ok ? 24 : 18), d.y - (kopek ? 18 : ok ? 17 : 20), ad).setDepth(7);
+    const m = this.mermiler.create(d.x + yon * (ok ? 24 : yar ? 26 : 18), yar ? d.y + 4 : d.y - (kopek ? 18 : ok ? 17 : 20), ad).setDepth(7);
     m.setDisplaySize(M.gen, M.gen * M.h / M.w).setFlipX(yon < 0);
     m.body.setAllowGravity(false);
     m.body.setSize(M.w * 0.7, M.h * 0.6, true);
-    m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : 210));
+    m.setVelocityX(yon * (kopek ? 280 : ok ? 260 : yar ? 230 : 210));
     m.omur = 2.6;
   },
 

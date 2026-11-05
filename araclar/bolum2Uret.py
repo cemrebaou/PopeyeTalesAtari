@@ -420,6 +420,26 @@ for rf, c0, c1 in sorted(parcalar_, key=lambda p: -(p[2] - p[1])):
     tip = random.choice(turler)
     if tip == 'domuz' and c1 - c0 < 9: tip = 'kedi' if bol == 'a' else 'kertenkele'
     DUS.append({'tip': tip, 'x': cx * T + 16, 'y': rf * T})
+# Yarasalar (v0.71): koridorların ve iniş mağaralarının havasında, zeminin ~5 karo üstünde, etrafı 5×5 boş
+YARASA = []
+for rf in (A1, A2, A3, K1, K2, K3, M1, M2, M3):
+    r = rf - 5
+    for c in range(4, W - 4):
+        if not all(g[r + dy][c + dx] == 0 for dy in range(-2, 3) for dx in range(-2, 3)): continue
+        x, y = c * T + 16, r * T + 16
+        if abs(c - BASLA[0]) < 14 and abs(rf - BASLA[1]) < 6: continue
+        if any(abs(x - kx) < 6 * T and abs(y - ky) < 6 * T for kx, ky in KON): continue
+        if any(sx - 3 * T <= x <= sx + sw + 3 * T and sy - 3 * T <= y <= sy + sh + 3 * T for sx, sy, sw, sh in SAH): continue
+        if any(abs(x - gx) < 8 * T and abs(y - gy) < 6 * T for gx, gy in GIZ): continue
+        YARASA.append((rf, c, x, y))
+random.shuffle(YARASA)
+yer_ = []
+for rf, c, x, y in YARASA:
+    if any(abs(c - c2) < 34 and abs(rf - r2) < 10 for r2, c2 in yer_): continue
+    if any(abs(x - d['x']) < 6 * T and abs(rf * T - d['y']) < 3 * T for d in DUS): continue
+    yer_.append((rf, c))
+    DUS.append({'tip': 'yarasa', 'x': x, 'y': y})
+    if len(yer_) >= 16: break
 DUS.sort(key=lambda d: (d['y'], d['x']))
 
 # ======================================================================= çıktı
@@ -467,5 +487,5 @@ open(KOK + '/js/veri/level2.js', 'w', encoding='utf8').write(s)
 # kaba önizleme (scratch): her karakter 1 karo
 open('/tmp/claude-0/-home-claude/85164cd8-761e-5dc1-8ca5-a447e90ed51c/scratchpad/l2.txt', 'w').write(
     '\n'.join(''.join('#' if v else '.' for v in row) for row in g))
-print('düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('kedi', 'domuz', 'kertenkele')})
+print('düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('kedi', 'domuz', 'kertenkele', 'yarasa')})
 print('blok', len(B), 'elmas', len(E), 'özel', len(OZ), 'sandık', len(SAN), 'taş', len(TAS), 'zincir', len(ZIN))

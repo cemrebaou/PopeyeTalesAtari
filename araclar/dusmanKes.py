@@ -22,7 +22,7 @@ def temizle(dosya):
     im = im.astype(np.uint8)
     return im, im[:, :, 3] > 60
 KAYNAK = {'1': temizle('dusman_seti.png'), '2': temizle('dusman_seti2.png'),   # v0.52: 2 = maymun, köpek, patron yeni görseller
-          '3': temizle('dusman_seti3.png')}                                        # v0.70: 2. bölüm: kedi, domuz, kertenkele
+          '3': temizle('dusman_seti3.png'), '4': temizle('dusman_seti4.png')}   # v0.71: 4 = yarasa                                        # v0.70: 2. bölüm: kedi, domuz, kertenkele
 # Kertenkelenin üfleme okunu (8. kare, borunun ucunda) ayrı mermi olarak kes, kareden sil
 _im3, _A3 = KAYNAK['3']
 OK_KUTU = (725, 768, 1296, 1350)   # y0, y1, x0, x1
@@ -31,6 +31,14 @@ _ys, _xs = np.where(_ok[:, :, 3] > 30)
 _ok = _ok[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
 _im3[OK_KUTU[0]:OK_KUTU[1], OK_KUTU[2]:OK_KUTU[3]] = 0
 _A3[OK_KUTU[0]:OK_KUTU[1], OK_KUTU[2]:OK_KUTU[3]] = False
+# Yarasanın ses dalgası (son kare, ağzın önü) ayrı mermi
+_im4, _A4 = KAYNAK['4']
+DALGA_KUTU = (60, 200, 1660, 1774)
+_dalga = _im4[DALGA_KUTU[0]:DALGA_KUTU[1], DALGA_KUTU[2]:DALGA_KUTU[3]].copy()
+_ys, _xs = np.where(_dalga[:, :, 3] > 30)
+_dalga = _dalga[_ys.min():_ys.max() + 1, _xs.min():_xs.max() + 1]
+_im4[DALGA_KUTU[0]:DALGA_KUTU[1], DALGA_KUTU[2]:DALGA_KUTU[3]] = 0
+_A4[DALGA_KUTU[0]:DALGA_KUTU[1], DALGA_KUTU[2]:DALGA_KUTU[3]] = False
 im, A = KAYNAK['1']
 
 def parcalar(y0, y1, bol=()):
@@ -72,6 +80,7 @@ DUS = {
   # v0.70: kaynak 3 (dusman_seti3.png) — ölüm karesi yok, oyunda devrilip söner
   'kedi':       (170, 324, 10, {6: 4}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [6]}, None, 46, '3'),
   'domuz':      (366, 579, 10, {5: 2}, {'yuru': [0,1,2,3,4,5], 'saldir': [6,7,8], 'dur': [9], 'ol': [7]}, None, 58, '3'),
+  'yarasa':     (0, 307, 9, {3: 2, 6: 2}, {'uc': [0,1,2,3,4,5], 'saldir': [6,7,8], 'ol': [8]}, None, 40, '4'),
   'kertenkele': (682, 844, 10, {5: 3}, {'yuru': [0,1,2,3,4,5], 'at': [6,7,8], 'dur': [9], 'ol': [8]}, None, 40, '3'),
 }
 # Ek kareler: ayrı gönderilen görseller → şeridin sonuna eklenir (ölçek: mevcut ilk karenin boyuna eşitlenir)
@@ -98,6 +107,11 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
     for k, i in enumerate(kareler):
         x0, x1 = seg[i]
         pa = im[y0:y1, x0:x1].copy()
+        if kay and kay[0] == '4':   # yarasa: sadece gövde (en büyük parça) kalır, ses dalgaları ayrı mermi
+            lab, nl = ndimage.label(pa[:, :, 3] > 30)
+            if nl > 1:
+                bo = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1))
+                pa[(lab > 0) & (lab != int(np.argmax(bo)) + 1)] = 0
         if kay and kay[0] == '3':   # v0.70: komşu kareden kalan küçük kırpıntılar (kenara değen) silinir
             lab, nl = ndimage.label(pa[:, :, 3] > 30)
             for li in range(1, nl + 1):
@@ -130,6 +144,9 @@ for ad, (y0, y1, n, bol, an, mi, boy, *kay) in DUS.items():
     if ad == 'kertenkele':
         Image.fromarray(_ok).save(KOK + '/assets/dusman/ok.png', optimize=True)
         meta['ok'] = {'w': int(_ok.shape[1]), 'h': int(_ok.shape[0]), 'gen': 24}
+    if ad == 'yarasa':
+        Image.fromarray(_dalga).save(KOK + '/assets/dusman/dalga.png', optimize=True)
+        meta['dalga'] = {'w': int(_dalga.shape[1]), 'h': int(_dalga.shape[0]), 'gen': 30}
     meta[ad] = {'w': W, 'h': H, 'ayak': int(alt), 'ust': int(ust), 'boy': boy,
                 'anim': {k: [yeniNo[i] for i in v] for k, v in an.items()}}
     if ekNo: meta[ad]['anim'][EK[ad][1]] = ekNo
