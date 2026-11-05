@@ -57,9 +57,11 @@ Object.assign(OyunSahnesi.prototype, {
     if (y0 === undefined) { y0 = b.y + 4; h = b.height - 8; }
     return this.katiBul(yon > 0 ? b.right : b.left - 2, y0, 2, h);
   },
-  // Asılma kancası (baston, ayakların kancaY üstü) önündeki taşa değiyor mu
+  // Asılma kancası (baston, ayakların kancaY üstü) önündeki taşa ya da kırılır taşa değiyor mu
   kancaDuvar(yon) {
-    return this.duvarVar(yon, this.player.body.bottom - CONFIG.oyuncu.kancaY - 3, 6);
+    const b = this.player.body, y0 = b.bottom - CONFIG.oyuncu.kancaY - 3, x = yon > 0 ? b.right : b.left - 2;
+    return this.duvarVar(yon, y0, 6) || this.physics.overlapRect(x, y0, 2, 6, true, false)
+      .find(o => o.enable && o.gameObject && o.gameObject.kirTas && !o.gameObject.kiriliyor) || null;
   },
 
   // ---- Girdi ----
@@ -357,8 +359,8 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   pogoZipla() {
-    this.sekmeSira = !this.sekmeSira;
-    this.ses(this.sekmeSira ? 'sekme1' : 'sekme2');
+    this.sekmeSira = ((this.sekmeSira || 0) % 3) + 1;   // sekme1 → 2 → 3 sırayla
+    this.ses('sekme' + this.sekmeSira);
     const F = CONFIG.fizik;
     this.player.body.setVelocityY(this.k && this.k.zipla ? F.pogoYuksek : F.pogo);
     this.ziplarken = false;

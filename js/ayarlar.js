@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.65',
+  surum: 'v0.66',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   dusmanOlcek: 0.9,     // tüm düşmanlar (görsel + gövde)
   selaleHiz: 140,       // şelale suyunun aşağı akış hızı (px/sn)
@@ -46,8 +46,8 @@ const CONFIG = {
     hiz: 110,           // geri yürüyerek çekme hızı
     uzatSure: 0.2
   },
-  puan: { elmas: 10, buyuk: 100, kizil: 50, altin: 5, kalpFazla: 50, dusman: 20, patron: 500 },
-  toplanBoy: { elmas: 16, buyukelmas: 26, kizilelmas: 24, kalp: 22, yasam: 24, altin: 18 },
+  puan: { elmas: 10, buyuk: 100, kizil: 50, altin: 5, capa: 25, kalpFazla: 50, dusman: 20, patron: 500 },
+  toplanBoy: { elmas: 16, buyukelmas: 26, kizilelmas: 24, kalp: 22, capa: 20, altin: 16 },
   patron: { can: 4, uyanMesafe: 520 }
 };
 
@@ -55,12 +55,12 @@ const CONFIG = {
 // 'kapiAcil' (çıkış kapısı açılınca) ve 'kazanma' (kapıdan girince) dosyaları gelince buraya eklenir.
 const SESLER = [
   // oyuncu
-  'bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'inis', 'tirmanCik', 'tirmanIn',
+  'bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
   'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'zipla4', 'zipla5', 'zipla6',
   'olum', 'tamKaybet',
   // toplanabilir, nesne, ortam
-  'elmas', 'kizilElmas', 'buyukElmas', 'can', 'gizli', 'bayrak', 'sandikDus',
-  'tasVur1', 'tasVur2', 'tasKir', 'selale',
+  'elmas', 'para1', 'para2', 'para3', 'para4', 'para5', 'capaAltin', 'kizilElmas', 'buyukElmas', 'can', 'gizli', 'bayrak', 'sandikDus',
+  'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale',
   // düşmanlar
   'ates1', 'ates2', 'mizrak', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri', 'olOrumcek', 'olYilan',
   'olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13',

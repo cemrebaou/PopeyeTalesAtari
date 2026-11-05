@@ -5,7 +5,7 @@ import json, re
 import numpy as np
 from PIL import Image
 KOK = __file__.rsplit('/araclar/', 1)[0]
-SIRA = ['elmas', 'buyukelmas', 'kizilelmas', 'kalp', 'yasam', 'altin']
+SIRA = ['elmas', 'buyukelmas', 'kizilelmas', 'kalp', 'capa', 'altin']
 im = np.array(Image.open(KOK + '/assets/kaynak/toplanan_seti.png').convert('RGBA'))
 im[im[:, :, 3] < 60] = 0
 A = im[:, :, 3] > 150

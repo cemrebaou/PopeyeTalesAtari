@@ -3,8 +3,9 @@
 const ODUL = {
   buyuk: { ses: 'buyukElmas', gorsel: 'buyukelmas' },   // mavi elmas
   kizil: { ses: 'kizilElmas', gorsel: 'kizilelmas' },   // yakut
-  altin: { ses: null, gorsel: 'altin' },
-  yasam: { gorsel: 'yasam' },
+  altin: { ses: 'elmas', gorsel: 'altin' },        // küçük altın para (tahta kasadan %75)
+  capa: { ses: 'capaAltin', gorsel: 'capa' },       // çapalı altın para (tahta kasadan %25)
+  yasam: { gorsel: null },                          // görseli şapka (ui_sapka)
   kalp: { gorsel: 'kalp' }
 };
 
@@ -39,7 +40,7 @@ Object.assign(OyunSahnesi.prototype, {
   elmasAl(e) {
     if (!e.active) return;
     e.disableBody(true, true);
-    this.ses('elmas');
+    this.ses('para' + Phaser.Math.Between(1, 5));
     this.durum.elmas++;
     this.durum.puan += CONFIG.puan.elmas;
     this.hudGuncelle();
@@ -60,7 +61,9 @@ Object.assign(OyunSahnesi.prototype, {
       if (ODUL[tur].ses) this.ses(ODUL[tur].ses);
     }
     if (goster) {
-      const el = this.toplananYarat(null, ODUL[tur].gorsel, x, y - 10).setDepth(20);
+      const el = ODUL[tur].gorsel ? this.toplananYarat(null, ODUL[tur].gorsel, x, y - 10).setDepth(20)
+        : this.add.image(x, y - 10, 'ui_sapka').setDepth(20);
+      if (!ODUL[tur].gorsel) el.setScale(24 / el.height);
       this.tweens.add({ targets: el, y: y - 60, alpha: 0, duration: 800, onComplete: () => el.destroy() });
     }
   },
@@ -125,6 +128,14 @@ Object.assign(OyunSahnesi.prototype, {
           s.kaymaHedef = null;
           s.body.setVelocityX(0);
         } else s.body.setVelocityX(s.kaymaYon * Phaser.Math.Clamp(kalan * 4, 40, 220));
+      }
+      // Vurulup kayan sandık düşmana çarparsa düşman ölür (patron 1 hasar)
+      if (s.kaymaHedef !== undefined && s.kaymaHedef !== null && Math.abs(s.body.velocity.x) > 20) {
+        const r = govdeRect(s.body); r.x -= 3; r.width += 6;
+        this.dusmanlar.getChildren().forEach(d => {
+          if (d.active && !d.oldu && d.body.enable && Phaser.Geom.Intersects.RectangleToRectangle(r, govdeRect(d.body)))
+            this.dusmanHasar(d, d.tip === 'boss' ? 1 : 99);
+        });
       }
       const yerde = yerdeMi(s.body);
       if (!yerde && s.body.velocity.y > 150) s.dusuyor = true;
@@ -207,20 +218,22 @@ Object.assign(OyunSahnesi.prototype, {
     });
   },
 
-  // Baston ya da pogo vuruşu: 1. ve 2. vuruş çatlatır (rock1, rock2), 3. vuruş kırar → enkaz → solup kaybolur
+  // Baston ya da pogo vuruşu: 1. ve 2. vuruş çatlatır (rock1, rock2), 3. vuruş kırar → enkaz → solup kaybolur.
+  // Tahta kasa (kasa): 2 vuruşta kırılır (tahtaVur → tahtaKir), altın para düşürür (%75 küçük, %25 çapalı).
   tasVur(s) {
     if (!s.active || s.kiriliyor) return;
     s.vurus++;
-    this.parcala(s.x, s.y - 16, 0xcfc6b8);
-    if (s.vurus < 3) {
-      this.ses('tasVur' + s.vurus);
+    const kasa = s.tur === 'kasa', gerek = kasa ? 2 : 3;
+    this.parcala(s.x, s.y - 16, kasa ? 0x9a6a3a : 0xcfc6b8);
+    if (s.vurus < gerek) {
+      this.ses(kasa ? 'tahtaVur' : 'tasVur' + s.vurus);
       s.setFrame(s.kirSira + s.vurus);
       this.tweens.add({ targets: s, angle: { from: -2, to: 2 }, duration: 50, yoyo: true, repeat: 1, onComplete: () => s.setAngle(0) });
       return;
     }
     s.kiriliyor = true;
     if (this.cekSandik === s) this.cekBirak();
-    this.ses('tasKir');
+    this.ses(kasa ? 'tahtaKir' : 'tasKir');
     // Havadaysa kırılan taş önce altındaki ilk desteğe düşer, enkaz orada oluşup solar
     const hedef = Math.min(this.destekY(s), this.dunyaY), dusus = Math.max(0, hedef - s.body.bottom);
     s.body.enable = false;   // üstündekiler desteksiz kalır ve düşer (taslariGuncelle)
@@ -229,6 +242,10 @@ Object.assign(OyunSahnesi.prototype, {
     this.tweens.add({ targets: s, y: s.y + dusus, duration: sure, ease: 'Quad.easeIn', onComplete: () => {
       if (!s.active) return;
       s.setFrame(s.kirSira + 4);
+      if (kasa) {
+        const tip = Math.random() < 0.75 ? 'altin' : 'capa';
+        this.toplananYarat(this.ozeller, ODUL[tip].gorsel, s.x, s.y - 16).tip = tip;
+      }
       this.tweens.add({ targets: s, alpha: 0, delay: 90, duration: 300, onComplete: () => s.destroy() });
     } });
   },

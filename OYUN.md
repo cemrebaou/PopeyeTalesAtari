@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.65 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.66 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -47,7 +47,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - Yatay menzil (yükseklik farkına göre en uzak iniş): 4 yukarı 110 px · 3 yukarı 137 · 2 yukarı 153 · 1 yukarı 167 · aynı hiza 177 · 1 aşağı 187 · 3 aşağı 203.
 - **Rahat zıplama kuralı**: atlayış havada tam hızın %65'iyle yapılabiliyorsa rahat sayılır; pogo hesaba katılmaz. `node araclar/erisim.js` bunu denetler.
 - Oyuncu gövdesi 18×42 (eğik 18×26), görünür boy 60 px; animasyona göre görsel ölçek `CONFIG.oyuncu.animOlcek` (gövde değişmez).
-- Puan: elmas 10, yakut 50, mavi elmas 100, altın 5, kalp fazlası 50, düşman 20, patron 500.
+- Puan: elmas 10, yakut 50, mavi elmas 100, altın para 5, çapalı altın 25, kalp fazlası 50, düşman 20, patron 500.
 
 ## Görseller
 - **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+). Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
@@ -58,9 +58,11 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - **Arayüz**: kalpler, yaşam şapkası, elmas/altın ikonları, rakamlar, 6 dokunmatik tuş (normal / basılı), taş panel. **Harfler**: Türkçe büyük/küçük, Q, noktalama, semboller (`harfYazi`, `{zipla}` gibi işaretler tuş görseli olur).
 
 ## Nesneler
-- **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), çapalı jeton (`yasam`, +1 yaşam), altın para (`altin`, +5, bölümde yok).
-- **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam / kizil / buyuk) yukarı süzülür. Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
+- **Toplanabilirler** (dönen): küçük altın taş (elmas, +10), yakut (`kizil`, +50), mavi elmas (`buyuk`, +100), kalp (+1 can), altın para (`altin`, +5), çapalı altın (`capa`, +25, bir tık büyük). Altınlar tahta kasadan çıkar. Toplanabilirler katı değildir (üstüne basılmaz, pogo / kafa çarpması tetiklemez). Sesler: elmas `para1-5` (rastgele), altın para eski `elmas` sesi, çapalı `capaAltin`.
+- **Sandık**: üstüne çıkılır, itilir / çekilir, vurunca ya da pogo ile açılır; ödülü (kalp / yasam (şapka görseli) / kizil / buyuk) yukarı süzülür. Açık sandık vurulup kayarken düşmana çarparsa düşman ölür (patron 1 hasar). Düşen sandık düşmanın kafasına inerse düşman ölür (patron 1 hasar).
 - **Kırılır taş** (`kirTaslar: [x, y, tür, sabit]`; türler `KIRTAS`): baston ya da pogo vuruşu — 1. ve 2. vuruş çatlatır (hafif sallanır), 3. kırar: havadaysa önce altındaki ilk desteğe düşer, enkaz orada oluşup solar. Uykuda durur (üst üste sağlam); altı boşalınca elle düşer ve ilk desteğe oturur, düşerken altındaki düşmanı ezer; itilen / çekilen taş o sırada fizikle hareket eder. `sabit=1` havada durur (sadece kırılır).
+- **Tahta kasa** (`kasa` türü kırılır taş, boş bölgelere 40 adet): 2 vuruşta kırılır (`tahtaVur` → `tahtaKir`), %75 altın para, %25 çapalı altın düşürür. Kırılır taşlara da bastonla asılınır.
+- **Pogo sesi**: `sekme1 → 2 → 3` sırayla.
   Bölümde: patron kapısı (2 yosunlu), kapı önündeki çukur (8 tuğla — açılırsa patron düşüp yenilir), üst mavi elmas odası girişi (7 kristal sütun), sol mavi elmas odasının kapağı (12 sabit kristal, pogo ile), sol alt sandık odasının duvarı (3 toprak, geçit — alttaki gizli koridora açılır; koridorda mavi elmas, yakutlu sandık ve gizli yer sesi), eski basamaklar, ara kayalar ve tek başına duran bütün tek karolar (havadakiler sabit) — kırılmayan tek taş kalmadı.
 - **Kontrol noktası** (5): bayrak kalkar, ses, yeniden doğma yeri. **Gizli yer** (`gizliler`): yaklaşınca bir kez ses (300 px içindekiler tek alan).
 - **Çıkış**: patron ölünce ödül sandığı çıkar, kapı açılır; kapıdan girince bölüm biter.
@@ -75,7 +77,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 | orumcek | 1 | tavandan ipiyle inip çıkar |
 | boss | 4 | 520 px'te uyanır; yürü → hazırlan → atıl → dinlen; yarı canın altında hızlanır, zıplayarak atılır; rastgele patron sesleri |
 - Yürüyenler bastıkları zemin parçasının (duvar / uçurum / dikene kadar) iki ucu arasında gider, asla düşmez; duvara çarpınca döner (0.35 sn tekrar dönmez → titreme yok).
-- Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar.
+- Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar; mermiler sandık / taş / kasaların içinden geçer.
 
 ## Sesler
 `SESLER` listesindeki `assets/ses/<ad>.mp3` yüklenir. Kodda çalınıp listede olmayan ses sessizce atlanır — **eksik**: `kapiAcil` (çıkış kapısı açılınca) ve `kazanma` (kapıdan girince); dosyaları gelince `assets/ses/`'e koyup `SESLER`'e eklemek yeterli.

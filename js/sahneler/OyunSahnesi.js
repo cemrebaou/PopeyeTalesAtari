@@ -182,7 +182,6 @@ class OyunSahnesi extends Phaser.Scene {
       return yerdeki(d);
     });
     F.overlap(this.mermiler, this.solids, (m) => m.destroy());
-    F.overlap(this.mermiler, this.sandiklar, (m) => m.destroy());
     F.overlap(P, this.mermiler, (p, m) => {
       if (!m.active) return;
       const kaynakX = m.x - m.body.velocity.x;   // destroy'dan önce oku
@@ -190,8 +189,9 @@ class OyunSahnesi extends Phaser.Scene {
       this.oyuncuHasar(kaynakX);
     });
     F.overlap(P, this.dusmanlar, (p, d) => this.dusmanTemas(p, d));
-    F.overlap(P, this.elmaslar, (p, e) => this.elmasAl(e));
-    F.overlap(P, this.ozeller, (p, o) => this.ozelAl(o));
+    // Toplanabilirler katı değil: işlem geri çağrısında alınır ve false döner → değme bilgisi (yerde / kafa çarpma) oluşmaz
+    F.overlap(P, this.elmaslar, null, (p, e) => { this.elmasAl(e); return false; });
+    F.overlap(P, this.ozeller, null, (p, o) => { this.ozelAl(o); return false; });
   }
 
   // ---- Klavye ----
