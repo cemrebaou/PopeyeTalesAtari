@@ -11,6 +11,8 @@ class BootSahnesi extends Phaser.Scene {
     // Nesneler (sandık, kapı, bayrak, diken, sarmaşık) — boyutları ASSETLER.obje
     Object.keys(A.obje).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
     L.spritesheet('kirTas', 'assets/nesne/kirTas.png', { frameWidth: 128, frameHeight: 128 });
+    L.spritesheet('kirParca', 'assets/nesne/kirParca.png', { frameWidth: ASSETLER.kirParca.huc, frameHeight: ASSETLER.kirParca.huc });
+    L.image('tane', 'assets/nesne/tane.png');
     L.spritesheet('toplanan', 'assets/nesne/toplanan.png', { frameWidth: A.toplanan.w, frameHeight: A.toplanan.h });
     // Oyuncu
     const K1 = CONFIG.oyuncu.kare, K2 = CONFIG.oyuncu.kare2;

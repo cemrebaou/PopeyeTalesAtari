@@ -76,6 +76,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.sandiklar = this.physics.add.group();   // sandıklar ve kırılır taşlar: itilir, çekilir, üst üste durur
     this.dusmanlar = this.physics.add.group();
     this.mermiler = this.physics.add.group({ allowGravity: false });
+    this.taneler = this.physics.add.group();   // kristal taştan saçılan küçük elmaslar
     this.ipGrafik = this.add.graphics().setDepth(5);   // örümcek ipleri
     this.dikenRect = [];
     this.sarmasikRect = [];
@@ -192,6 +193,9 @@ class OyunSahnesi extends Phaser.Scene {
     // Toplanabilirler katı değil: işlem geri çağrısında alınır ve false döner → değme bilgisi (yerde / kafa çarpma) oluşmaz
     F.overlap(P, this.elmaslar, null, (p, e) => { this.elmasAl(e); return false; });
     F.overlap(P, this.ozeller, null, (p, o) => { this.ozelAl(o); return false; });
+    F.overlap(P, this.taneler, null, (p, t) => { this.taneAl(t); return false; });
+    F.collider(this.taneler, this.solids);
+    F.collider(this.taneler, this.sandiklar);
   }
 
   // ---- Klavye ----

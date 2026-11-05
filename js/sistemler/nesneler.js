@@ -220,11 +220,13 @@ Object.assign(OyunSahnesi.prototype, {
 
   // Baston ya da pogo vuruşu: 1. ve 2. vuruş çatlatır (rock1, rock2), 3. vuruş kırar → enkaz → solup kaybolur.
   // Tahta kasa (kasa): 2 vuruşta kırılır (tahtaVur → tahtaKir), altın para düşürür (%75 küçük, %25 çapalı).
+  // Her vuruşta türüne ait parçalar vuruş yönüne fırlar; kristal taş kırılınca 1–5 küçük elmas saçar.
   tasVur(s) {
     if (!s.active || s.kiriliyor) return;
     s.vurus++;
     const kasa = s.tur === 'kasa', gerek = kasa ? 2 : 3;
-    this.parcala(s.x, s.y - 16, kasa ? 0x9a6a3a : 0xcfc6b8);
+    const yon = Math.sign(s.x - this.player.x) || this.bakis || 1;
+    this.tasParcala(s.x, s.y - 16, s.tur, s.vurus < gerek ? 3 : 2, yon);
     if (s.vurus < gerek) {
       this.ses(kasa ? 'tahtaVur' : 'tasVur' + s.vurus);
       s.setFrame(s.kirSira + s.vurus);
@@ -242,12 +244,35 @@ Object.assign(OyunSahnesi.prototype, {
     this.tweens.add({ targets: s, y: s.y + dusus, duration: sure, ease: 'Quad.easeIn', onComplete: () => {
       if (!s.active) return;
       s.setFrame(s.kirSira + 4);
+      this.tasParcala(s.x, s.y - 12, s.tur, 7, yon);
+      if (s.tur === 'kristal') this.taneSac(s.x, s.y - 14, yon);
       if (kasa) {
         const tip = Math.random() < 0.75 ? 'altin' : 'capa';
         this.toplananYarat(this.ozeller, ODUL[tip].gorsel, s.x, s.y - 16).tip = tip;
       }
       this.tweens.add({ targets: s, alpha: 0, delay: 90, duration: 300, onComplete: () => s.destroy() });
     } });
+  },
+
+  // Kristal taştan 1–5 küçük elmas (tane) saçılır: fizikle zıplayıp yerde durur, toplanınca CONFIG.puan.tane
+  taneSac(x, y, yon) {
+    const n = Phaser.Math.Between(1, 5);
+    for (let i = 0; i < n; i++) {
+      const t = this.taneler.create(x + Phaser.Math.Between(-6, 6), y, 'tane').setDepth(3);
+      t.setScale(CONFIG.toplanBoy.tane / t.height);
+      t.body.setVelocity(yon * Phaser.Math.Between(20, 130) + Phaser.Math.Between(-40, 40), -Phaser.Math.Between(160, 320));
+      t.body.setBounce(0.35, 0.35).setDragX(160);
+      t.body.mass = 0.01;
+      t.alinir = this.time.now + 300;   // hemen toplanmasın, saçıldığı görünsün
+    }
+  },
+
+  taneAl(t) {
+    if (!t.active || this.time.now < t.alinir) return;
+    const x = t.x, y = t.y;
+    t.destroy();
+    this.ses('para' + Phaser.Math.Between(1, 5));
+    this.puanEkle(CONFIG.puan.tane, x, y - 10);
   },
 
   // ---- Kontrol noktaları, gizli yerler, çıkış ----

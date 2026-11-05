@@ -9,6 +9,7 @@ python3 araclar/oyuncuEk.py
 python3 araclar/dusmanKes.py
 python3 araclar/toplananKes.py
 python3 araclar/kirTasKes.py
+python3 araclar/kirParcaKes.py
 python3 araclar/uiKes.py
 python3 araclar/harfKes.py      # uiKes'ten sonra (rakamları ui'dan alır)
 python3 araclar/harfAtlas.py    # harfKes'ten sonra: harfleri tek atlasa toplar
