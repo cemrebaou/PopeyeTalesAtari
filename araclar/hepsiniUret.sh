@@ -11,4 +11,5 @@ python3 araclar/toplananKes.py
 python3 araclar/kirTasKes.py
 python3 araclar/uiKes.py
 python3 araclar/harfKes.py      # uiKes'ten sonra (rakamları ui'dan alır)
+python3 araclar/harfAtlas.py    # harfKes'ten sonra: harfleri tek atlasa toplar
 node araclar/erisim.js | tail -1

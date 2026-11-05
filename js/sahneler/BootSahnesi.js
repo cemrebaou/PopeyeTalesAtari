@@ -1,9 +1,10 @@
-// Açılış sahnesi: tüm görselleri ve sesleri yükler, animasyonları tanımlar, oyunu başlatır.
+// Açılış sahnesi: yükleme çubuğu gösterir, görselleri yükler (sesler oyunda arka planda: sesleriYukle), animasyonları tanımlar, oyunu başlatır.
 class BootSahnesi extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   preload() {
     const L = this.load, A = ASSETLER;
+    this.yuklemeEkrani();
     // Karolar ve şelale
     L.image('tileset', 'assets/karo/tileset.png');
     L.image('selaleOrta', 'assets/karo/selaleOrta.png');
@@ -22,9 +23,20 @@ class BootSahnesi extends Phaser.Scene {
     });
     // Arayüz ve harfler
     A.ui.forEach(ad => L.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
-    Object.keys(A.harf.k).forEach(ch => L.image('h_' + ch.codePointAt(0), 'assets/harf/' + ch.codePointAt(0) + '.png'));
-    // Sesler
-    SESLER.forEach(ad => L.audio(ad, 'assets/ses/' + ad + '.mp3'));
+    L.atlas('harf', 'assets/harf/harf.png', 'assets/harf/harf.json');   // araclar/harfAtlas.py
+  }
+
+  // Siyah ekranda beklemesin: ortada çubuk + yüzde
+  yuklemeEkrani() {
+    const W = this.scale.width, H = this.scale.height, u = Math.min(W, H) / 400;
+    this.cameras.main.setBackgroundColor('#1a0f08');
+    const bw = Math.min(W * 0.6, 420 * u), bh = 14 * u, x = (W - bw) / 2, y = H / 2;
+    const cerceve = this.add.rectangle(W / 2, y, bw + 6 * u, bh + 6 * u).setStrokeStyle(2 * u, 0xffc21a);
+    const cubuk = this.add.rectangle(x, y, 1, bh, 0xffc21a).setOrigin(0, 0.5);
+    const yazi = this.add.text(W / 2, y - 26 * u, 'Yükleniyor 0%', {
+      fontFamily: 'Arial Black, Arial, sans-serif', fontSize: Math.round(18 * u) + 'px', color: '#ffc21a'
+    }).setOrigin(0.5);
+    this.load.on('progress', p => { cubuk.width = Math.max(1, bw * p); yazi.setText('Yükleniyor ' + Math.round(p * 100) + '%'); });
   }
 
   create() {

@@ -5,6 +5,7 @@ class OyunSahnesi extends Phaser.Scene {
   constructor() { super('Game'); }
 
   create() {
+    sesleriYukle(this);
     const L = LEVEL1;
     this.L = L;
     this.dunyaG = L.genislik;

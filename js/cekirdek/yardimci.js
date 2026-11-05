@@ -20,6 +20,14 @@ function sesBaslat(sahne, ad, ayar) {
 }
 
 // sesBaslat ile başlatılan sesi durdurur; her zaman null döner (değişkeni sıfırlamak için: x = sesDurdur(x))
+// Sesler oyun açıldıktan sonra arka planda yüklenir (açılışı bekletmez); yüklenmeyen ses sessizce atlanır.
+function sesleriYukle(sahne) {
+  const eksik = SESLER.filter(ad => !sahne.cache.audio.exists(ad));
+  if (!eksik.length) return;
+  eksik.forEach(ad => sahne.load.audio(ad, 'assets/ses/' + ad + '.mp3'));
+  sahne.load.start();
+}
+
 function sesDurdur(s) {
   if (s) { s.stop(); s.destroy(); }
   return null;
@@ -94,7 +102,7 @@ function harfYazi(sahne, metin, boy, hiza) {
         const m = H.k[ch];
         if (m) {
           const s = s0 * m[3];
-          ogeler.push(sahne.add.image(x, boy + m[2] * s, 'h_' + ch.codePointAt(0)).setOrigin(0, 0).setScale(s));
+          ogeler.push(sahne.add.image(x, boy + m[2] * s, 'harf', String(ch.codePointAt(0))).setOrigin(0, 0).setScale(s));
           x += m[0] * s + ara;
         } else {
           const t = sahne.add.text(x, boy, ch, {

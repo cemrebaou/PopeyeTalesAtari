@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.64 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.65 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -11,7 +11,7 @@ js/
   veri/assetlar.js         görsel verileri — araclar/*.py üretir, elle düzenlenmez
   veri/level1.js           1. bölüm verisi (koordinatlar piksel, ızgara 32 px)
   cekirdek/yardimci.js     yerdeMi, govdeRect, ses (sesCal / sesBaslat / sesDurdur), tam ekran, harfYazi, gorselYazi
-  sahneler/BootSahnesi.js  yükleme + tüm animasyon tanımları
+  sahneler/BootSahnesi.js  yükleme çubuğu + görseller + tüm animasyon tanımları (sesler oyun açılınca arka planda: sesleriYukle)
   sahneler/OyunSahnesi.js  seviye kurulumu, kamera (P: tüm harita), çarpışmalar, klavye, ana döngü, şelale
   sistemler/oyuncu.js      oyuncu: girdi, hareket, baston (vur/çek/it/asıl), sarmaşık, hasar/ölüm, animasyon, adım sesleri
   sistemler/dusmanlar.js   düşmanlar, patron, mermiler, hasar ve ölüm
@@ -97,3 +97,4 @@ Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `b
 | `kirTasKes.py` | `kaynak/kirilir_taslar.png` → `nesne/kirTas.png` |
 | `uiKes.py` | `kaynak/ui_seti.png`, `ui_ek.png` → `ui/*.png` + `ASSETLER.ui` |
 | `harfKes.py` | `kaynak/harf_seti.png`, `ui_ek.png` + rakamlar → `harf/*.png` + `ASSETLER.harf` (uiKes'ten sonra) |
+| `harfAtlas.py` | `harf/*.png` → tek atlas `harf/harf.png` + `harf.json` (ayrı dosyaları siler; harfKes'ten sonra) |
