@@ -171,6 +171,8 @@ Object.assign(OyunSahnesi.prototype, {
     // Baston vuruşu (yerde ve havada)
     if (k.saldirBas && this.saldiriBekleme <= 0 && !cekiyor && !this.pogoModu) {
       this.ses('bastonSalla');
+      this.vurNo = this.vurNo === 'vur' ? 'vur2' : 'vur';   // iki vuruş sırayla
+      this.player.anims.stop();
       this.saldiriZaman = CONFIG.oyuncu.saldiriSure;
       this.saldiriBekleme = CONFIG.oyuncu.saldiriBekleme;
       this.vurulan = new Set();
@@ -491,7 +493,7 @@ Object.assign(OyunSahnesi.prototype, {
     else if (this.tirmaniyor) { a = 'tirman'; durdur = b.velocity.y === 0; }
     else if (this.cekDurum === 'uzat') a = 'uzat';
     else if (this.cekDurum === 'cek') { a = 'cek'; durdur = b.velocity.x === 0; }
-    else if (this.saldiriZaman > 0) a = 'vur';
+    else if (this.saldiriZaman > 0) a = this.vurNo || 'vur';
     else if (this.pogoModu && (!yerde || this.pogoSekZaman > 0)) a = this.pogoSekZaman > 0 ? 'pogoSek' : 'pogoHava';
     else if (!yerde && this.taklaZaman > 0) a = 'takla';
     else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
