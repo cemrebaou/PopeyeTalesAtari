@@ -58,7 +58,7 @@ class BootSahnesi extends Phaser.Scene {
     tanimla('oyuncu', [
       ['dur',      aralik(60, 65), 7,  -1],  // bekleme (v0.76 araclar/oyuncuYeni.py)
       ['ayakVur',  aralik(74, 81), 10, -1],  // uzun beklemede ayak vurma
-      ['kos',      aralik(4, 9),   12, -1],
+      ['kos',      aralik(82, 93), 13, -1],
       ['zipla',    [10, 11, 12],   14, 0],   // çömel → kalk → tepe
       ['dus',      [13],           1,  0],
       ['in',       [14],           1,  0],   // yere iniş (toz)

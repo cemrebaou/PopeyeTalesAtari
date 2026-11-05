@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.76 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.77 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -118,7 +118,7 @@ Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `b
 | `bolum2Uret.py` | 2. bölümü (`level2.js`) baştan yazar; sonra zeminDose.py level2 |
 | `erisim.js [level2]` | önemli yerlere rahat zıplamayla ulaşılıyor mu (zemin içinden zıplama, zeminden zincire tutunma dahil; `--coz`: çözüm için kaya önerir) |
 | `oyuncuEk.py` | `kaynak/oyuncu_ek.png` vb. → `oyuncu/oyuncu2.png` |
-| `oyuncuYeni.py` | `kaynak/oyuncu_taban.png` + `oyuncu_dur.gif`, `oyuncu_tirman.gif`, `oyuncu_ayakVur.gif`, `oyuncu_pogo.png`, `oyuncu_egil.png` → `oyuncu/oyuncu.png` (10×9): 60–65 dur, 66–73 tırman (arkadan), 74–81 ayak vurma, 49–52 pogo, 53–57 eğik yürüme; her biri eski karelerin boyuna ölçeklenir |
+| `oyuncuYeni.py` | `kaynak/oyuncu_taban.png` + `oyuncu_dur.gif`, `oyuncu_tirman.gif`, `oyuncu_ayakVur.gif`, `oyuncu_pogo.png`, `oyuncu_egil.png` → `oyuncu/oyuncu.png` (10×10): 60–65 dur, 66–73 tırman (arkadan), 74–81 ayak vurma, 82–93 koşma (`oyuncu_kos.gif`), 49–52 pogo, 53–57 eğik yürüme; her biri eski karelerin boyuna ölçeklenir |
 | `dusmanKes.py` | `kaynak/dusman_seti*.png` → `dusman/*.png` + `ASSETLER.dusman` (seti3: kedi, domuz, kertenkele + ayrı kesilen üfleme oku; seti4: yarasa + ayrı kesilen ses dalgası; seti5: golem, bitki + zehir; seti6: fıçı (2 satır tek şeritte), büyücü + büyü) |
 | `toplananKes.py` | `kaynak/toplanan_seti.png` → `nesne/toplanan.png` + `ASSETLER.toplanan` |
 | `kirTasKes.py` | `kaynak/kirilir_taslar.png` → `nesne/kirTas.png` |

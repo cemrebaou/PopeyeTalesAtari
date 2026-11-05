@@ -1,6 +1,6 @@
 # Oyuncu yeni kareleri (v0.76): duruş (GIF), tırmanma (GIF, arkadan), bastonla zıplama (pogo) ve eğik yürüme.
 # Taban: assets/kaynak/oyuncu_taban.png (eski oyuncu.png, 10×6 hücre 176×141, ayak çizgisi y=125).
-# Çıktı: assets/oyuncu/oyuncu.png — 10×9 hücre (74–81 uzun beklemede ayak vurma). Değişen kareler:
+# Çıktı: assets/oyuncu/oyuncu.png — 10×10 hücre (74–81 uzun beklemede ayak vurma, 82–93 koşma). Değişen kareler:
 #   60–65 dur (oyuncu_dur.gif), 66–73 tirman (oyuncu_tirman.gif), 49 pogoHava + 50–52 pogoSek (oyuncu_pogo.png),
 #   53–57 egil (oyuncu_egil.png). Eski 0–3 ve 29–32 boşaltılır.
 # Her yeni animasyon eski karelerinin piksel boyuna ölçeklenir; şapka ortası eski şapka ortasına, alt kenar ayak
@@ -15,7 +15,7 @@ temizle_kod = src[src.index('def temizle'):src.index('KAYNAK = {')]
 exec(temizle_kod.replace("KOK + '/assets/kaynak/' + ad", "KOK + '/assets/kaynak/' + ad"))
 
 taban = np.array(Image.open(KOK + '/assets/kaynak/oyuncu_taban.png').convert('RGBA'))
-out = np.zeros((H * 9, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
+out = np.zeros((H * 10, W * SUT, 4), np.uint8); out[:taban.shape[0]] = taban
 def hucre(i): return (i // SUT) * H, (i % SUT) * W
 def eski(i):
     y, x = hucre(i); return taban[y:y + H, x:x + W]
@@ -112,4 +112,8 @@ print('egil', anim(egil, [53, 54, 55, 56, 57], range(53, 58), False))
 # v0.76: uzun beklemede ayak vurma (oyuncu_ayakVur.gif) → 74.. ; duruşla aynı ölçek ve hiza
 ayak = gif('oyuncu_ayakVur.gif')
 print('ayakVur', anim(ayak, [0, 1, 2, 3], range(74, 74 + len(ayak)), True), len(ayak))
+# v0.77: koşma (oyuncu_kos.gif, 12 kare) → 82–93; eski koşma (4–9) boyunda, eski kareler boşaltılır
+kos = gif('oyuncu_kos.gif')
+print('kos', anim(kos, [4, 5, 6, 7, 8, 9], range(82, 82 + len(kos)), True), len(kos))
+for i in range(4, 10): bosalt(i)
 Image.fromarray(out).save(KOK + '/assets/oyuncu/oyuncu.png', optimize=True)
