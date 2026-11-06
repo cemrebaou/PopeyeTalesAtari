@@ -24,6 +24,9 @@ class BootSahnesi extends Phaser.Scene {
       if (D.anim) L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
       else L.image(ad, 'assets/dusman/' + ad + '.png');
     });
+    // v1.08: dükkan odası
+    Object.keys(A.dukkan.parca).forEach(ad => L.image('dk_' + ad, 'assets/dukkan/' + ad + '.png'));
+    L.spritesheet('dk_satici', 'assets/dukkan/satici.png', { frameWidth: A.dukkan.satici.w, frameHeight: A.dukkan.satici.h });
     Object.entries(A.ekKare).forEach(([ad, E]) => L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: E.w, frameHeight: E.h }));   // v1.00 ek şeritler
     L.spritesheet('d_yarasaOl', 'assets/dusman/yarasaOl.png', { frameWidth: A.yarasaOl.w, frameHeight: A.yarasaOl.h });   // v0.98
     // Arayüz ve harfler
@@ -118,6 +121,7 @@ class BootSahnesi extends Phaser.Scene {
     // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
     const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 12, repeat: 0 });   // v1.07: 8 → 12
     yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);
+    this.anims.create({ key: 'dk_satici', frames: this.anims.generateFrameNumbers('dk_satici', { start: 0, end: ASSETLER.dukkan.satici.kare - 1 }), frameRate: 7, repeat: -1 });   // v1.08
     // v1.00: ek şeritler (araclar/ekKareKes.py): <düşman>Ol → d_<düşman>Ol; <düşman>Bekle / <düşman>Saldir vb. → d_<düşman>_<anim> (eskisinin yerine)
     Object.entries(ASSETLER.ekKare).forEach(([ad, E]) => {
       const an = ad.slice(E.dusman.length).toLowerCase(), key = an === 'ol' ? 'd_' + ad : 'd_' + E.dusman + '_' + an;

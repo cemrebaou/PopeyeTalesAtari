@@ -58,6 +58,13 @@ class OyunSahnesi extends Phaser.Scene {
     const cam = this.cameras.main, K = CONFIG.kamera;
     const w = this.scale.width, h = this.scale.height;
     cam.setSize(w, h);
+    if (this.dukkanda && !this.haritaModu) {   // v1.08: dükkanda kamera sabit, odanın tamamını gösterir
+      const O = this.dukkanOda;
+      cam.stopFollow(); cam.removeBounds();
+      cam.setZoom(Math.min(h / O.h, w / O.w));
+      cam.centerOn(O.x + O.w / 2, O.y + O.h / 2);
+      return;
+    }
     if (this.haritaModu) {
       cam.stopFollow();
       cam.setZoom(Math.min(w / this.dunyaG, h / this.dunyaY));
@@ -71,7 +78,7 @@ class OyunSahnesi extends Phaser.Scene {
     this.haritaModu = !this.haritaModu;
     const cam = this.cameras.main;
     if (this.haritaModu) cam.removeBounds();
-    else cam.setBounds(0, 0, this.dunyaG, this.dunyaY).startFollow(this.player, true, 0.12, 0.12);
+    else if (!this.dukkanda) cam.setBounds(0, 0, this.dunyaG, this.dunyaY).startFollow(this.player, true, 0.12, 0.12);
     this.kameraAyarla();
   }
 
@@ -119,6 +126,7 @@ class OyunSahnesi extends Phaser.Scene {
     L.ipuclari.forEach(([x, y, yazi]) => harfYazi(this, yazi, 11, 'sol').setPosition(x, y).setDepth(4));
     L.dusmanlar.forEach(e => this.dusmanYarat(e));
     if (L.boss) this.dusmanYarat({ tip: 'boss', x: L.boss[0], y: L.boss[1] });
+    this.dukkanKur();   // dukkan.js (v1.08)
   }
 
   // Karo katmanı: seviye verisindeki karakter satırları → tilemap (128 px kaynak, 32 px gösterim)
@@ -282,6 +290,7 @@ class OyunSahnesi extends Phaser.Scene {
   update(time, delta) {
     const dt = Math.min(delta, 50) / 1000;
     if (this.durum.bitti || this.durum.oyunBitti) return;
+    this.dukkanGuncelle();
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
     this.updateMermiler(dt);

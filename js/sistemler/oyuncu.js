@@ -72,14 +72,14 @@ Object.assign(OyunSahnesi.prototype, {
   girdi() {
     const K = this.keys, T = this.touch;
     const ziplaTus = K.zipla.isDown || K.z.isDown || T.zipla;   // sarmaşıktan atlamak için (↑ hariç)
-    const zipla = ziplaTus || K.yukari.isDown || K.w.isDown;    // klavyede ↑ de zıplatır
+    const zipla = ziplaTus || ((K.yukari.isDown || K.w.isDown) && !this.kapiKilit);    // klavyede ↑ de zıplatır (kapıdan geçince bırakılana dek değil)
     const saldir = K.saldir.isDown || K.k.isDown || K.j.isDown || T.saldir;
     const cek = K.cek.isDown || K.l.isDown;                      // klavyede doğrudan çekme (dokunmatikte VUR basılı)
     const asagiKlavye = K.asagi.isDown || K.s.isDown;
     const k = {
       sol: K.sol.isDown || K.a.isDown || T.sol,
       sag: K.sag.isDown || K.d.isDown || T.sag,
-      yukari: K.yukari.isDown || K.w.isDown || T.yukari,
+      yukari: (K.yukari.isDown || K.w.isDown || T.yukari) && !this.kapiKilit,
       asagi: asagiKlavye || T.asagi,
       egil: asagiKlavye || this.egilKilit,                        // dokunmatik ▼ aç/kapa (egilKilit)
       zipla, saldir, cek,
