@@ -102,6 +102,12 @@ pogo = serit('oyuncu_pogo.png')
 assert len(pogo) == 4, len(pogo)
 # eski pogoHava (49) boyuna göre: 1. kare (efektsiz) ölçü; şapka üstü her karede aynı satırda
 print('pogo', anim(pogo, [49], [49, 50, 51, 52], False, olcek_kare=0))
+# v0.95: pogoHava (bastonla zıplama açılınca / havada) oyuncu_pogoHava.png; karakter boyu eskisiyle aynı (şapka genişliği), şapka ortası aynı, baston ucu ayak çizgisinde
+_y, _x = hucre(49); _c = out[_y:_y + H, _x:_x + W].copy(); _h = kutu(_c)[1] - kutu(_c)[0] + 1
+_p = lekesiz(np.array(Image.open(KOK + '/assets/kaynak/oyuncu_pogoHava.png').convert('RGBA'))); _y0, _y1, _x0, _x1 = kutu(_p); _p = _p[_y0:_y1 + 1, _x0:_x1 + 1]
+def _sapkaG(a):   # şapka siperi genişliği: figürün üst %22'sindeki en geniş satır
+    m = a[:, :, 3] > 150; ys = np.where(m.any(1))[0]; return max(np.ptp(np.where(m[y])[0]) for y in range(ys[0], ys[0] + int((ys[-1] - ys[0]) * 0.22)))
+koy(49, _p, _sapkaG(_c) / _sapkaG(_p), sapka(_p), _p.shape[0] - 1)   # karakter boyu şapkaya göre eşit
 def bilesenler(ad):   # kareler birbirine değiyorsa: her büyük parça bir kare, küçük parçalar en yakın kareye
     im, A = temizle(ad); b = im[:, :, 3] > 150
     lab, n = ndimage.label(b); bo = ndimage.sum(b, lab, range(1, n + 1))
