@@ -54,6 +54,13 @@ ASILI = [0, 1, 2, 3, 4, 5, 17]
 ITME = [6, 7, 8, 9, 10, 11, 16]
 ON_KENAR = C + 9 / (66.21 / (117 * K) * 0.77) + 2 * K   # boy (CONFIG.oyuncu.boy) ve itme ölçeği (animOlcek.it) değişirse güncelle   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
 ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
+# v0.93: asılma kareleri (0–5) oyuncu_asili.gif'ten (6 kare). Ölçek: baston boyu (figür genişliği) eskisiyle aynı;
+# baston yüksekliği eski hizada kalsın diye ASILI_BOY eski karelerden hesaplanır (yukarıda).
+from PIL import ImageSequence
+_eskiG = np.mean([kareler[i][0].shape[1] for i in range(6)])
+for i, f in enumerate(ImageSequence.Iterator(Image.open(KOK + '/assets/kaynak/oyuncu_asili.gif'))):
+    a_ = np.array(f.convert('RGBA')); a_[a_[:, :, 3] < 60] = 0; a_ = kes(a_, 0, a_.shape[0], 0, a_.shape[1])
+    kareler[i] = (a_, 0, _eskiG / a_.shape[1])
 KANCA_X = C + 38 * K   # v0.43: baston ucu gövdenin ~5.5 px önünde (v0.38'deki ~10.6 px'ten 5 px geri) → kanca taşın içine girer
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
