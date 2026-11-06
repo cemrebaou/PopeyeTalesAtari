@@ -16,6 +16,7 @@ EK = {   # ad: (düşman, kaynak GIF, fps, döngü)
     'maymunOl': ('maymun', 'maymun_ol.gif', 7, False, -2),     # v1.02: son 2 kare kullanılmaz
     'domuzSaldir': ('domuz', 'domuz_saldir.gif', 12, False),   # v1.03: gürz vuruşu (eskisinin yerine); 7. karede iner
     'ficiOl': ('fici', 'fici_ol.gif', 7, False),               # v1.04: dikenli dönen fıçı
+    'bossOl': ('boss', 'boss_ol.gif', 6, False),               # v1.05: 1. bölüm patronu
 }
 ap = KOK + '/js/veri/assetlar.js'; s = open(ap, encoding='utf8').read()
 D = json.loads(re.search(r'ASSETLER.dusman = (\{.*\});', s).group(1))
