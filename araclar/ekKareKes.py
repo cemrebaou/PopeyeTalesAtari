@@ -7,18 +7,21 @@ import numpy as np
 from PIL import Image, ImageSequence
 KOK = __file__.rsplit('/araclar/', 1)[0]
 EK = {   # ad: (düşman, kaynak GIF, fps, döngü)
-    'bitkiOl': ('bitki', 'bitki_ol.gif', 9, False),            # v0.99: yerinde ölüm
+    'bitkiOl': ('bitki', 'bitki_ol.gif', 14, False),            # v0.99: yerinde ölüm
     'bitkiBekle': ('bitki', 'bitki_bekle.gif', 7, True),       # v1.00: saldırmazken duruş
-    'kertenkeleOl': ('kertenkele', 'kertenkele_ol.gif', 7, False),   # v1.00: yerinde ölüm, sonra 1 sn bekleyip solar
-    'kediOl': ('kedi', 'kedi_ol.gif', 7, False),               # v1.00: bıçaklı leopar
-    'domuzOl': ('domuz', 'domuz_ol.gif', 6, False),            # v1.00: yaban domuzu
-    'kopekOl': ('kopek', 'kopek_ol.gif', 7, False),            # v1.01: mızraklı
-    'maymunOl': ('maymun', 'maymun_ol.gif', 7, False, -2),     # v1.02: son 2 kare kullanılmaz
+    'kertenkeleOl': ('kertenkele', 'kertenkele_ol.gif', 15, False),   # v1.00: yerinde ölüm, sonra 1 sn bekleyip solar
+    'kediOl': ('kedi', 'kedi_ol.gif', 12, False),               # v1.00: bıçaklı leopar
+    'domuzOl': ('domuz', 'domuz_ol.gif', 11, False),            # v1.00: yaban domuzu
+    'kopekOl': ('kopek', 'kopek_ol.gif', 12, False),            # v1.01: mızraklı
+    'maymunOl': ('maymun', 'maymun_ol.gif', 12, False, -2),     # v1.02: son 2 kare kullanılmaz
     'domuzSaldir': ('domuz', 'domuz_saldir.gif', 12, False),   # v1.03: gürz vuruşu (eskisinin yerine); 7. karede iner
-    'ficiOl': ('fici', 'fici_ol.gif', 7, False),               # v1.04: dikenli dönen fıçı
-    'bossOl': ('boss', 'boss_ol.gif', 6, False),               # v1.05: 1. bölüm patronu
-    'buyucuOl': ('buyucu', 'buyucu_ol.gif', 7, False),         # v1.06: büyücü
+    'ficiOl': ('fici', 'fici_ol.gif', 12, False),               # v1.04: dikenli dönen fıçı
+    'bossOl': ('boss', 'boss_ol.gif', 10, False),               # v1.05: 1. bölüm patronu
+    'buyucuOl': ('buyucu', 'buyucu_ol.gif', 12, False),         # v1.06: büyücü
+    'golemOl': ('golem', 'golem_ol.gif', 12, False),           # v1.07: mor kaya golem
 }
+# v1.07: ölüm fps'leri hızlandırıldı (yavaş çekim kalıyordu)
+YER = {'kediOl': 6}   # bu kareden itibaren kare alt kenarı ilk karenin altına indirilir (ölüsü yere değsin)
 ap = KOK + '/js/veri/assetlar.js'; s = open(ap, encoding='utf8').read()
 D = json.loads(re.search(r'ASSETLER.dusman = (\{.*\});', s).group(1))
 meta = {}
@@ -32,7 +35,8 @@ for ad, (dus, gif, fps, dongu, *son) in EK.items():   # son: kareleri bu indekst
     serit = Image.new('RGBA', (W * len(fr), H))
     for i, f in enumerate(fr):
         a = np.array(f.resize((W, H), Image.LANCZOS)); a[a[:, :, 3] < 30] = 0
-        c = Image.new('RGBA', (W, H)); c.paste(Image.fromarray(a), (dx, 0)); serit.paste(c, (i * W, 0))
+        dy = round((g0[3] - f.getbbox()[3]) * r) if i >= YER.get(ad, 99) else 0
+        c = Image.new('RGBA', (W, H)); c.paste(Image.fromarray(a), (dx, dy)); serit.paste(c, (i * W, 0))
     serit.save(KOK + '/assets/dusman/' + ad + '.png', optimize=True)
     meta[ad] = {'dusman': dus, 'w': W, 'h': H, 'ayak': round(g0[3] * r), 'kare': len(fr), 'fps': fps, 'dongu': dongu}
 s = re.sub(r'\n// Bitki ölüm[^\n]*\nASSETLER.bitkiOl = [^\n]*;\n', '\n', s)
