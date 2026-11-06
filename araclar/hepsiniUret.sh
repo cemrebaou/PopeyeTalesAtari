@@ -7,6 +7,7 @@ python3 araclar/bolgeKaro.py
 python3 araclar/zeminDose.py
 python3 araclar/oyuncuEk.py
 python3 araclar/dusmanKes.py
+python3 araclar/yarasaOlKes.py   # dusmanKes'ten sonra (yarasa ölçeği)
 python3 araclar/toplananKes.py
 python3 araclar/kirTasKes.py
 python3 araclar/kirParcaKes.py

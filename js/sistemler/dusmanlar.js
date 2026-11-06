@@ -507,6 +507,36 @@ Object.assign(OyunSahnesi.prototype, {
     return true;
   },
 
+  // v0.98: yarasa ölümü: havada 4 kare → 4. karede aşağı düşer → yere yaklaşınca 5. kare → yere değince kalan kareler
+  // → 1 sn yerde kalır → solarak kaybolur. Ölçek uçarkenkiyle aynı; görsel gövde ortası olduğu yerden başlar.
+  yarasaOlum(d, bitince) {
+    const Y = ASSETLER.yarasaOl, s = Math.abs(d.scaleY), T = this.L.karo;
+    const ortaY = d.y + ((ASSETLER.dusman.yarasa.ust + ASSETLER.dusman.yarasa.ayak) / 2 - d.displayOriginY) * s;   // uçarkenki gövde ortası (dünya)
+    d.setTexture('d_yarasaOl', 0).setOrigin(0.5, Y.ayak / Y.h);
+    d.y = ortaY + (Y.ayak - Y.merkez) * s;   // d.y = görselin yer çizgisi
+    const c = Math.floor(d.x / T);
+    let r = Math.max(0, Math.floor(d.y / T));
+    while (r < this.izgara.length && !(this.izgara[r] && this.izgara[r][c])) r++;
+    const yerY = Math.min(r * T, this.dunyaY || r * T) + (this.zeminGomme || 0);
+    let hiz = 0, durum = 'hava';
+    const bitir = () => this.time.delayedCall(1000, () => this.tweens.add({
+      targets: d, alpha: 0, duration: 400, onComplete: () => { d.destroy(); if (bitince) bitince(); } }));
+    const guncelle = (t, dtMs) => {
+      if (!d.active) { this.events.off('update', guncelle); return; }
+      if (durum !== 'dus') return;
+      hiz = Math.min(hiz + CONFIG.fizik.yercekimi * dtMs / 1000, CONFIG.fizik.maxDusme);
+      d.y = Math.min(yerY, d.y + hiz * dtMs / 1000);
+      if (yerY - d.y < 30 && d.frame.name !== 4) d.setFrame(4);
+      if (d.y >= yerY) {
+        durum = 'yer'; this.events.off('update', guncelle);
+        d.play('d_yarasaOl_yer'); d.once('animationcomplete', bitir);
+      }
+    };
+    this.events.on('update', guncelle);
+    d.play('d_yarasaOl_hava');
+    d.once('animationcomplete', () => { if (d.active) { durum = 'dus'; d.setFrame(3); } });
+  },
+
   // Ölüm: ses, gövde kapanır, parçalanma animasyonu, solup kaybolur
   dusmanOlum(d, bitince) {
     d.sesObj = sesDurdur(d.sesObj);
@@ -515,6 +545,7 @@ Object.assign(OyunSahnesi.prototype, {
     d.clearTint();
     d.body.setVelocity(0, 0);
     d.body.enable = false;
+    if (d.ad === 'yarasa') return this.yarasaOlum(d, bitince);
     d.play('d_' + d.ad + '_ol');
     if (ASSETLER.dusman[d.ad].anim.ol.length === 1) {   // ölüm karesi olmayanlar: devrilip söner
       const yon = d.flipX ? 1 : -1;

@@ -24,6 +24,7 @@ class BootSahnesi extends Phaser.Scene {
       if (D.anim) L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
       else L.image(ad, 'assets/dusman/' + ad + '.png');
     });
+    L.spritesheet('d_yarasaOl', 'assets/dusman/yarasaOl.png', { frameWidth: A.yarasaOl.w, frameHeight: A.yarasaOl.h });   // v0.98
     // Arayüz ve harfler
     A.ui.forEach(ad => L.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
     L.atlas('harf', 'assets/harf/harf.png', 'assets/harf/harf.json');   // araclar/harfAtlas.py
@@ -113,5 +114,8 @@ class BootSahnesi extends Phaser.Scene {
         } else ekle(k, kareler, ad === 'bitki' && k === 'bekle' ? 8 : HIZ[k] || 10, DONGU[k]);
       });
     });
+    // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
+    const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 8, repeat: 0 });
+    yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);
   }
 }
