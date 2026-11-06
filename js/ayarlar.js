@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v0.95',
+  surum: 'v0.96',
   bayrakBoy: 57.6,      // kontrol noktası bayrağının boyu
   ustUsteGomme: 4,
   tasYukari: 3,         // kırılır taşlar (kasa hariç) yerde bu kadar yukarıda çizilir (bölümde tasZeminYukari varsa o)
@@ -40,7 +40,7 @@ const CONFIG = {
     // animasyona göre görsel ölçek (yoksa 1)
     animOlcek: {
       tirman: 1.17, uzat: 1.044, cek: 1.044, egil: 0.756, egilDur: 0.756, kos: 1.1, pogoHava: 1.2, pogoSek: 1.2, vur: 0.99,
-      asili: 0.7, it: 0.77, itDur: 0.77, h_tirman: 0.7, h_egil: 0.7, h_hava: 0.7, h_cek: 0.7, h_it: 0.7, h_asili: 0.7, olum: 0.7
+      asili: 0.7, it: 0.77, itDur: 0.77, itAlt: 0.77, itAltDur: 0.77, h_tirman: 0.7, h_egil: 0.7, h_hava: 0.7, h_cek: 0.7, h_it: 0.7, h_asili: 0.7, olum: 0.7
     },
     dokunulmaz: 1.5,    // hasar sonrası
     saldiriSure: 0.24,

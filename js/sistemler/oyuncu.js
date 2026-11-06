@@ -207,8 +207,10 @@ Object.assign(OyunSahnesi.prototype, {
       if (s) {
         this.itiyor = true;
         hiz = F.itme;
-        if (s.kirTas) this.tasUyandir(s);
-        s.body.setVelocityX(s.body.blocked[yon > 0 ? 'right' : 'left'] ? 0 : yon * F.itme);
+        // v0.96: üst üste duranlar birlikte itilir (alttaki kıpırdayamıyorsa hiçbiri)
+        const yigin = this.yiginBul(s), vx = s.body.blocked[yon > 0 ? 'right' : 'left'] ? 0 : yon * F.itme;
+        this.itYigin = yigin.length;
+        yigin.forEach(u => { if (u.kirTas) this.tasUyandir(u); u.body.setVelocityX(vx); });
       }
     }
     // Duvara doğru basarken yatay hız verme (gövde duvara sürtünüp zıplamayı engellemesin)
@@ -312,6 +314,19 @@ Object.assign(OyunSahnesi.prototype, {
       if (bosluk >= -4 && bosluk <= CONFIG.cek.menzil && bosluk < enB) { en = s; enB = bosluk; }
     });
     return en;
+  },
+
+  // s ve üstünde (gövdesine oturmuş, yatayda örtüşen) duranlar, aşağıdan yukarı
+  yiginBul(s) {
+    const y = [s];
+    for (let i = 0; i < y.length; i++) {
+      const a = y[i].body;
+      this.sandiklar.getChildren().forEach(u => {
+        if (!u.active || u.sabit || u.kiriliyor || !u.body.enable || y.includes(u)) return;
+        if (Math.abs(u.body.bottom - a.top) < 4 && u.body.right > a.left + 4 && u.body.left < a.right - 4) y.push(u);
+      });
+    }
+    return y;
   },
 
   // Yürünen yönde gövdeye bitişik sandık / taş
@@ -501,7 +516,7 @@ Object.assign(OyunSahnesi.prototype, {
     else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
     else if (this.egik) a = Math.abs(b.velocity.x) > 10 ? 'egil' : 'egilDur';
     else if (this.inisZaman > 0) a = 'in';
-    else if (this.itiyor) a = Math.abs(b.velocity.x) <= 10 ? 'itDur' : 'it';
+    else if (this.itiyor) a = (this.itYigin > 1 ? 'it' : 'itAlt') + (Math.abs(b.velocity.x) <= 10 ? 'Dur' : '');   // tek nesne: eller aşağıda
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else {   // ayakta bekleme; 5 sn'den uzun beklerse sabırsızca ayak vurur
       this.durSure = (this.durSure || 0) + this.game.loop.delta / 1000;
@@ -517,7 +532,7 @@ Object.assign(OyunSahnesi.prototype, {
 
   // Koşarken / eğilerek yürürken adım sesleri (adim1-3), çekerken / iterken kaydırma sesleri (kaydir1-2), sırayla
   adimSesi(a, durdur) {
-    const kaydir = (a === 'cek' || a === 'it') && !durdur;
+    const kaydir = (a === 'cek' || a === 'it' || a === 'itAlt') && !durdur;
     const aralik = a === 'kos' ? 0.3 : kaydir ? 0.4 : (a === 'egil' && !durdur) ? 0.45 : 0;
     if (!aralik) { this.adimZaman = 0; return; }
     this.adimZaman = (this.adimZaman || 0) - this.game.loop.delta / 1000;

@@ -44,14 +44,14 @@ ol = yukle('oyuncu_olum.png'); OA = ol[:, :, 3] > 150
 for x0, x1 in [(18, 236), (245, 466), (472, 698), (708, 936), (944, 1175), (1182, 1423)]:
     kareler.append((kes(ol, 0, ol.shape[0], x0, x1), 0))
 ORTALI = set(range(18, 24))
-out = Image.new('RGBA', (W * SUT, H * 5), (0, 0, 0, 0))   # v0.94: 5 satır (24–25 itme)
+out = Image.new('RGBA', (W * SUT, H * 6), (0, 0, 0, 0))   # v0.96: 6 satır (24–25 itme, 26–33 tek nesne itme)
 # v0.36: asılma kareleri (0–5, 17) bastona göre hizalanır → baston her karede aynı yerde sabit, gövde sallanır.
 # Hedef: en uzun asılma karesinin ayağı ayak çizgisinde, baston sağ ucu x=KANCA_X.
 def baston(arr):   # bastonun (figürün en üst 14 satırı) üstü ve sağ ucu
     b = arr[:, :, 3] > 150; t = np.where(b.any(1))[0][0]
     return t, np.where(b[t:t + 14].any(0))[0][-1]
 ASILI = [0, 1, 2, 3, 4, 5, 17]
-ITME = [6, 7, 8, 9, 10, 11, 16, 24, 25]
+ITME = [6, 7, 8, 9, 10, 11, 16, 24, 25] + list(range(26, 34))
 ON_KENAR = C + 9 / (66.21 / (117 * K) * 0.77) + 2 * K   # boy (CONFIG.oyuncu.boy) ve itme ölçeği (animOlcek.it) değişirse güncelle   # gövde yarı genişliği (9 px) hücre pikseline çevrildi
 ASILI_BOY = max(round(kareler[i][0].shape[0] * OLCEK * (kareler[i][2] if len(kareler[i]) > 2 else 1)) for i in ASILI[:6])
 # v0.93: asılma kareleri (0–5) oyuncu_asili.gif'ten (6 kare). Ölçek: baston boyu (figür genişliği) eskisiyle aynı;
@@ -71,6 +71,9 @@ _o = _eskiB / np.mean([a_.shape[0] for a_ in _it])
 for i, a_ in zip(list(range(6, 12)) + [24, 25], _it):
     if i < len(kareler): kareler[i] = (a_, 0, _o)
     else: kareler.append((a_, 0, _o))
+# v0.96: tek nesneyi itme (eller aşağıda) oyuncu_itAlt.gif (8 kare) → 26–33 (26–32 döngü, 33 dururken); ölçek/hiza itmeyle aynı
+for f in ImageSequence.Iterator(Image.open(KOK + '/assets/kaynak/oyuncu_itAlt.gif')):
+    a_ = np.array(f.convert('RGBA')); a_[a_[:, :, 3] < 60] = 0; kareler.append((kes(a_, 0, a_.shape[0], 0, a_.shape[1]), 0, _o))
 KANCA_X = C + 38 * K   # v0.43: baston ucu gövdenin ~5.5 px önünde (v0.38'deki ~10.6 px'ten 5 px geri) → kanca taşın içine girer
 for n, k in enumerate(kareler):
     arr, alt = k[0], k[1]
