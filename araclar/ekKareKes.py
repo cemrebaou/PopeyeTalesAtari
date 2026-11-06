@@ -12,6 +12,7 @@ EK = {   # ad: (düşman, kaynak GIF, fps, döngü)
     'kertenkeleOl': ('kertenkele', 'kertenkele_ol.gif', 7, False),   # v1.00: yerinde ölüm, sonra 1 sn bekleyip solar
     'kediOl': ('kedi', 'kedi_ol.gif', 7, False),               # v1.00: bıçaklı leopar
     'domuzOl': ('domuz', 'domuz_ol.gif', 6, False),            # v1.00: yaban domuzu
+    'kopekOl': ('kopek', 'kopek_ol.gif', 7, False),            # v1.01: mızraklı
 }
 ap = KOK + '/js/veri/assetlar.js'; s = open(ap, encoding='utf8').read()
 D = json.loads(re.search(r'ASSETLER.dusman = (\{.*\});', s).group(1))
