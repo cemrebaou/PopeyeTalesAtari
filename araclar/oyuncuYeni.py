@@ -86,7 +86,18 @@ def anim(yeni, eskiler, hedefler, gif_mi, olcek_kare=None):
 
 for i in list(range(0, 4)) + list(range(29, 33)) + list(range(49, 58)): bosalt(i)
 print('dur', anim(gif('oyuncu_dur.gif'), [0, 1, 2, 3], range(60, 66), True))
-print('tirman', anim(gif('oyuncu_tirman.gif'), [29, 30, 31, 32], range(66, 74), True))
+# v0.87: yeni tırmanma GIF'i (8 kare); 0. kare alınmaz, 1–7 döngü. Boy eski tırmanma boyunda; hiza: karelerdeki
+# yumruğun (ipi tutan el) ortalama x'i hücre ortasına (oyuncu x'i = ip ortası), alt kenar ayak çizgisinde.
+def yumrukX(a):   # üst yarıda, gövdenin sağındaki ten rengi en büyük leke
+    r, g, b, al = [a[:, :, k].astype(int) for k in range(4)]
+    m = (al > 150) & (r > 200) & (g > 140) & (g < 210) & (b > 110) & (b < 190) & (r - b > 40)
+    m[a.shape[0] * 45 // 100:] = False; m[:, :a.shape[1] // 2] = False
+    lab, n = ndimage.label(m); s = ndimage.sum(m, lab, range(1, n + 1)); return np.where(lab == np.argmax(s) + 1)[1].mean()
+tr = gif('oyuncu_tirman.gif')[1:]
+eb = max(kutu(eski(i))[1] - kutu(eski(i))[0] + 1 for i in [29, 30, 31, 32]); nb = max(kutu(a)[1] - kutu(a)[0] + 1 for a in tr)
+HEDEF_X = W / 2; ex = np.mean([yumrukX(a) for a in tr])
+for i, a in zip(range(66, 73), tr): koy(i, a, eb / nb, ex, a.shape[0] - 1)
+print('tirman', eb / nb, ex)
 pogo = serit('oyuncu_pogo.png')
 assert len(pogo) == 4, len(pogo)
 # eski pogoHava (49) boyuna göre: 1. kare (efektsiz) ölçü; şapka üstü her karede aynı satırda
@@ -161,7 +172,7 @@ y0, y1, _, _ = kutu(v[0]); o = egBoy / (y1 - y0 + 1); hx = sapka(v[0])
 for k, a in enumerate(v): koy(130 + k, a, o, hx, kutu(a)[1])
 # Sıkıştır: sadece kullanılan kareler, animasyon sırasıyla 8 sütunlu sayfaya; kare listesi ASSETLER.oyuncu'ya
 ANIM = {'dur': range(60, 66), 'ayakVur': range(74, 82), 'kos': range(82, 94), 'zipla': [95, 96, 97], 'dus': [98], 'in': [100], 'takla': range(102, 111),
-        'sersem': [15, 16, 17], 'vur': range(111, 117), 'tirman': range(66, 74), 'uzat': range(119, 122), 'cek': range(122, 130),
+        'sersem': [15, 16, 17], 'vur': range(111, 117), 'tirman': range(66, 73), 'uzat': range(119, 122), 'cek': range(122, 130),
         'pogoHava': [49], 'pogoSek': [50, 51, 52], 'egilDur': [130], 'egil': range(131, 138)}
 S2 = 8; sira = [i for v in ANIM.values() for i in v]; yeniNo = {}
 sayfa = np.zeros((H * (-(-len(sira) // S2)), W * S2, 4), np.uint8)
