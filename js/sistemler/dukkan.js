@@ -2,7 +2,7 @@
 // dükkana ışınlanır; dükkandaki kapıda yukarı basınca geri döner. Oda haritanın sağında, dünya dışında bir kamera
 // boyunda kapalı alan (13×6 kare, 64 px): üst tavan, solda/sağda duvar, altta zemin. Odada kamera sabit, odayı gösterir.
 // Solda satıcı (ileride yetenek satacak), oyuncu onun sağında belirir, kapı sağda.
-const DUKKAN = { kare: 64, sut: 13, sat: 6, saticiBoy: 200 };
+const DUKKAN = { kare: 64, sut: 13, sat: 6, saticiBoy: 90, nadir: [8000, 9000] };   // v1.09: satıcı %45 (200 → 90)
 
 Object.assign(OyunSahnesi.prototype, {
   dukkanKur() {
@@ -36,12 +36,30 @@ Object.assign(OyunSahnesi.prototype, {
     kati(ox, oy, W, K); kati(ox, zeminY, W, K); kati(ox, oy, K, H); kati(ox + W - K, oy, K, H);
 
     // Satıcı (döngü), sağında oyuncunun belireceği yer, sağda kapı
-    const S = ASSETLER.dukkan.satici, ss = DUKKAN.saticiBoy / S.alt, sx = ox + K + 12 + S.w * ss / 2;
-    this.add.sprite(sx, zeminY + 4, 'dk_satici', 0).setOrigin(0.5, S.alt / S.h).setScale(ss).setDepth(1.2).play('dk_satici');
-    this.dukkanGiris = { x: sx + S.w * ss / 2 + 36, y: zeminY - 2 };
+    const S = ASSETLER.dukkan.satici, ss = DUKKAN.saticiBoy / S.icerikY, sx = ox + K + 24 + S.w * ss / 2;
+    this.satici = this.add.sprite(sx, zeminY + 3, 'dk_satici', 0).setOrigin(0.5, S.alt / S.h).setScale(ss).setDepth(1.2);
+    this.saticiBekle();
+    this.dukkanGiris = { x: sx + S.w * ss / 2 + 30, y: zeminY - 2 };
     const ix = ox + W - K - 44;
     this.boyutla(this.add.image(ix, zeminY + 2, 'kapiAcik').setOrigin(0.41, 1).setDepth(1.6), 'kapiAcik', { h: 72 });
     this.dukkanKapilar.push({ x: ix, y: zeminY, hedef: 'dis' });
+  },
+
+  // v1.09: satıcı ana döngüde; 8–9 sn'de bir iki nadir hareketten biri bir kez oynar, sonra ana döngüye döner
+  saticiBekle() {
+    const s = this.satici;
+    if (!s || !s.active) return;
+    s.play('dk_satici_bekle');
+    if (this.saticiZaman) this.saticiZaman.remove();
+    this.saticiZaman = this.time.delayedCall(Phaser.Math.Between(...DUKKAN.nadir), () => this.saticiTepki(Phaser.Utils.Array.GetRandom(['nadir1', 'nadir2'])));
+  },
+  // Tek seferlik hareket, bitince ana döngü: 'basparmak' (eşya alınca), 'para' (para yetmeyince), 'nadir1' / 'nadir2'
+  saticiTepki(ad) {
+    const s = this.satici;
+    if (!s || !s.active) return;
+    if (this.saticiZaman) this.saticiZaman.remove();
+    s.play('dk_satici_' + ad);
+    s.once('animationcomplete', () => this.saticiBekle());
   },
 
   // Kapının önünde, yerde, yukarı yeni basıldıysa geçiş. updatePlayer'dan önce çalışır (↑ zıplatmasın diye kilit).

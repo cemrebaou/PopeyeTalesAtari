@@ -121,7 +121,9 @@ class BootSahnesi extends Phaser.Scene {
     // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
     const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 12, repeat: 0 });   // v1.07: 8 → 12
     yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);
-    this.anims.create({ key: 'dk_satici', frames: this.anims.generateFrameNumbers('dk_satici', { start: 0, end: ASSETLER.dukkan.satici.kare - 1 }), frameRate: 7, repeat: -1 });   // v1.08
+    // v1.09: satıcı animasyonları (GIF süreleriyle): bekle döngü, nadir1/nadir2 ara sıra, basparmak (eşya alınca), para (para yetmeyince)
+    Object.entries(ASSETLER.dukkan.satici.anim).forEach(([ad, A]) => this.anims.create({ key: 'dk_satici_' + ad,
+      frames: A.kareler.map((frame, i) => ({ key: 'dk_satici', frame, duration: A.sure[i] })), frameRate: 10, repeat: ad === 'bekle' ? -1 : 0 }));
     // v1.00: ek şeritler (araclar/ekKareKes.py): <düşman>Ol → d_<düşman>Ol; <düşman>Bekle / <düşman>Saldir vb. → d_<düşman>_<anim> (eskisinin yerine)
     Object.entries(ASSETLER.ekKare).forEach(([ad, E]) => {
       const an = ad.slice(E.dusman.length).toLowerCase(), key = an === 'ol' ? 'd_' + ad : 'd_' + E.dusman + '_' + an;
