@@ -87,12 +87,12 @@ def anim(yeni, eskiler, hedefler, gif_mi, olcek_kare=None):
 for i in list(range(0, 4)) + list(range(29, 33)) + list(range(49, 58)): bosalt(i)
 print('dur', anim(gif('oyuncu_dur.gif'), [0, 1, 2, 3], range(60, 66), True))
 # v0.87: yeni tırmanma GIF'i (8 kare); 0. kare alınmaz, 1–7 döngü. Boy eski tırmanma boyunda; hiza: karelerdeki
-# yumruğun (ipi tutan el) ortalama x'i hücre ortasına (oyuncu x'i = ip ortası), alt kenar ayak çizgisinde.
+# v0.88: kolun/yumruğun iç kenarı (ortalama) hücre ortasına; oyun ipin yarı genişliği kadar dışa kaydırır (el ipe dıştan değer).
 def yumrukX(a):   # üst yarıda, gövdenin sağındaki ten rengi en büyük leke
     r, g, b, al = [a[:, :, k].astype(int) for k in range(4)]
     m = (al > 150) & (r > 200) & (g > 140) & (g < 210) & (b > 110) & (b < 190) & (r - b > 40)
     m[a.shape[0] * 45 // 100:] = False; m[:, :a.shape[1] // 2] = False
-    lab, n = ndimage.label(m); s = ndimage.sum(m, lab, range(1, n + 1)); return np.where(lab == np.argmax(s) + 1)[1].mean()
+    lab, n = ndimage.label(m); s = ndimage.sum(m, lab, range(1, n + 1)); return np.where(lab == np.argmax(s) + 1)[1].min()
 tr = gif('oyuncu_tirman.gif')[1:]
 eb = max(kutu(eski(i))[1] - kutu(eski(i))[0] + 1 for i in [29, 30, 31, 32]); nb = max(kutu(a)[1] - kutu(a)[0] + 1 for a in tr)
 HEDEF_X = W / 2; ex = np.mean([yumrukX(a) for a in tr])
