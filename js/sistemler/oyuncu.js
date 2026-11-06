@@ -35,7 +35,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (this.gorselCarpan === anahtar) return;
     this.gorselCarpan = anahtar;
     const O = CONFIG.oyuncu, K1 = ASSETLER.oyuncu.kare, KR = ikinci ? O.kare2 : K1;
-    const s = O.boy / K1.ayakBoy * f, gomme = this.zeminGomme / s;
+    const s = O.boy / K1.ayakBoy * f, gomme = (this.zeminGomme + O.ayakEk) / s;
     const gw = O.govdeG / s, gh = (this.egik ? O.govdeEgik : O.govdeY) / s;
     p.setScale(s).setOrigin(0.5, (KR.ayakY - gomme) / KR.h);
     p.body.setSize(gw, gh, false).setOffset(KR.w / 2 - gw / 2, KR.ayakY - gomme - gh);

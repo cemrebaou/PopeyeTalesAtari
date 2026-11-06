@@ -35,20 +35,21 @@ def isaretle(x, y, w, h, v):
 for b in sayilar('bloklar'): isaretle(*map(int, b), 1)
 for b in sayilar('basamaklar'): isaretle(*map(int, b), 2)
 for b in sayilar('kayalar'): isaretle(int(b[0]), int(b[1]), T, T, 1)   # v0.33: ara (uçan) kayalar normal zemin karosu
-for b in sayilar('sahte'): isaretle(*map(int, b), 1)                    # v0.68: sahte duvarlar taş gibi döşenir (oyunda çarpışmasız)
-def bos(i, j):
+for b in sayilar('sahte'): isaretle(*map(int, b), 3)                    # v0.68: sahte duvarlar taş gibi döşenir (oyunda çarpışmasız)
+# v0.84: sahte duvar komşu için boş sayılır → altındaki gerçek zemin çimli üst karo olur
+def bos(i, j, ben=1):   # ben: döşenen kare (3 = sahte duvar; sahte komşusunu dolu sayar)
     if i < 0 or i >= GX or j < 0 or j >= GY: return False
-    return dolu[j][i] == 0
+    return dolu[j][i] == 0 or (dolu[j][i] == 3 and ben != 3)
 rnd = random.Random(7)
 on = []
 for j in range(GY):
     r = ''
     for i in range(GX):
-        if dolu[j][i] != 1: r += alf[0]; continue
+        if dolu[j][i] not in (1, 3): r += alf[0]; continue
         m = bolge(j)
-        sol, sag = bos(i - 1, j), bos(i + 1, j)
+        sol, sag = bos(i - 1, j, dolu[j][i]), bos(i + 1, j, dolu[j][i])
         yan = 'L' if sol and not sag else 'R' if sag and not sol else 'M'
-        p = ('T' if bos(i, j - 1) else 'F') + yan
+        p = ('T' if bos(i, j - 1, dolu[j][i]) else 'F') + yan
         r += alf[NO[m + p] + 1]
     on.append(r)
 m = re.search(r"\n  on: \[.*?\n  \]", L, re.S)

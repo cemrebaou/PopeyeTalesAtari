@@ -138,8 +138,9 @@ class OyunSahnesi extends Phaser.Scene {
     if (!m.active) return;
     this.ses('zehirVur');
     for (let i = 0; i < 6; i++) {
-      const k = this.add.circle(m.x, m.y, Phaser.Math.Between(2, 4), 0x8fe03a).setDepth(8);
-      this.tweens.add({ targets: k, x: m.x + Phaser.Math.Between(-22, 22), y: m.y - Phaser.Math.Between(4, 18), alpha: 0,
+      const y = m.y + 7;   // sıçrama biraz aşağıdan
+      const k = this.add.circle(m.x, y, Phaser.Math.Between(2, 4), 0x8fe03a).setDepth(8);
+      this.tweens.add({ targets: k, x: m.x + Phaser.Math.Between(-22, 22), y: y - Phaser.Math.Between(4, 18), alpha: 0,
         duration: 320, onComplete: () => k.destroy() });
     }
   }

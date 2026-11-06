@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.83 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.84 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -55,7 +55,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 - **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+) — 1. bölüm; `a` açık gri taş, `k` koyu taş, `m` mor kristal (biraz karartılmış) — 2. bölüm. Yeni bölgelerde arka plan karoları dolgunun en fazla %60'ı parlaklıkta (`ARKA_ORAN`). Bölümün `bolgeler: [[satır, önek], …]` alanı hangi satırdan itibaren hangi bölgenin döşeneceğini söyler. Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
 - **Şelale** `[x, w, y0, y1, önde]`: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. `önde=1`: oyuncunun ve zeminin önünde çizilir — ardındaki gizli zemin ve içine giren oyuncu görünmez; taşa taşmaz (tavanın altından çıkar, alttaki zeminin hizasında kesilir). Yan yana şelaleler farklı evrede akar. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
 - **Sarmaşık / zincir**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`. Bölümde `tirmanma: 'zincir'` varsa zincir çizilir (`nesne/zincir.png`). Zeminde dururken ↑ ile tutunulur.
-- **Zemine oturma**: oyuncu, sandık ve taşlar zemin çizgisinin `zeminGomme` px altına çizilir (bölüm alanı; 1. bölüm 2, 2. bölüm 6) — çim / taş kenarını örter. Üst üste taş / kasa: üstteki, alttakinin üst kenarına `CONFIG.ustUsteGomme` (4 px) gömülür ve önünde çizilir (`gommeGuncelle`). Kırılır taşlar (kasa hariç) yerde `tasZeminYukari` (bölüm alanı; 2. bölüm 0, yoksa `CONFIG.tasYukari` 3 px), taş / kasa üstünde `CONFIG.tasUstuYukari` (5 px) yukarıda çizilir. Gövdeler yerinde kalır, sadece görsel kayar.
+- **Zemine oturma**: oyuncu, sandık ve taşlar zemin çizgisinin `zeminGomme` px altına çizilir (bölüm alanı; 1. bölüm 2, 2. bölüm 6) — çim / taş kenarını örter. Üst üste taş / kasa: üstteki, alttakinin üst kenarına `CONFIG.ustUsteGomme` (4 px) gömülür ve önünde çizilir (`gommeGuncelle`). Sandık zemine `CONFIG.sandikGomme` (3) fazla, oyuncu ayakları `CONFIG.oyuncu.ayakEk` (2) fazla gömülür. Kırılır taşlar (kasa hariç) yerde `tasZeminYukari` (2. bölüm 0, yoksa 3 px) yukarıda. Üst üste: üstteki, alttakinin çizim payına + `ustUsteGomme` (4) oturur. Çimsiz zeminde (ör. sahte duvar altı) nesneler gömülmez; zeminDose sahte duvarın altındaki zemini çimli döşer. Gövdeler yerinde kalır, sadece görsel kayar.
 - **Gizli yerler**: her birinde en az bir mavi elmas ve yaşam ya da kalp çıkan sandık var.
 - **Elmas yerleşimi**: elmas / özel ödül zemine, taşa ya da sandığa değiyorsa açılışta en yakın boş yere (sola / sağa, sonra yukarı) kayar (`bosYer`).
 - **Sahte duvar** `sahte: [x, y, w, h]`: taş gibi döşenir ama çarpışması yok; karoları oyuncunun önünde ayrı katmanda, oyuncu içine girince %25'e saydamlaşır (gizli oda).
@@ -83,11 +83,11 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 | ari | 1 | kamera görüş alanına girince kovalar (95 px/sn), 520 px uzaklaşınca bırakır; görünürken arı sesi |
 | orumcek | 1 | tavandan ipiyle inip çıkar |
 | kedi (2. bölüm) | 2 | devriye (70); oyuncu aynı zeminde 120 px'e gelince bıçakla ileri atılır (52 px menzil), 1 sn dinlenir |
-| domuz (2. bölüm) | 3 | devriye (35); 80 px'te gürzü indirir (70 px menzil, sarsıntı), 1.5 sn dinlenir |
+| domuz (2. bölüm) | 3 | devriye (35); oyuncuyu 6 karoda görünce üstüne yürür, gövdeler arası ~14 px kalınca gürzü indirir, 1.5 sn dinlenir |
 | kertenkele (2. bölüm) | 1 | maymun gibi: aynı zemindeyse üfleme okunu ağız hizasından, oklu kare görünürken atar (`ok.png`, 260 px/sn) |
-| golem (2. bölüm, sadece mor) | 4 | devriye (30); 80 px'te yumruk (76 px menzil, sarsıntı) |
+| golem (2. bölüm, sadece mor) | 4 | domuz gibi: görünce üstüne yürür, yanına gelince yumruk |
 | bitki (2. bölüm, sadece üst) | 1 | yerinde durur (duruşu ileri-geri akıcı), oyuncuya döner; 6 karo içindeyse ağzından alçak yayla zehir tükürür, önündeki 5. karoya düşer (`zehir.png`; `zehirAt` / çarpınca `zehirVur`) |
-| fici (2. bölüm) | 2 | devriye; aynı zeminde görünce 0.5 sn kurulur, top olup oyuncuya doğru yavaşça hızlanarak dönerek atılır (en çok 290 px/sn); zemin ucunda durur, bir turun dörtte biri kadar (1–4 sn) yürür, sonra yeniden. Dönerken vurulmaz, pogo işlemez |
+| fici (2. bölüm) | 2 | devriye; aynı zeminde 6 karo içinde görünce 0.5 sn kurulur, top olup yavaşça hızlanarak dönerek atılır (en çok 290 px/sn, en çok 12 karo ya da zemin ucuna kadar); sonra 2 sn yürür, oyuncu yine yakınsa tekrar döner. Dönerken vurulmaz, pogo işlemez |
 | buyucu (2. bölüm) | 1 | maymun gibi; asalı kareler yavaşça (1.25 sn) oynar, sonunda 2 can götüren büyü atar (`buyu.png`) |
 | yarasa (2. bölüm) | 2 | uçar; görünce oyuncunun 150 px yanına, biraz üstüne gelir; aynı hizadaysa durup ses dalgası atar (`dalga.png`, 230 px/sn, 2.2 sn arayla); 560 px uzaklaşınca evine döner |
 | boss | 4 | 520 px'te uyanır; yürü → hazırlan → atıl → dinlen; yarı canın altında hızlanır, zıplayarak atılır; rastgele patron sesleri |

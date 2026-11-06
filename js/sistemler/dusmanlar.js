@@ -23,7 +23,7 @@ const DUSMAN_TIP = {
   yarasa:     [26, 20, 2, 0, true]      // uçar, oyuncunun yanına gelip ses dalgası atar
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
-const DUSMAN_GOMME = { yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 5, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
+const DUSMAN_GOMME = { yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 11, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -199,7 +199,8 @@ Object.assign(OyunSahnesi.prototype, {
       if (!d.vurdu && d.saldiri < (kedi ? 0.25 : 0.22)) {
         d.vurdu = true;
         const on = (p.x - d.x) * d.yon;
-        if (!this.durum.olu && on > -10 && on < (kedi ? 52 : golem ? 76 : 70) && Math.abs(p.body.bottom - b.bottom) < 40) this.oyuncuHasar(d.x);
+        const kenar = (b.width + p.body.width) / 2;   // gövdeler arası boşluk + menzil
+        if (!this.durum.olu && on > -10 && on < (kedi ? 52 : kenar + 22) && Math.abs(p.body.bottom - b.bottom) < 40) this.oyuncuHasar(d.x);
         if (!kedi) this.cameras.main.shake(90, 0.004);
       }
       if (d.saldiri <= 0) { d.dinlen = kedi ? 1 : 1.5; this.dusmanAnim(d, 'dur'); }
@@ -207,7 +208,8 @@ Object.assign(OyunSahnesi.prototype, {
     }
     if (d.dinlen > 0) { d.dinlen -= dt; b.setVelocityX(0); return; }
     const ayni = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && p.x >= d.minX - 24 && p.x <= d.maxX + 24;
-    if (ayni && Math.abs(dx) < (kedi ? 120 : 80)) {
+    const vurMesafe = kedi ? 120 : (b.width + p.body.width) / 2 + 14;   // domuz / golem yanına gelip vurur
+    if (ayni && Math.abs(dx) < vurMesafe) {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
       d.saldiri = kedi ? 0.48 : golem ? 0.7 : 0.6;
@@ -216,7 +218,10 @@ Object.assign(OyunSahnesi.prototype, {
       this.ses(kedi ? 'bastonSalla' : 'bastonVur');
       return;
     }
-    this.devriye(d, dt);
+    if (!kedi && ayni && Math.abs(dx) < 6 * 32) {   // domuz / golem: oyuncuyu görünce üstüne yürür
+      d.yon = Math.sign(dx) || 1; d.setFlipX(d.yon < 0);
+      b.setVelocityX(d.yon * d.hiz * 1.4);
+    } else this.devriye(d, dt);
     this.dusmanAnim(d, 'yuru');
   },
 
@@ -290,9 +295,10 @@ Object.assign(OyunSahnesi.prototype, {
       T.rotation += d.yon * d.hizX * dt / (75 * s);
       const uc = (d.yon > 0 && d.x >= d.maxX - 1) || (d.yon < 0 && d.x <= d.minX + 1)
         || (b.blocked.right && d.yon > 0) || (b.blocked.left && d.yon < 0);
-      if (uc || (d.sure -= dt) <= 0) {
-        this.ficiDon(d, false); d.yon = -d.yon;
-        d.dinlen = Phaser.Math.Clamp((d.maxX - d.minX) / d.hiz / 2, 1, 4);   // bir turun dörtte biri kadar yürür
+      if (uc || Math.abs(d.x - d.donX) >= 12 * 32 || (d.sure -= dt) <= 0) {   // en çok 12 karo döner
+        this.ficiDon(d, false);
+        if (uc) d.yon = -d.yon;
+        d.dinlen = 2;   // 2 sn yürür, sonra oyuncu yakınsa yine döner
       }
       return;
     }
@@ -300,8 +306,8 @@ Object.assign(OyunSahnesi.prototype, {
     this.dusmanAnim(d, 'yuru');
     d.setFlipX(d.yon < 0);
     if (d.dinlen > 0) d.dinlen -= dt;
-    const gor = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && Math.abs(dx) < 300
-      && p.x >= d.minX - 24 && p.x <= d.maxX + 24 && this.cameras.main.worldView.contains(d.x, d.y - 10);
+    const gor = !this.durum.olu && Math.abs(p.body.bottom - b.bottom) < 24 && Math.abs(dx) < 6 * 32
+      && p.x >= d.minX - 24 && p.x <= d.maxX + 24;
     if (gor && !(d.dinlen > 0)) {
       d.durum = 'hazir'; d.sure = 0.5; d.yon = Math.sign(dx) || 1; d.setFlipX(d.yon < 0);
       this.dusmanAnim(d, 'hazir');
@@ -310,7 +316,7 @@ Object.assign(OyunSahnesi.prototype, {
 
   ficiDon(d, basla, yon) {
     if (basla) {
-      d.durum = 'don'; d.yon = yon; d.hizX = 0; d.sure = 4;
+      d.durum = 'don'; d.yon = yon; d.hizX = 0; d.sure = 6; d.donX = d.x;
       if (!d.topImg) d.topImg = this.add.image(0, 0, 'd_fici', 6).setOrigin(91 / 184, 87 / 168).setDepth(6);
       d.topImg.setScale(d.scaleX).setFlipX(yon < 0).setVisible(true).setRotation(0);
       d.setVisible(false);

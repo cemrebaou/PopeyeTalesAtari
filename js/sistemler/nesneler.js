@@ -196,16 +196,23 @@ Object.assign(OyunSahnesi.prototype, {
     liste.forEach(s => ust.set(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.top / T), s));
     liste.sort((a, b) => b.body.bottom - a.body.bottom).forEach(s => {
       const alt = ust.get(Math.floor(s.body.center.x / T) + ',' + Math.round(s.body.bottom / T));
-      const taban = alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3 ? (alt.gommeTaban || 0) + CONFIG.ustUsteGomme : this.zeminGomme;
-      s.gommeTaban = taban;
-      // taşlar (kasa hariç): yerde tasZeminYukari, başka taş / kasa üstünde tasUstuYukari kadar yukarıda
-      const tas = s.kirTas && s.tur !== 'kasa', ustte = taban !== this.zeminGomme;
-      const d = taban - (!tas ? 0 : ustte ? CONFIG.tasUstuYukari : (this.L.tasZeminYukari ?? CONFIG.tasYukari));
+      const tas = s.kirTas && s.tur !== 'kasa';
+      let d;
+      if (alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3) d = (alt.gommeD || 0) + CONFIG.ustUsteGomme;   // alttakinin üst payına
+      else if (!this.cimliZemin(s.body.center.x, s.body.bottom)) d = 0;   // çimsiz zemin (sahte duvar altı vb.): gömülmez
+      else d = this.zeminGomme + (tas ? -(this.L.tasZeminYukari ?? CONFIG.tasYukari) : s.kirTas ? 0 : CONFIG.sandikGomme);
       if (s.gommeD === d) return;
       s.gommeD = d;
       s.setDepth(2 + d / 1000);
       this.kutuGovdesi(s);
     });
+  },
+
+  // Verilen noktanın altındaki zemin karosu çimli üst karo mu
+  cimliZemin(x, y) {
+    const T = this.L.karo, t = this.anaKatman && this.anaKatman.getTileAt(Math.floor(x / T), Math.floor((y + 1) / T));
+    if (!this.ustKaro) this.ustKaro = new Set(Object.entries(ASSETLER.tile).filter(([ad]) => ad[1] === 'T').map(([, i]) => i));
+    return !t || this.ustKaro.has(t.index);
   },
 
   tasUyut(s) {
