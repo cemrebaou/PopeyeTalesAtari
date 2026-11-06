@@ -13,13 +13,15 @@ EK = {   # ad: (düşman, kaynak GIF, fps, döngü)
     'kediOl': ('kedi', 'kedi_ol.gif', 7, False),               # v1.00: bıçaklı leopar
     'domuzOl': ('domuz', 'domuz_ol.gif', 6, False),            # v1.00: yaban domuzu
     'kopekOl': ('kopek', 'kopek_ol.gif', 7, False),            # v1.01: mızraklı
+    'maymunOl': ('maymun', 'maymun_ol.gif', 7, False, -2),     # v1.02: son 2 kare kullanılmaz
 }
 ap = KOK + '/js/veri/assetlar.js'; s = open(ap, encoding='utf8').read()
 D = json.loads(re.search(r'ASSETLER.dusman = (\{.*\});', s).group(1))
 meta = {}
-for ad, (dus, gif, fps, dongu) in EK.items():
+for ad, (dus, gif, fps, dongu, *son) in EK.items():   # son: kareleri bu indekste kes (ör. -2 → son 2 kare atılır)
     d = D[dus]; b = Image.open(KOK + '/assets/dusman/' + dus + '.png').crop((0, 0, d['w'], d['h'])).getbbox()
     fr = [f.convert('RGBA') for f in ImageSequence.Iterator(Image.open(KOK + '/assets/kaynak/' + gif))]
+    if son: fr = fr[:son[0]]
     g0 = fr[0].getbbox(); r = (b[2] - b[0]) / (g0[2] - g0[0])
     W, H = round(fr[0].width * r), round(fr[0].height * r)
     dx = round(((b[0] + b[2]) / 2 - d['w'] / 2) - ((g0[0] + g0[2]) / 2 * r - W / 2))
