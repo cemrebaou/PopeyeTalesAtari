@@ -32,3 +32,6 @@ ASSETLER.oyuncu = {"kare": {"w": 352, "h": 282, "ayakY": 250, "ayakBoy": 234}, "
 
 // Yarasa ölüm şeridi (araclar/yarasaOlKes.py): hücre, yer çizgisi, uçarkenki gövde ortası (yarasa.png ölçeğinde)
 ASSETLER.yarasaOl = {"w": 203, "h": 191, "ayak": 171, "merkez": 99, "kare": 9};
+
+// Bitki ölüm şeridi (araclar/bitkiOlKes.py): hücre, ayak çizgisi (bitki.png ölçeğinde)
+ASSETLER.bitkiOl = {"w": 228, "h": 228, "ayak": 210, "kare": 12};

@@ -144,3 +144,4 @@ Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat
 - **Bastonla zıplama (v0.95)**: açılınca / havadayken `pogoHava` karesi `kaynak/oyuncu_pogoHava.png` (karakter boyu şapka genişliğine göre eskisiyle aynı, baston ucu ayak çizgisinde). Sekme kareleri eski.
 - **Tek / yığın itme (v0.96)**: önde tek nesne varsa `itAlt` (`kaynak/oyuncu_itAlt.gif`, eller aşağıda; 1–7 döngü, 8. kare dururken `itAltDur`); üst üste 2+ nesne varsa eski `it` / `itDur` (eller yukarıda) ve üstteki(ler) alttakiyle birlikte itilir (`yiginBul`). oyuncu2.png 6 satır.
 - **Yarasa ölümü (v0.98)**: `kaynak/yarasa_ol.gif` → `dusman/yarasaOl.png` (`araclar/yarasaOlKes.py`). 1–4. kareler havada, 4. karede yere düşer, yere 30 px kala 5. kare, yere değince 6–9, 1 sn sonra solarak kaybolur (`yarasaOlum`).
+- **Bitki ölümü (v0.99)**: `kaynak/bitki_ol.gif` → `dusman/bitkiOl.png` (`araclar/bitkiOlKes.py`); olduğu yerde 12 kare bir kez oynar, sonra yok olur.

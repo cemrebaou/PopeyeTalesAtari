@@ -546,6 +546,13 @@ Object.assign(OyunSahnesi.prototype, {
     d.body.setVelocity(0, 0);
     d.body.enable = false;
     if (d.ad === 'yarasa') return this.yarasaOlum(d, bitince);
+    if (d.ad === 'bitki') {   // v0.99: olduğu yerde ölüm animasyonu (ayak çizgisi aynı), bitince kaybolur
+      const B = ASSETLER.bitkiOl, s = Math.abs(d.scaleY), gom = (DUSMAN_GOMME.bitki || 0) / s;
+      d.setTexture('d_bitkiOl', 0).setOrigin(0.5, (B.ayak - gom) / B.h);
+      d.play('d_bitkiOl');
+      d.once('animationcomplete', () => { d.destroy(); if (bitince) bitince(); });
+      return;
+    }
     d.play('d_' + d.ad + '_ol');
     if (ASSETLER.dusman[d.ad].anim.ol.length === 1) {   // ölüm karesi olmayanlar: devrilip söner
       const yon = d.flipX ? 1 : -1;
