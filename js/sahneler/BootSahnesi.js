@@ -26,6 +26,7 @@ class BootSahnesi extends Phaser.Scene {
     });
     // v1.08: dükkan odası
     Object.keys(A.dukkan.parca).forEach(ad => L.image('dk_' + ad, 'assets/dukkan/' + ad + '.png'));
+    L.spritesheet('dk_ikon', 'assets/dukkan/ikon.png', { frameWidth: A.dukkanIkon.boyut, frameHeight: A.dukkanIkon.boyut });   // v1.10
     L.spritesheet('dk_satici', 'assets/dukkan/satici.png', { frameWidth: A.dukkan.satici.w, frameHeight: A.dukkan.satici.h });
     Object.entries(A.ekKare).forEach(([ad, E]) => L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: E.w, frameHeight: E.h }));   // v1.00 ek şeritler
     L.spritesheet('d_yarasaOl', 'assets/dusman/yarasaOl.png', { frameWidth: A.yarasaOl.w, frameHeight: A.yarasaOl.h });   // v0.98

@@ -11,6 +11,7 @@ Object.assign(OyunSahnesi.prototype, {
       inisZaman: 0, havadaydi: false, coyote: 0, ziplaTampon: 0, ziplarken: false,
       tirmaniyor: false, bakis: 1, egik: false, tavan: false, egilKilit: false, itiyor: false,
       asili: 0, asiliSon: 1, asiliBekle: 0, yatayKilit: 0,
+      duvarZincir: false, sonDuvar: 0, duvarZiplaBekle: 0,
       oncekiZipla: false, oncekiZiplaTus: false, oncekiSaldir: false, oncekiCek: false,
       k: null
     });
@@ -102,7 +103,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (tut && !this.vurCek && !this.vurPogo && yerde && !this.cekDurum
       && this.vurSure >= CONFIG.oyuncu.saldiriSure + 0.04 && this.cekHedefBul()) { this.vurCek = true; cekBas = true; }
     if (!tut) this.vurCek = false;
-    this.vurPogo = tut && !this.vurCek && (this.vurPogo || (!yerde && this.vurSure >= 0.15));
+    this.vurPogo = tut && !this.vurCek && yetenekVar('pogo') && (this.vurPogo || (!yerde && this.vurSure >= 0.15));   // v1.10: yetenek
     if (this.vurPogo) this.saldiriZaman = 0;
     k.cek = k.cek || this.vurCek;
     k.cekBas = k.cekBas || cekBas;
@@ -117,7 +118,7 @@ Object.assign(OyunSahnesi.prototype, {
 
     const k = this.girdi();
     this.k = k;
-    ['dokunulmaz', 'knock', 'saldiriBekleme', 'pogoSekZaman', 'inisZaman', 'sersemZaman', 'asiliBekle', 'yatayKilit']
+    ['dokunulmaz', 'knock', 'saldiriBekleme', 'pogoSekZaman', 'inisZaman', 'sersemZaman', 'asiliBekle', 'yatayKilit', 'duvarZiplaBekle']
       .forEach(a => { if (this[a] > 0) this[a] -= dt; });
     p.setAlpha(this.dokunulmaz > 0 && Math.floor(time / 90) % 2 ? 0.35 : 1);
 
@@ -143,6 +144,7 @@ Object.assign(OyunSahnesi.prototype, {
       this.asiliBekle = Math.max(this.asiliBekle, 0.35);
     }
     if (this.asilmaGuncelle(k, yerde)) { this.animasyon(yerde); return; }
+    this.duvarZiplaGuncelle(k, yerde);
 
     this.cekGuncelle(k, yerde, dt);
     const cekiyor = this.cekDurum !== null;
@@ -156,7 +158,8 @@ Object.assign(OyunSahnesi.prototype, {
       this.zipSes();
     }
     // Çift zıplama: havadayken (ilk zıplamadan ya da düşerken) bir kez daha zıpla → takla atar
-    else if (!cekiyor && !yerde && k.ziplaBas && !this.ciftZipladi && this.coyote <= 0 && this.knock <= 0 && !this.pogoModu) {
+    else if (!cekiyor && !yerde && k.ziplaBas && !this.ciftZipladi && this.coyote <= 0 && this.knock <= 0 && !this.pogoModu
+      && !this.duvarZincir && yetenekVar('ciftZipla')) {
       b.setVelocityY(F.ziplama * 0.85);
       this.ciftZipladi = true; this.taklaZaman = 0.55; this.ziplarken = true; this.ziplaTampon = 0;
       this.zipSes();
@@ -204,8 +207,8 @@ Object.assign(OyunSahnesi.prototype, {
     let hiz = this.egik ? F.egilYurume : F.yurume;
     this.itiyor = false;
     if (yon && yerde && !this.egik && this.knock <= 0) {
-      const s = this.itHedefBul(yon);
-      if (s) {
+      const s = this.itHedefBul(yon), n = s ? this.yiginBul(s).length : 0;
+      if (s && yetenekVar(n > 1 ? 'itCift' : 'itTek')) {   // v1.10: tek / çift itme yeteneği
         this.itiyor = true;
         hiz = F.itme;
         // v0.96: üst üste duranlar birlikte itilir (alttaki kıpırdayamıyorsa hiçbiri)
@@ -218,26 +221,37 @@ Object.assign(OyunSahnesi.prototype, {
     if (this.knock <= 0 && !(this.yatayKilit > 0)) b.setVelocityX(yon && this.duvarVar(yon) ? 0 : yon * hiz);
   },
 
+  // v1.10 Duvar Zıplama (yetenek duvarZipla): havada duvara değerken zıpla basılı + duvara doğru yön → duvardan ters yöne,
+  // zıplama basılı tutma süresinden bağımsız en yükseğe sıçrar. Zıplama basılı kaldıkça (yere inmeden) karşı duvara değince
+  // kendiliğinden yine sıçrar (iki duvar arasında sağa sola). Bırakınca ya da yere inince zincir biter.
+  duvarZiplaGuncelle(k, yerde) {
+    if (yerde || !k.zipla) this.duvarZincir = false;
+    if (yerde || !k.zipla || !yetenekVar('duvarZipla') || this.tirmaniyor || this.cekDurum || this.knock > 0 || this.pogoModu) return;
+    const b = this.player.body, F = CONFIG.fizik;
+    if (this.duvarZiplaBekle > 0) return;
+    const d = (b.blocked.right || this.duvarVar(1)) ? 1 : (b.blocked.left || this.duvarVar(-1)) ? -1 : 0;
+    if (!d || (this.duvarZincir && d === this.sonDuvar)) return;
+    if (!this.duvarZincir && !(d > 0 ? k.sag : k.sol)) return;
+    this.bakis = -d; this.player.setFlipX(this.bakis < 0);
+    b.setVelocity(-d * F.duvarZiplaX, F.ziplama);
+    this.duvarZincir = true; this.sonDuvar = d; this.duvarZiplaBekle = 0.12;
+    this.ziplarken = false; this.ziplaTampon = 0; this.yatayKilit = 0.22; this.ciftZipladi = false; this.taklaZaman = 0;
+    this.zipSes();
+  },
+
   // Bastonla duvara asılma. Havada düşerken duvara doğru basılı ve baston kancası yandaki taşa değiyorsa takılır
-  // (taş gövdenin üstündeyse — alttan kafa girerse — takılmaz). Zıpla → duvardan uzağa sıçrar; ters yön / ↓ / duvar biterse bırakır.
+  // (taş gövdenin üstündeyse — alttan kafa girerse — takılmaz). Zıpla / ters yön / ↓ / duvar biterse bırakır. Yetenek: asilma.
   // Asılı kaldıysa true döner.
   asilmaGuncelle(k, yerde) {
     const p = this.player, b = p.body, F = CONFIG.fizik;
     if (this.asili) {
       const ters = this.asili > 0 ? k.sol : k.sag;
-      if (k.ziplaBas) {
-        this.asiliBirak();
-        this.bakis = -this.asiliSon; p.setFlipX(this.bakis < 0);
-        b.setVelocity(this.bakis * F.asiliZipla, F.ziplama);
-        this.zipSes();
-        this.ziplarken = true; this.ziplaTampon = 0; this.yatayKilit = 0.15;
-        return false;
-      }
+      if (k.ziplaBas) { this.asiliBirak(); this.ziplaTampon = 0; return false; }   // v1.10: duvardan sıçrama yok, bırakır (Duvar Zıplama yeteneği ayrı)
       if (ters || k.asagi || yerde || !this.kancaDuvar(this.asili)) { this.asiliBirak(); return false; }
       b.setVelocity(0, 0);
       return true;
     }
-    if (yerde || this.asiliBekle > 0 || b.velocity.y <= 0 || this.knock > 0 || this.pogoModu) return false;
+    if (yerde || this.asiliBekle > 0 || b.velocity.y <= 0 || this.knock > 0 || this.pogoModu || !yetenekVar('asilma')) return false;
     const y = k.sag && !k.sol ? 1 : (k.sol && !k.sag ? -1 : 0);
     const duvar = y ? this.kancaDuvar(y) : null;
     if (!duvar || !(y > 0 ? duvar.left >= b.right - 1 : duvar.right <= b.left + 1)) return false;
@@ -285,12 +299,12 @@ Object.assign(OyunSahnesi.prototype, {
     b.setVelocityX((this.bakis > 0 ? k.sol : k.sag) ? -this.bakis * C.hiz : 0);
     const fark = this.cekBosluk(s) - this.cekMesafe;
     if (fark > C.menzil) { this.cekBirak(); return; }
-    if (s.kirTas) this.tasUyandir(s);
-    s.body.setVelocityX(b.velocity.x - this.bakis * fark * 10);
+    const vx = b.velocity.x - this.bakis * fark * 10;
+    this.yiginBul(s).forEach(u => { if (u.kirTas) this.tasUyandir(u); u.body.setVelocityX(vx); });   // v1.10: üst üste olanlar birlikte
   },
 
   cekBirak() {
-    if (this.cekSandik && this.cekSandik.active) this.cekSandik.body.setVelocityX(0);
+    if (this.cekSandik && this.cekSandik.active) this.yiginBul(this.cekSandik).forEach(u => u.body.setVelocityX(0));
     this.cekDurum = null;
     this.cekSandik = null;
   },
@@ -310,7 +324,7 @@ Object.assign(OyunSahnesi.prototype, {
   cekHedefBul() {
     let en = null, enB = Infinity;
     this.sandiklar.getChildren().forEach(s => {
-      if (!this.tasinabilir(s)) return;
+      if (!this.tasinabilir(s) || !yetenekVar(this.yiginBul(s).length > 1 ? 'cekCift' : 'cekTek')) return;   // v1.10
       const bosluk = this.cekBosluk(s);
       if (bosluk >= -4 && bosluk <= CONFIG.cek.menzil && bosluk < enB) { en = s; enB = bosluk; }
     });
@@ -489,7 +503,7 @@ Object.assign(OyunSahnesi.prototype, {
   canlan() {
     const S = this.durum, p = this.player, b = p.body;
     S.olu = false;
-    S.can = CONFIG.oyuncu.canMax;
+    S.can = canMaxi();
     b.checkCollision.none = false;
     b.setAllowGravity(true);
     b.reset(this.spawn.x, this.spawn.y);

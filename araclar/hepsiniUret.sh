@@ -20,3 +20,4 @@ python3 araclar/zeminDose.py level2
 node araclar/erisim.js | tail -1
 node araclar/erisim.js level2 | tail -1
 python3 araclar/dukkanUret.py
+python3 araclar/dukkanIkon.py

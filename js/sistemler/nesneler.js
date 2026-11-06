@@ -108,7 +108,7 @@ Object.assign(OyunSahnesi.prototype, {
   kalpVer(x, y) {
     const S = this.durum;
     this.ses('can');
-    if (S.can < CONFIG.oyuncu.canMax) { S.can++; this.popup(x, y - 20, '+1', 'ui_kalp'); this.hudGuncelle(); }
+    if (S.can < canMaxi()) { S.can++; this.popup(x, y - 20, '+1', 'ui_kalp'); this.hudGuncelle(); }
     else this.puanEkle(CONFIG.puan.kalpFazla, x, y - 20);
   },
 
@@ -280,6 +280,11 @@ Object.assign(OyunSahnesi.prototype, {
   // Her vuruşta türüne ait parçalar vuruş yönüne fırlar; kristal taş kırılınca 1–5 küçük elmas saçar.
   tasVur(s) {
     if (!s.active || s.kiriliyor) return;
+    if (!yetenekVar(s.tur === 'kasa' ? 'kasaKir' : 'tasKir')) {   // v1.10: kırma yeteneği yoksa sadece sallanır
+      this.ses(s.tur === 'kasa' ? 'tahtaVur' : 'tasVur1');
+      this.tweens.add({ targets: s, angle: { from: -1, to: 1 }, duration: 40, yoyo: true, onComplete: () => s.setAngle(0) });
+      return;
+    }
     s.vurus++;
     const kasa = s.tur === 'kasa', gerek = kasa ? 2 : 3;
     const yon = Math.sign(s.x - this.player.x) || this.bakis || 1;

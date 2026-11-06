@@ -13,8 +13,8 @@ class OyunSahnesi extends Phaser.Scene {
     this.dunyaG = L.genislik;
     this.dunyaY = L.yukseklik;
     this.durum = {
-      puan: 0, elmas: 0, elmasToplam: 0,
-      can: CONFIG.oyuncu.canMax, yasam: CONFIG.oyuncu.yasam,
+      puan: KAYIT.puan, elmas: 0, elmasToplam: 0,   // v1.10: puan kalıcı (dükkan parası)
+      can: canMaxi(), yasam: CONFIG.oyuncu.yasam + KAYIT.can,
       olu: false, bitti: false, oyunBitti: false
     };
     this.oyuncuDurumuSifirla();
@@ -270,6 +270,8 @@ class OyunSahnesi extends Phaser.Scene {
     kb.addCapture('SPACE,UP,DOWN,LEFT,RIGHT');
     kb.on('keydown-R', () => this.scene.restart());
     kb.on('keydown-P', () => this.haritaDegistir());
+    // GELİŞTİRME (yayından önce silinecek): O → +10 000 puan (dükkanı denemek için)
+    kb.on('keydown-O', () => { this.durum.puan += 10000; this.hudGuncelle(); });
     // GELİŞTİRME (yayından önce silinecek): harita modunda (P) tıklanan yere ışınlan, normal kameraya dön
     this.input.on('pointerdown', ptr => {
       if (!this.haritaModu) return;
@@ -290,7 +292,8 @@ class OyunSahnesi extends Phaser.Scene {
   update(time, delta) {
     const dt = Math.min(delta, 50) / 1000;
     if (this.durum.bitti || this.durum.oyunBitti) return;
-    this.dukkanGuncelle();
+    if (this.durum.puan !== KAYIT.puan) { KAYIT.puan = this.durum.puan; kayitYaz(); }
+    this.dukkanGuncelle(dt);
     this.updatePlayer(time, dt);
     this.updateDusmanlar(time, dt);
     this.updateMermiler(dt);

@@ -89,7 +89,7 @@ class ArayuzSahnesi extends Phaser.Scene {
     const S = this.oyunS.durum, u = this.u, W = this.scale.width;
     this.hud.forEach(n => n.destroy());
     this.hud = [];
-    for (let i = 0; i < CONFIG.oyuncu.canMax; i++) {
+    for (let i = 0; i < canMaxi(); i++) {
       const k = this.add.image((12 + i * 46) * u, 10 * u, i < S.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0);
       this.hud.push(k.setScale(30 * u / k.height));
     }
