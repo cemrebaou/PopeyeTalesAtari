@@ -232,6 +232,9 @@ class OyunSahnesi extends Phaser.Scene {
       return yerdeki(d);
     });
     F.overlap(this.mermiler, this.solids, (m) => { if (m.zehir) this.zehirPatla(m); m.destroy(); });
+    // Mermiler sandık ve tahta kasalardan geçer, kırılır taşlarda durur
+    F.overlap(this.mermiler, this.sandiklar, (m) => { if (m.zehir) this.zehirPatla(m); m.destroy(); },
+      (m, s) => s.kirTas && s.tur !== 'kasa' && !s.kiriliyor);
     F.overlap(P, this.mermiler, (p, m) => {
       if (!m.active) return;
       const kaynakX = m.x - m.body.velocity.x, hasar = m.hasar || 1;   // destroy'dan önce oku

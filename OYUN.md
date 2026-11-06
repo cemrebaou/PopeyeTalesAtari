@@ -1,6 +1,6 @@
 # Popeye Tales (Atari) — OYUN.md
 
-Sürüm: v0.85 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
+Sürüm: v0.86 (`js/ayarlar.js` → `CONFIG.surum`) · Motor: Phaser 3.80.1 (CDN), Arcade Physics.
 Bu dosya oyunun **şu anki** tasarım belgesidir; sürüm sürüm değişiklikler `git log`'da.
 
 ## Klasör yapısı
@@ -93,7 +93,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 | boss | 4 | 520 px'te uyanır; yürü → hazırlan → atıl → dinlen; yarı canın altında hızlanır, zıplayarak atılır; rastgele patron sesleri |
 - Yeni düşmanlar ile maymun, yılan, gülün ayakları zemin çizgisinin 5 px altına çizilir (`DUSMAN_GOMME`). Düşman taşın / sandığın / zeminin içinde doğmaz: gövdesi dolu kareye değiyorsa aynı zeminde en yakın boş yere kayar (`dusmanBosX`); devriye alanı başlangıçtaki taş / sandıkta biter. Düz atılan mermiler 8 karo gidip kaybolur (`CONFIG.mermiMenzil`), düşmanlar en çok 9 karodan ateş eder (`CONFIG.atisMenzil`). Ölüm karesi olmayanlar (2. bölüm) devrilip söner. Yarasalar koridor ve iniş mağaralarının havasına dağıtılır. 2. bölüm düşmanları `bolum2Uret.py` ile zemin parçalarına dağıtılır (A katında çoğu kedi, K'de domuz, M'de kertenkele; başlangıç, kontrol noktası, zincir dibi, gizli oda ve iniş mağaraları boş).
 - Yürüyenler bastıkları zemin parçasının (duvar / uçurum / dikene kadar) iki ucu arasında gider, asla düşmez; duvara çarpınca döner (0.35 sn tekrar dönmez → titreme yok).
-- Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar; mermiler sandık / taş / kasaların içinden geçer.
+- Çok canlılara ilk vuruş: beyaz parlama, geri savrulma, kısa sersemlik. Uzaktakiler (900 px) uyur. Mermiler 2.6 sn sonra kaybolur, baston mermiyi bozar; mermiler sandık ve tahta kasalardan geçer, kırılır taşlarda durur.
 
 ## Sesler
 `SES_KLASOR` listesindeki `assets/ses/<klasör>/<ad>.mp3` yüklenir (klasörler: popeye, elmaslar, cevre, dusmanlar, patron, arayuz); kodda ses sadece adıyla çalınır. Kodda çalınıp listede olmayan ses sessizce atlanır — **eksik**: `kapiAcil` (çıkış kapısı açılınca) ve `kazanma` (kapıdan girince); dosyaları gelince `assets/ses/`'e koyup `SES_KLASOR`'a eklemek yeterli.
