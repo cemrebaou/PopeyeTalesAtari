@@ -32,7 +32,8 @@ Object.assign(OyunSahnesi.prototype, {
   // ip: tırmanma karesi — kolun iç kenarı hücre ortasında; ipin yarı genişliği kadar dışa kaydırılır (el ipe dıştan değer)
   gorselOlcek(f, ip) {
     const p = this.player, ikinci = p.texture.key === 'oyuncu2';
-    const kay = ip ? (this.L.tirmanma === 'zincir' ? 7 : 10.5) * (p.flipX ? -1 : 1) : 0;
+    // v0.97: ipe dıştan değme payından 40 kullanıcı birimi (230 birim = boy 66.21 px → 11.5 px) içeri: sağa bakarken sola, sola bakarken sağa
+    const kay = ip ? ((this.L.tirmanma === 'zincir' ? 7 : 10.5) - 11.5) * (p.flipX ? -1 : 1) : 0;
     const anahtar = f + (this.egik ? 'e' : '') + (ikinci ? '2' : '') + '_' + kay;
     if (this.gorselCarpan === anahtar) return;
     this.gorselCarpan = anahtar;
