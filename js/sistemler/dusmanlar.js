@@ -206,7 +206,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (d.saldiri > 0) {
       d.saldiri -= dt;
       b.setVelocityX(kedi && d.saldiri > 0.12 && d.saldiri < 0.36 ? d.yon * 240 : 0);
-      if (!d.vurdu && d.saldiri < (kedi ? 0.25 : 0.22)) {
+      if (!d.vurdu && d.saldiri < (kedi ? 0.25 : d.tip === 'domuz' ? 0.3 : 0.22)) {   // domuz (v1.03): 9 kare 12 fps, gürz 7. karede iner
         d.vurdu = true;
         const on = (p.x - d.x) * d.yon;
         const kenar = (b.width + p.body.width) / 2;   // gövdeler arası boşluk + menzil
@@ -222,7 +222,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (ayni && Math.abs(dx) < vurMesafe) {
       d.yon = Math.sign(dx) || 1;
       d.setFlipX(d.yon < 0);
-      d.saldiri = kedi ? 0.48 : golem ? 0.7 : 0.6;
+      d.saldiri = kedi ? 0.48 : golem ? 0.7 : d.tip === 'domuz' ? 0.8 : 0.6;
       d.vurdu = false;
       d.play('d_' + d.ad + '_saldir');
       this.ses(kedi ? 'bastonSalla' : 'bastonVur');

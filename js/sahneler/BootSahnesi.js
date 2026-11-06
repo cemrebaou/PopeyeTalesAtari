@@ -118,9 +118,9 @@ class BootSahnesi extends Phaser.Scene {
     // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
     const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 8, repeat: 0 });
     yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);
-    // v1.00: ek şeritler (araclar/ekKareKes.py): d_<ad>; <düşman>Bekle varsa d_<düşman>_bekle onunla değişir
+    // v1.00: ek şeritler (araclar/ekKareKes.py): <düşman>Ol → d_<düşman>Ol; <düşman>Bekle / <düşman>Saldir vb. → d_<düşman>_<anim> (eskisinin yerine)
     Object.entries(ASSETLER.ekKare).forEach(([ad, E]) => {
-      const key = ad === E.dusman + 'Bekle' ? 'd_' + E.dusman + '_bekle' : 'd_' + ad;
+      const an = ad.slice(E.dusman.length).toLowerCase(), key = an === 'ol' ? 'd_' + ad : 'd_' + E.dusman + '_' + an;
       if (this.anims.exists(key)) this.anims.remove(key);
       this.anims.create({ key, frames: this.anims.generateFrameNumbers('d_' + ad, { start: 0, end: E.kare - 1 }), frameRate: E.fps, repeat: E.dongu ? -1 : 0 });
     });
