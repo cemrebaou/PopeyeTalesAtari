@@ -42,6 +42,16 @@ Object.assign(OyunSahnesi.prototype, {
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
     d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
     Object.assign(d, { ad: e.tip, tip: e.tip, hp, hiz, oldu: false, yon: 1 });
+    // v1.00: ek şeritlere (ASSETLER.ekKare) geçen animasyonlarda hücre farklı: ayak çizgisi ve gövde dünyada aynı yerde kalsın
+    if (Object.values(ASSETLER.ekKare).some(E => E.dusman === e.tip)) {
+      const taban = { w: D.w, oy, ox: d.body.offset.x, oyOff: d.body.offset.y };
+      d.on('animationstart', (anim) => {
+        const tk = anim.frames[0].textureKey, E = tk === 'd_' + d.ad ? null : ASSETLER.ekKare[tk.slice(2)];
+        const w = E ? E.w : taban.w, y0 = E ? E.ayak - gom : taban.oy, h = E ? E.h : D.h;
+        d.setOrigin(0.5, y0 / h);
+        d.body.setOffset(taban.ox + (w - taban.w) / 2, taban.oyOff + (y0 - taban.oy));
+      });
+    }
     if (ucan) d.body.setAllowGravity(false);
 
     if (e.tip === 'boss') {
@@ -546,11 +556,10 @@ Object.assign(OyunSahnesi.prototype, {
     d.body.setVelocity(0, 0);
     d.body.enable = false;
     if (d.ad === 'yarasa') return this.yarasaOlum(d, bitince);
-    if (d.ad === 'bitki') {   // v0.99: olduğu yerde ölüm animasyonu (ayak çizgisi aynı), bitince kaybolur
-      const B = ASSETLER.bitkiOl, s = Math.abs(d.scaleY), gom = (DUSMAN_GOMME.bitki || 0) / s;
-      d.setTexture('d_bitkiOl', 0).setOrigin(0.5, (B.ayak - gom) / B.h);
-      d.play('d_bitkiOl');
-      d.once('animationcomplete', () => { d.destroy(); if (bitince) bitince(); });
+    if (ASSETLER.ekKare[d.ad + 'Ol']) {   // v1.00: ek şeritten olduğu yerde ölüm; son karede 1 sn kalıp solar (bitki son karede boş → hemen)
+      d.angle = 0; d.play('d_' + d.ad + 'Ol');
+      d.once('animationcomplete', () => this.time.delayedCall(d.ad === 'bitki' ? 0 : 1000, () => this.tweens.add({
+        targets: d, alpha: 0, duration: d.ad === 'bitki' ? 1 : 400, onComplete: () => { d.destroy(); if (bitince) bitince(); } })));
       return;
     }
     d.play('d_' + d.ad + '_ol');

@@ -33,5 +33,7 @@ ASSETLER.oyuncu = {"kare": {"w": 352, "h": 282, "ayakY": 250, "ayakBoy": 234}, "
 // Yarasa ölüm şeridi (araclar/yarasaOlKes.py): hücre, yer çizgisi, uçarkenki gövde ortası (yarasa.png ölçeğinde)
 ASSETLER.yarasaOl = {"w": 203, "h": 191, "ayak": 171, "merkez": 99, "kare": 9};
 
-// Bitki ölüm şeridi (araclar/bitkiOlKes.py): hücre, ayak çizgisi (bitki.png ölçeğinde)
-ASSETLER.bitkiOl = {"w": 228, "h": 228, "ayak": 210, "kare": 12};
+
+
+// Düşman ek şeritleri (araclar/ekKareKes.py): hücre, ayak çizgisi, fps (ana şerit ölçeğinde)
+ASSETLER.ekKare = {"bitkiOl": {"dusman": "bitki", "w": 228, "h": 228, "ayak": 210, "kare": 12, "fps": 9, "dongu": false}, "bitkiBekle": {"dusman": "bitki", "w": 224, "h": 233, "ayak": 216, "kare": 12, "fps": 7, "dongu": true}, "kertenkeleOl": {"dusman": "kertenkele", "w": 206, "h": 206, "ayak": 188, "kare": 12, "fps": 7, "dongu": false}, "kediOl": {"dusman": "kedi", "w": 208, "h": 184, "ayak": 174, "kare": 9, "fps": 7, "dongu": false}, "domuzOl": {"dusman": "domuz", "w": 243, "h": 218, "ayak": 200, "kare": 9, "fps": 6, "dongu": false}};

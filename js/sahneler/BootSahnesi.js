@@ -24,7 +24,7 @@ class BootSahnesi extends Phaser.Scene {
       if (D.anim) L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
       else L.image(ad, 'assets/dusman/' + ad + '.png');
     });
-    L.spritesheet('d_bitkiOl', 'assets/dusman/bitkiOl.png', { frameWidth: A.bitkiOl.w, frameHeight: A.bitkiOl.h });   // v0.99
+    Object.entries(A.ekKare).forEach(([ad, E]) => L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: E.w, frameHeight: E.h }));   // v1.00 ek şeritler
     L.spritesheet('d_yarasaOl', 'assets/dusman/yarasaOl.png', { frameWidth: A.yarasaOl.w, frameHeight: A.yarasaOl.h });   // v0.98
     // Arayüz ve harfler
     A.ui.forEach(ad => L.image('ui_' + ad, 'assets/ui/' + ad + '.png'));
@@ -118,7 +118,11 @@ class BootSahnesi extends Phaser.Scene {
     // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
     const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 8, repeat: 0 });
     yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);
-    // v0.99: bitki ölümü — tüm kareler yerinde bir kez
-    this.anims.create({ key: 'd_bitkiOl', frames: this.anims.generateFrameNumbers('d_bitkiOl', { start: 0, end: ASSETLER.bitkiOl.kare - 1 }), frameRate: 9, repeat: 0 });
+    // v1.00: ek şeritler (araclar/ekKareKes.py): d_<ad>; <düşman>Bekle varsa d_<düşman>_bekle onunla değişir
+    Object.entries(ASSETLER.ekKare).forEach(([ad, E]) => {
+      const key = ad === E.dusman + 'Bekle' ? 'd_' + E.dusman + '_bekle' : 'd_' + ad;
+      if (this.anims.exists(key)) this.anims.remove(key);
+      this.anims.create({ key, frames: this.anims.generateFrameNumbers('d_' + ad, { start: 0, end: E.kare - 1 }), frameRate: E.fps, repeat: E.dongu ? -1 : 0 });
+    });
   }
 }
