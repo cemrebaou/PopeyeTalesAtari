@@ -501,7 +501,7 @@ Object.assign(OyunSahnesi.prototype, {
     else if (!yerde && !this.egik) a = b.velocity.y < 0 ? 'zipla' : 'dus';
     else if (this.egik) a = Math.abs(b.velocity.x) > 10 ? 'egil' : 'egilDur';
     else if (this.inisZaman > 0) a = 'in';
-    else if (this.itiyor) { a = 'it'; durdur = Math.abs(b.velocity.x) <= 10; }
+    else if (this.itiyor) a = Math.abs(b.velocity.x) <= 10 ? 'itDur' : 'it';
     else if (Math.abs(b.velocity.x) > 10) a = 'kos';
     else {   // ayakta bekleme; 5 sn'den uzun beklerse sabırsızca ayak vurur
       this.durSure = (this.durSure || 0) + this.game.loop.delta / 1000;

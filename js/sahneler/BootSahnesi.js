@@ -78,7 +78,8 @@ class BootSahnesi extends Phaser.Scene {
     // assets/oyuncu/oyuncu2.png (araclar/oyuncuEk.py)
     tanimla('oyuncu2', [
       ['asili',    aralik(0, 5),   8,  -1],  // bastonla duvara asılı
-      ['it',       aralik(6, 11),  10, -1],
+      ['it',       aralik(6, 11).concat([24]), 10, -1],   // iterken yürüme döngüsü
+      ['itDur',    [25],           1,  0],    // iterken durunca (eller önde, ayaklar sabit)
       ['h_tirman', [12], 1, 0], ['h_egil', [13], 1, 0], ['h_hava', [14], 1, 0],   // duruma göre darbe kareleri
       ['h_cek',    [15], 1, 0], ['h_it',   [16], 1, 0], ['h_asili', [17], 1, 0],
       ['olum',     aralik(18, 23), 9,  0]    // bir kez oynar, son karede kalır

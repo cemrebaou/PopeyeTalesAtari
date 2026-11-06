@@ -140,3 +140,4 @@ Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat
 
 - **Ayak payı (v0.92)**: oyuncu ayağı `zeminGomme + ayakEk` kadar aşağı çizilir. Bölüm kendi `ayakEk`'ini verebilir (2. bölüm: zeminGomme 6, ayakEk −2 → 1. bölümle aynı 4 px). Bölümler birbirini etkilemez.
 - **Bastonla asılma (v0.93)**: kareler `kaynak/oyuncu_asili.gif`ten (6 kare, döngü); baston boyu ve yeri eskisiyle aynı (`araclar/oyuncuEk.py`).
+- **İtme (v0.94)**: `kaynak/oyuncu_it.gif` (8 kare). 1–7. kareler iterken yürürken döngü (`it`), 8. kare sadece iterken durunca (`itDur`: eller önde, ayaklar sabit); geri gidince / zıplayınca itme biter. oyuncu2.png 5 satır.
