@@ -111,7 +111,6 @@ class OyunSahnesi extends Phaser.Scene {
     this.karoKatmani(L.arka, -5);
     this.sahteKaroDuzelt();
     this.anaKatman = this.karoKatmani(L.on, 1);
-    if (L.metal) this.metalCiz();   // v1.66: 4. bölüm metal demo
     this.sahteDuvarlarKur();
     this.selaleCiz();
 
@@ -148,24 +147,6 @@ class OyunSahnesi extends Phaser.Scene {
     this.dukkanKur();   // dukkan.js (v1.08)
     this.odalarKur();   // odalar.js (v1.37): patron arenası, bonus odası
     this.susle();       // susler.js (v1.37): bitki / kaya / sarmaşık süsleri
-  }
-
-  // v1.66: metal bölüm — bloklar ve arka duvar 64 px metal karolarla (karo/metal_<kat>.png, 9 çeşit). Kat, hücrenin y'sine göre
-  // L.metal'den seçilir; çeşit hücre konumundan (her açılışta aynı). Arka duvar aynı karolar, üstünde koyu örtü.
-  // v1.67: Blitter yerine tek tek görsel — bazı cihazlarda Blitter ölçeği uygulanmıyor, karolar 2 kat büyük çıkıyordu.
-  metalCiz() {
-    const L = this.L, S = 64, izgara = new Set();
-    const kat = y => L.metal.find(([y0]) => y >= y0)[1];
-    const cesit = (c, r) => ((c * 73856093) ^ (r * 19349663)) >>> 0;
-    const yaz = (c, r, d) => {
-      this.add.image(c * S, r * S, 'metal_' + kat(r * S + S / 2), cesit(c, r) % 9).setOrigin(0, 0)
-        .setDisplaySize(S + 0.5, S + 0.5).setDepth(d === 'a' ? -6 : 1);   // +0.5: karo arası ince çizgi kalmasın
-    };
-    L.bloklar.forEach(([x, y, w, h]) => {
-      for (let r = y / S; r < (y + h) / S; r++) for (let c = x / S; c < (x + w) / S; c++) { izgara.add(c + ',' + r); yaz(c, r, 'o'); }
-    });
-    for (let r = 0; r < L.yukseklik / S; r++) for (let c = 0; c < L.genislik / S; c++) if (!izgara.has(c + ',' + r)) yaz(c, r, 'a');
-    this.add.rectangle(0, 0, L.genislik, L.yukseklik, 0x04060b, 0.78).setOrigin(0, 0).setDepth(-5.5);   // arka duvar gölgede (zeminden ayırt edilsin)
   }
 
   // Karo katmanı: seviye verisindeki karakter satırları → tilemap (128 px kaynak, 32 px gösterim)

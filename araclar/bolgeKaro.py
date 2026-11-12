@@ -1,7 +1,8 @@
 # Bölge karoları (v0.58): her bölge için 3×3 sayfa — 1. satır basılan üst (sol / orta / sağ),
 # 2. satır alt dolgu (sol / orta / sağ), 3. satır arka plan (3 çeşit). Kaynaklar assets/kaynak/bolge_*.png.
 # Karolar 128×128'e getirilir (oran gerekirse bozulur), köşe boşlukları en yakın renkle doldurulur.
-# assets/karo/tileset.png sıfırdan bu 27 karoyla kurulur, js/veri/assetlar.js → ASSETLER.tile / tileset güncellenir.
+# v1.68: sonuna 4. bölümün metal karoları eklenir (3 kat × 18 panel, aşağıda METAL).
+# assets/karo/tileset.png sıfırdan bu karolarla kurulur, js/veri/assetlar.js → ASSETLER.tile / tileset güncellenir.
 # Sonra: python3 araclar/zeminDose.py (seviyenin karo ızgaraları yeniden döşenir). Çalıştırma: python3 araclar/bolgeKaro.py
 import json, re
 import numpy as np
@@ -76,6 +77,40 @@ for on, dosya in BOLGE.items():
                 y = Image.new('RGBA', (ts.width, oy + P), (0, 0, 0, 0)); y.paste(ts, (0, 0)); ts = y
             timg = Image.fromarray(t)
             ts.paste((0, 0, 0, 0), (ox, oy, ox + P, oy + P))
+            ts.paste(timg.resize((P, P), Image.NEAREST), (ox, oy))
+            ts.paste(timg, (ox + EX, oy + EX))
+# --- Metal karolar (v1.68, 4. bölüm): kaynak/metal_<kat>.png 3×3 sayfa (siyah zemin), 9 çeşit panel. Bölge yapısı farklı:
+# her panel tek başına bir karo — <önek>M0–M8 zemin / duvar, <önek>B0–B8 aynı panellerin karartılmış hali (arka duvar).
+# Çeşitler: 0 yarıklı · 1 çapraz · 2 ızgara · 3 boru · 4 şeritli levha · 5 lomboz · 6 baklava sac · 7 dişli · 8 üst şerit (pasta: zincir)
+METAL = {'x': 'metal_pasli.png', 'y': 'metal_koyu.png', 'z': 'metal_parlak.png'}   # alt kat pas · orta koyu çelik · üst parlak çelik
+METAL_ARKA = 0.4   # arka duvar parlaklığı
+def araliklar(oran):
+    r, bas = [], None
+    for i, d in enumerate(np.r_[oran > 0.35, False]):
+        if d and bas is None: bas = i
+        if not d and bas is not None:
+            if i - bas > 100: r.append((bas, i))
+            bas = None
+    return r
+for on, dosya in METAL.items():
+    im = Image.open(KOK + '/assets/kaynak/' + dosya).convert('RGB')
+    m = np.array(im).max(-1) > 28
+    sat, sut = araliklar(m.mean(1)), araliklar(m.mean(0))
+    assert len(sat) == 3 and len(sut) == 3, (dosya, sat, sut)
+    paneller = []
+    for y0, y1 in sat:
+        for x0, x1 in sut:
+            py, px = int((y1 - y0) * 0.02), int((x1 - x0) * 0.02)   # köşe yuvarlaklığı kalmasın
+            paneller.append(np.array(im.crop((x0 + px, y0 + py, x1 - px, y1 - py)).resize((B, B), Image.LANCZOS).convert('RGBA')))
+    for ek, carp in (('M', None), ('B', METAL_ARKA)):
+        for k, t in enumerate(paneller):
+            t = t.copy()
+            if carp: t[:, :, :3] = (t[:, :, :3] * [carp * 0.92, carp * 0.97, carp * 1.08]).clip(0, 255).astype(np.uint8)   # koyu, hafif mavi
+            i = len(NO); NO[on + ek + str(k)] = i
+            ox, oy = (i % KOLON) * P, (i // KOLON) * P
+            if oy + P > ts.height:
+                y = Image.new('RGBA', (ts.width, oy + P), (0, 0, 0, 0)); y.paste(ts, (0, 0)); ts = y
+            timg = Image.fromarray(t)
             ts.paste(timg.resize((P, P), Image.NEAREST), (ox, oy))
             ts.paste(timg, (ox + EX, oy + EX))
 ts.save(KOK + '/assets/karo/tileset.png', optimize=True)

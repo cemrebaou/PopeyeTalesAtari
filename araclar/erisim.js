@@ -1,5 +1,6 @@
 // Bölüm erişilebilirlik kontrolü — kullanım (repo klasöründe):
 //   node araclar/erisim.js [level2]  → (varsayılan level1) rahat zıplamayla (havada tam hızın %65'i, pogo yok) ulaşılamayan önemli yerleri listeler
+//   node araclar/erisim.js level4 --bolge=130,143,168,193  → o karo dikdörtgenindeki zeminleri ulaşılır (+) / ulaşılmaz (-) diye döker (tasarım hatası ararken)
 //   node araclar/erisim.js --coz    → ulaşılamayan yer kalmayana kadar ara kaya önerir (level1.js → kayalar'a eklenir)
 // Model: gövde 18x30 px (eğik geçişleri de kapsasın diye; ayakta gövde 42 px, 1 karelik aralıklardan eğilerek geçilir), Arcade benzeri 60 Hz adımlar, ızgara çarpışması, zıplama 625, yerçekimi 1400, sarmaşığa tutunma.
 // Kayalar, taşlar, kırılır taşlar (kristal, yosun ve tahta kasalar hariç: kırılıp geçilir), bloklar ve basamaklar dahil edilir (takozlar kırılabildiği için geçilebilir sayılır). Önemli yerler: patron, çıkış, kontrol noktaları, sandıklar, elmaslar, özel eşyalar.
@@ -63,6 +64,10 @@ const HIZ=[0,25,50,75,100,130],VY=[-625];
 let kayalar=[];
 let cur=degerlendir(kayalar,HIZ,VY);
 console.log('ulaşılamayan önemli yer:',cur.eksik.length);
+const BOLGE=(process.argv.find(a=>a.startsWith('--bolge='))||'').slice(8).split(',').map(Number);
+if(BOLGE.length===4){const [c0,r0,c1,r1]=BOLGE;
+  console.log(cur.segs.filter(s=>s.r>=r0&&s.r<=r1&&s.c1>=c0&&s.c0<=c1).map(s=>(cur.R.has(s.id)?'+':'-')+' satır '+s.r+' sütun '+s.c0+'-'+s.c1).join('\n'));
+  console.log(vinesAll.filter(v=>v.c>=c0&&v.c<=c1&&v.y1/T>=r0&&v.y0/T<=r1).map(v=>(cur.R.has(cur.segs.length+v.id)?'+':'-')+' zincir sütun '+v.c+' satır '+Math.round(v.y0/T)+'-'+Math.round(v.y1/T)).join('\n'));}
 const COZ=process.argv.includes('--coz');
 for(let it=0;COZ&&it<60&&cur.eksik.length;it++){
   const ulas=[...cur.R].filter(i=>i<cur.segs.length).map(i=>cur.segs[i]);

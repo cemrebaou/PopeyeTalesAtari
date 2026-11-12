@@ -41,6 +41,26 @@ def bos(i, j, ben=1):   # ben: döşenen kare (3 = sahte duvar; sahte komşusunu
     if i < 0 or i >= GX or j < 0 or j >= GY: return False
     return dolu[j][i] == 0 or (dolu[j][i] == 3 and ben != 3)
 rnd = random.Random(7)
+# v1.68: metal bölgeler (x pas · y koyu çelik · z parlak çelik; bolgeKaro.py METAL) — her karo bir panel, 9 çeşit.
+# Basılan üst yüz baklava sac (6), platform uçları sarı şeritli (8; pasta 4), iç dolgu karışık (yan yana aynısı gelmez),
+# arka duvar karartılmış paneller + düzenli aralıklı lombozlar.
+METAL = 'xyz'
+def kar(i, j, s=0):   # konuma bağlı sabit sayı (0–99)
+    h = (i * 73856093) ^ (j * 19349663) ^ (s * 83492791)
+    h = (h ^ (h >> 13)) * 1274126177 & 0xffffffff
+    return (h ^ (h >> 16)) % 100
+def metalIc(m, i, j, s=0):
+    h = kar(i, j, s)
+    return 1 if h < 24 else 0 if h < 46 else 2 if h < 62 else 4 if h < 76 else (8 if m != 'x' else 0) if h < 84 else 3 if h < 90 else 7 if h < 95 else 5
+def metalOn(m, i, j, ust, kenar):
+    if ust: return (8 if m != 'x' else 4) if kenar else 6
+    v = metalIc(m, i, j)
+    if i and dolu[j][i - 1] in (1, 3) and v == metalIc(m, i - 1, j): v = metalIc(m, i, j, 1)
+    return v
+def metalArka(m, i, j):
+    if i % 9 == 4 and j % 7 == 3: return 5      # lombozlar
+    h = kar(i, j, 2)
+    return 1 if h < 30 else 0 if h < 56 else 2 if h < 76 else 4 if h < 90 else 6 if h < 96 else 7
 on = []
 for j in range(GY):
     r = ''
@@ -50,6 +70,7 @@ for j in range(GY):
         sol, sag = bos(i - 1, j, dolu[j][i]), bos(i + 1, j, dolu[j][i])
         yan = 'L' if sol and not sag else 'R' if sag and not sol else 'M'
         p = ('T' if bos(i, j - 1, dolu[j][i]) else 'F') + yan
+        if m in METAL: p = 'M' + str(metalOn(m, i, j, p[0] == 'T', yan != 'M'))
         r += alf[NO[m + p] + 1]
     on.append(r)
 m = re.search(r"\n  on: \[.*?\n  \]", L, re.S)
@@ -58,7 +79,7 @@ L = L[:m.start()] + '\n  on: [\n' + ',\n'.join("    '" + r + "'" for r in on) + 
 arka = []
 for j in range(GY):
     m = bolge(j)
-    arka.append(''.join(alf[NO[m + 'B' + str(rnd.randint(0, 2))] + 1] for i in range(GX)))
+    arka.append(''.join(alf[NO[m + 'B' + str(metalArka(m, i, j) if m in METAL else rnd.randint(0, 2))] + 1] for i in range(GX)))
 m = re.search(r"\n  arka: \[.*?\n  \]", L, re.S)
 L = L[:m.start()] + '\n  arka: [\n' + ',\n'.join("    '" + r + "'" for r in arka) + '\n  ]' + L[m.end():]
 open(lp, 'w', encoding='utf8').write(L)

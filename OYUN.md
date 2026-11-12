@@ -12,6 +12,7 @@ js/
   veri/level1.js           1. bölüm verisi (koordinatlar piksel, ızgara 32 px)
   veri/level2.js           2. bölüm verisi (araclar/bolum2Uret.py üretir)
   veri/level3.js           3. bölüm (yüzme) — sadece ad ve `yuzme: true`
+  veri/level4.js           4. bölüm verisi (araclar/bolum4Uret.py üretir)
   cekirdek/yardimci.js     yerdeMi, govdeRect, ses (sesCal / sesBaslat / sesDurdur), tam ekran, harfYazi, gorselYazi
   sahneler/BootSahnesi.js  yükleme çubuğu + görseller + tüm animasyon tanımları (sesler oyun açılınca arka planda: sesleriYukle)
   sahneler/OyunSahnesi.js  seviye kurulumu, kamera (P: tüm harita), çarpışmalar, klavye, ana döngü, şelale
@@ -56,6 +57,7 @@ Hareketler: baston vuruşu sandık/taşta sadece öndeki tek karoya (ayak hizas�
 
 ## Görseller
 - **Karolar** (`assets/karo/tileset.png`, 128 px kaynak → 32 px): 3 bölge × 9 karo — basılan üst (sol/orta/sağ), alt dolgu (sol/orta/sağ), arka plan (3 çeşit). Önek: `p` tapınak (satır < 48), `c` yosunlu parke taş (48–116), `d` toprak / kökler (117+) — 1. bölüm; `a` açık gri taş, `k` koyu taş, `m` mor kristal (biraz karartılmış) — 2. bölüm. Yeni bölgelerde arka plan karoları dolgunun en fazla %60'ı parlaklıkta (`ARKA_ORAN`). Bölümün `bolgeler: [[satır, önek], …]` alanı hangi satırdan itibaren hangi bölgenin döşeneceğini söyler. Zemin, çarpışma bloklarından otomatik döşenir (`araclar/zeminDose.py`): üstü açık → üst karo, yanı açık → kenarlı karo.
+- **Metal karolar (v1.68, 4. bölüm)**: aynı `tileset.png`'nin sonunda, 3 kat × 18 panel (`bolgeKaro.py` `METAL`; kaynak `kaynak/metal_<kat>.png` 3×3 sayfa). Önek `x` pas (alt kat), `y` koyu çelik (orta), `z` parlak çelik (üst); `<önek>M0–M8` dolu panel, `<önek>B0–B8` aynı panelin karartılmış hali (arka duvar, parlaklık `METAL_ARKA`). Çeşitler: 0 ızgara yarıkları · 1 çapraz destek · 2 panjur · 3 borular · 4 sarı şeritli sac · 5 lomboz · 6 baklava sac · 7 dişliler · 8 üstü sarı şeritli (pasta: zincir). Döşeme (`zeminDose.py`): basılan üst yüz 6, platform uçları 8 (pasta 4), iç dolgu konuma bağlı karışık (yan yana aynısı gelmez), arka duvarda düzenli aralıklı lombozlar. Metal bölümde bitki / kaya süsü yok (`sussuz: true`).
 - **Şelale** `[x, w, y0, y1, önde]`: dikeyde kesintisiz doku, aşağı akar (`CONFIG.selaleHiz`); arka planın önünde, zeminin arkasında, uçları zemine girer. `önde=1`: oyuncunun ve zeminin önünde çizilir — ardındaki gizli zemin ve içine giren oyuncu görünmez; taşa taşmaz (tavanın altından çıkar, alttaki zeminin hizasında kesilir). Yan yana şelaleler farklı evrede akar. Sesi kadrajın `CONFIG.selaleDuyma` (420 px) dışından, şelalenin olduğu taraftaki hoparlörden kısık başlar; kadraja girdikçe artar ve iki taraftan gelir (uzaklaşırken tersi).
 - **Sarmaşık / zincir**: görsel üstteki ilk taşın altından başlar (8 px içine girer), zeminin arkasında; tırmanma alanı veri `sarmasiklar`. Bölümde `tirmanma: 'zincir'` varsa zincir çizilir (`nesne/zincir.png`). Zeminde dururken ↑ ile tutunulur. Tırmanma animasyonu (v0.87): `oyuncu_tirman.gif`in 1–7. kareleri (0. kare alınmaz); kolun iç kenarı ipin dış kenarına değer (el ipe dıştan, v0.88); tırmanırken boy 1.17 (v0.88: %10 küçük).
 - **Zemine oturma**: oyuncu, sandık ve taşlar zemin çizgisinin `zeminGomme` px altına çizilir (bölüm alanı; 1. bölüm 2, 2. bölüm 6) — çim / taş kenarını örter. Üst üste taş / kasa: üstteki, alttakinin üst kenarına `CONFIG.ustUsteGomme` (4 px) gömülür ve önünde çizilir (`gommeGuncelle`). Sandık zemine `CONFIG.sandikGomme` (3) fazla, oyuncu ayakları `CONFIG.oyuncu.ayakEk` (2) fazla gömülür. Kırılır taşlar (kasa hariç) yerde `tasZeminYukari` (2. bölüm 0, yoksa 3 px) yukarıda. Üst üste: üstteki, alttakinin çizim payına + `ustUsteGomme` (4) oturur. Çimsiz zeminde (ör. sahte duvar altı) nesneler gömülmez. v1.34: oyun açılışta (`sahteKaroDuzelt`) sahte duvarlı odanın tabanını ve odaya bakan dış duvar kenarını dolgu taşa çevirir — sahte duvar alttaki taşla yarıksız birleşir, sandık gömülüp altından görünmez. Gövdeler yerinde kalır, sadece görsel kayar.
@@ -151,6 +153,35 @@ Bölüm verisinde `yuzme: true` varsa `OyunSahnesi` kurulmadan `YuzmeSahnesi`'ne
 - İki kamera: ana (efektli dünya) + arayüz (efektsiz: sürüm yazısı, Tam ekran tuşu, yön tuşları). WebGL yoksa düz mavi zemin.
 - **Yüzme kareleri**: `assets/oyuncu/yuzme.png` (`araclar/yuzmeKes.py`, kaynak `kaynak/oyuncu_yuz.png` 2×4, okuma sırası) — 8 kare, hücre 512×256, kafaya göre hizalı; `ASSETLER.yuzme` (dönme noktası, ağız yeri), animasyon `yuz` (9 kare/sn).
 
+## 4. Bölüm — Demir Kule (v1.68, `js/veri/level4.js`, `araclar/bolum4Uret.py`)
+240 × 198 karo (7680 × 6336 px, 2. bölümle aynı boy; karo 32 px, ortak tileset). Dünya tamamen metal, odalar içinden oyulur. 2. bölümün tersine **aşağıdan yukarı** çıkılır: başlangıç sol altta, çıkış kapısı sağ üstte. Üç kat: alt pas (satır 132+), orta koyu çelik (66–131), üst parlak çelik (< 66) — `bolgeler: [[0,'z'],[66,'y'],[132,'x']]`. Şimdilik düşman yok. Hiçbir bölge ötekinin tekrarı değil; her birinin kendi fikri var (koordinatlar karo, üreticideki sırayla):
+
+| Bölge | Yer (sütun, satır) | Fikir |
+|---|---|---|
+| A Kazan Dairesi | 6–78, 172–193 | başlangıç + dükkan kapısı; iki kazan (ikincisinin altından sürünülür), diken çukuru, zincirle çıkılan iskele; kazandan yukarı yan tırmanış |
+| B Boru Labirenti | 81–129, 174–193 | 1 kare yüksek sürünme tünelleri ve küçük kavşak odaları; iki çıkmaz (sandık, yakut) |
+| C Hurda Kuyusu | 130–168, 143–193 | dikey tırmanış: çıkıntılar → zincir → sahanlık → hurda yığını → çıkıntılar |
+| D Paslı Köprü | 172–233, 140–193 | adadan adaya geçiş; altı hurdalık (zincirle inilir), ortası diken tarlası |
+| E Dişli Salonu | 150–233, 92–127 | iki dev dişlinin içinden (ortalarındaki kolun üstünden) geçilir; üçüncüsü dolu disk |
+| F Pres Hattı | 72–147, 114–127 | altı farklı engel: eğilerek geç, alçak tavan altında çukur, blok–pres arası, uzun sürünme + çukur, basamak, çukur–direk–çukur |
+| G Asansör Boşluğu | 44–69, 70–127 | çıkıntılar, kabin, halat boyunca uzun zincir, üst sahanlık, zincirle üst kata |
+| I Kumanda Köprüleri | 40–112, 42–64 | diken hendeği üstünde ince köprüler, ortada zincir |
+| J Reaktör | 114–178, 8–61 | 13 kare yarıçaplı dev kürenin üstünden yürünür |
+| K Kule Tepesi | 182–233, 6–29 | büyük merdiven (aralarında çukur ve diken), çıkış kapısı |
+
+Ana yol (A → B → C → D → E → F → G → I → J → K) yalnız yürüme / zıplama / eğilme / zincirle yapılır. Zıplama kuralı (erisim.js'in rahat zıplaması): 3–4 kare yukarı çıkarken aralık en çok 2, daha azında en çok 3 kare; zincirden platforma en çok 2, platformdan zincire en çok 3 kare. Kontrol noktası: 17.
+
+**Gizli yerler ve yan yollar**
+- **Sahte duvarlı odalar**: A'nın sol dış duvarı, D hurdalığının sağ dış duvarı, Depo'nun ve Arşiv'in sol dış duvarı.
+- **L Soğutma Tankları** (50–125, 140–165): C sahanlığının batı ucundaki sandığın arkasındaki duvar sahte. Üç tank: diken havuzu üstünde zincirden zincire (3 zincir, 3'er kare arayla) → org borusu gibi yükselen direkler (araları diken) → delikli katlardan aşağı (her katta diken öbekleri). Sonundaki delikten Kazan Dairesi'ne (2. kazanın üstüne) düşülür: başlangıca / dükkana geri dönüş yolu.
+- **M Bakım Katı** (8–39, 76–98): G'nin üst sahanlığından batıya. Salyangoz koridor (dış halka → iç halka → orta oda), dikey kollar zincirli, alçak tavanlar, ortada hazine (şapka, kalp, 2 mavi elmas). İç ve dış halkanın doğu kolları arasındaki duvar sahte (kestirme).
+- **Reaktörün içi**: kürenin tepesindeki kapak sahte; içine düşülür (şapka + mavi elmas), zincirle çıkılır.
+- **Üst kanal** (96–149, 104–108): E'deki dolu diskten direğe, direkten kanala 3 ve 4 karelik atlayışlar (4 karelik tam hız ister — bilerek zor). Kristaller, sandık, mavi elmas; batı ucundaki delikten Pres Hattı'na inilir.
+- **Yetenek isteyenler**: asılma / duvar zıplama — A'daki baca oyuğu, G'de halat ile ray arasındaki oluk → **bonus odası kapısı** · pogo — D hurdalığındaki diken tarlasının ortasında **anahtar** (üstündeki sundurma yukarıdan atlamayı engeller) · çift zıplama / pogo — C, D, J'deki yüksek çıkıntılar, I'daki asma çıkıntısı · taş kırma — B'de alt tünel kısayolu, Arşiv kapısı (I'nın batısı; içeride raflar), K zeminindeki tıkaç → Hazine Kasası · kasa kırma / itme / çekme — H Depo (G'nin batısı): kasa duvarı, itilen taş + raf, çekilen taş + raf.
+- **Kilitli kapı**: D'nin sonunda (227, 145) → Hazine Kasası (184–231, 36–58; K'nin altı). Kasaya K'deki tıkaçtan zincirle de inilir.
+
+Üretim: `python3 araclar/bolum4Uret.py && python3 araclar/zeminDose.py level4 && node araclar/erisim.js level4` (`L4_ONIZLEME=/yol/l4.png` ile küçük harita görseli; hatalı yerleşimde — havada sandık, metalin içinde taş, zeminsiz diken — durur). Otomatik elmaslar: elle eşya konmamış her basılabilir yüzeye, yüzeyin uzunluğuna ve konumuna göre değişen dizilişle (üçlü gruplar / seyrek sıra / yay / dalgalı). Erişim denetiminde kalanlar bilinçli: baca oyuğu, yüksek çıkıntılar, üst kanal, asma çıkıntısı. (Denetim zinciri tek düğüm saydığı için Hazine Kasası'nı ulaşılır gösterir; oyunda tıkaç taşları zinciri keser.)
+
 ## Odalar: patron arenası ve bonus odası (v1.37, `js/sistemler/odalar.js`)
 Haritanın sağında, dükkan odasının yanında dükkan taşlarıyla örülü kapalı alanlar (64 px kare, `odaOr`). Kapılar dükkan kapısı gibi çalışır: yaklaşınca açılır (kapıAçıl sesi), önünde ↑ → kararma geçişi (`kapiGecis`) ile içeri.
 - **Patron kapısı** (`L.patron.kapi`, 1. bölümde eski çıkış kapısının yerinde, 2. bölümde çıkışta): görsel `patron1Kapi` (aslan) / `patron2Kapi` (yılan), genişlik `CONFIG.patronKapiEn` 136. Patron açıkta beklemez, arenada (16×7 kare, kamera sabit) sağda durur; oyuncu girince hemen uyanır. Ölünce 0.7 sn sonra `bolumBitti` (kazandın ekranı). Arenada ölünce arenanın girişinde canlanılır. Patronlu bölümde çıkış kapısı yoktur (`cikis` yalnız erişim denetimi için). 2. bölüm patronu şimdilik 1. bölüm patronunun mor tonlusu (`renk`), yılan başlı görsel gelince değişecek.
@@ -169,9 +200,10 @@ Haritanın sağında, dükkan odasının yanında dükkan taşlarıyla örülü 
 Hepsi depo kökünden çalışır. Tümünü sırayla yeniden üretmek için: `bash araclar/hepsiniUret.sh`.
 | Araç | Ne yapar |
 |---|---|
-| `bolgeKaro.py` | `kaynak/bolge_*.png` (6 bölge) → `karo/tileset.png` + `ASSETLER.tile` |
+| `bolgeKaro.py` | `kaynak/bolge_*.png` (6 bölge) + `kaynak/metal_*.png` (3 kat, 4. bölüm) → `karo/tileset.png` + `ASSETLER.tile` |
 | `zeminDose.py [level2]` | bölüm dosyası → `on` / `arka` karo ızgaraları (bloklar değişince çalıştır; sahte duvarlar taş döşenir) |
 | `bolum2Uret.py` | 2. bölümü (`level2.js`) baştan yazar (v1.33 yılan akış); sonra zeminDose.py level2 |
+| `bolum4Uret.py` | 4. bölümü (`level4.js`) baştan yazar (v1.68 Demir Kule); sonra zeminDose.py level4. `erisim.js level4 --bolge=c0,r0,c1,r1` bir bölgedeki zeminleri ulaşılır (+) / ulaşılmaz (-) diye döker |
 | `erisim.js [level2]` | önemli yerlere rahat zıplamayla ulaşılıyor mu (zemin içinden zıplama, zeminden zincire tutunma dahil; `--coz`: çözüm için kaya önerir) |
 | `oyuncuEk.py` | `kaynak/oyuncu_ek.png` vb. → `oyuncu/oyuncu2.png` |
 | `oyuncuYeni.py` | `kaynak/oyuncu_taban.png` + `oyuncu_dur.gif`, `oyuncu_tirman.gif`, `oyuncu_ayakVur.gif`, `oyuncu_pogo.png`, `oyuncu_egil.png` → `oyuncu/oyuncu.png`: yeni duruş, tırmanma (arkadan), ayak vurma, koşma, pogo, eğik yürüme; her biri eski karelerin boyuna ölçeklenir. v0.78: 2 kat çözünürlük (hücre 352×282, ayak y=250), sadece kullanılan 64 kare 8 sütunda, kare listesi `ASSETLER.oyuncu.anim` |
@@ -241,3 +273,4 @@ Görünür boy `CONFIG.oyuncu.boy` 66.21. Oyuncu sayfaları v0.78'den beri 2 kat
 - **v1.65**: ayarlar / HUD simgeleri ve çerçeveler yeni orman temalı sayfalardan (`kaynak/ikonlar.png`, `kaynak/cerceveler.png`, saydam zemin) aynı adlarla yeniden kesildi (`araclar/ayarUiKes.py`); kod aynı.
 - **v1.66**: **4. bölüm metal demosu** (`js/veri/level4.js`, `araclar/level4Uret.py` ile üretilir; `4` tuşu / `?bolum=4`): üç kat üst üste, her kat ~3 ekran genişliğinde (1984 px) — alt kat pas (`metal_pasli`), orta koyu çelik (`metal_koyu`), üst parlak çelik (`metal_parlak`). Alt kattan sağdaki 4 basamakla (64×64) ortaya, ortadan soldaki 4 basamakla üste çıkılır; son iki basamağın üstü açık, gerisinde 128 px baş payı. Çıkış kapısı üst katın sağında. Toplanabilir / düşman yok. Çizim: `OyunSahnesi.metalCiz` — bloklar ve arka duvar 64 px metal karolar (9 çeşit, hücre konumundan seçilir, Blitter), arka duvarın üstünde %78 koyu örtü; kat `L.metal` [y, kat] listesinden. Karolar `araclar/metalKes.py`: `kaynak/metal_<kat>.png` (3×3) → `karo/metal_<kat>.png` (9 × 128 px).
 - **v1.67**: 4. bölüm metal karoları Blitter yerine tek tek görselle çiziliyor (bazı cihazlarda Blitter ölçeği uygulanmıyor, karolar 2 kat büyük çıkıyordu).
+- **v1.68**: **4. bölüm baştan tasarlandı — Demir Kule** (ayrıntı: "4. Bölüm"). Demo kaldırıldı (`metalCiz`, `karo/metal_*.png`, `metalKes.py`, `level4Uret.py`); metal karolar artık ortak tileset'te 32 px karo olarak (`bolgeKaro.py` METAL, `zeminDose.py` metal döşeme kuralları). Yeni üretici `bolum4Uret.py`; `erisim.js --bolge`; `sussuz: true` bölümde süs yok.

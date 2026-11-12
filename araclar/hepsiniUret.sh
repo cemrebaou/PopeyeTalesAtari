@@ -11,8 +11,6 @@ python3 araclar/mayinKes.py
 python3 araclar/dmayinKes.py
 python3 araclar/yuzmeSes.py
 python3 araclar/ayarUiKes.py
-python3 araclar/metalKes.py
-python3 araclar/level4Uret.py
 python3 araclar/dusmanKes.py
 python3 araclar/yarasaOlKes.py   # dusmanKes'ten sonra (yarasa ölçeği)
 python3 araclar/ekKareKes.py
@@ -26,6 +24,9 @@ python3 araclar/bolum2Uret.py
 python3 araclar/zeminDose.py level2
 node araclar/erisim.js | tail -1
 node araclar/erisim.js level2 | tail -1
+python3 araclar/bolum4Uret.py
+python3 araclar/zeminDose.py level4
+node araclar/erisim.js level4 | tail -1   # kalanlar yetenek / zor atlayış isteyen yerler (OYUN.md 4. Bölüm)
 python3 araclar/dukkanUret.py
 python3 araclar/dukkanIkon.py
 python3 araclar/nesne2Kes.py

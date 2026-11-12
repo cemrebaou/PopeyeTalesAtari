@@ -48,7 +48,6 @@ class BootSahnesi extends Phaser.Scene {
     ['ayarlar', 'kapat', 'amb', 'ambKapali', 'ses', 'sesKapali', 'muzik', 'muzikKapali', 'gr0', 'gr1', 'gr2'].forEach(a => L.image('ik_' + a, 'assets/ui/ik_' + a + '.png'));
     L.image('ui_ayarPanel', 'assets/ui/ayarPanel.png');
     L.image('ui_ayarBaslik', 'assets/ui/ayarBaslik.png');
-    ['pasli', 'koyu', 'parlak'].forEach(k => L.spritesheet('metal_' + k, 'assets/karo/metal_' + k + '.png', { frameWidth: 128, frameHeight: 128 }));   // v1.66: 4. bölüm
     L.image('ui_yetSerit', 'assets/ui/yetSerit.png');   // v1.62: yetenekler şeridi
     L.image('ui_yetAd', 'assets/ui/yetAd.png');         // v1.62: yetenek adı levhası   // v1.44: sağ üstte yetenekler rozeti   // v1.38: bölüm sonu çerçevesi (9:7, gerilmez)
     L.atlas('harf', 'assets/harf/harf.png', 'assets/harf/harf.json');   // araclar/harfAtlas.py

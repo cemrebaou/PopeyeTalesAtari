@@ -11,6 +11,7 @@ const SUS_TAVAN = [['susAsma1', 67, 3], ['susAsma2', 64, 3], ['susCelenk', 105, 
 
 Object.assign(OyunSahnesi.prototype, {
   susle() {
+    if (this.L.sussuz) return;   // v1.68: metal bölümde bitki / kaya süsü yok
     const L = this.L, T = L.karo, G = this.izgara, H = G.length, W = G[0].length;
     let tohum = 987654 + this.bolumNo * 7919;
     const rnd = () => (tohum = (Math.imul(tohum, 1103515245) + 12345) & 0x7fffffff) / 0x7fffffff;
