@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Popeye Tales</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; touch-action: none; }
+  #oyun { width: 100%; height: 100%; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<div id="oyun"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<!-- ayarlar ve veriler -->
+<script src="js/ayarlar.js"></script>
+<script src="js/veri/assetlar.js"></script>
+<script src="js/veri/level1.js"></script>
+  <script src="js/veri/level2.js"></script>
+  <script src="js/veri/level2Ek.js"></script>
+<script src="js/veri/level3.js"></script>
+<!-- ortak yardımcılar -->
+<script src="js/cekirdek/yardimci.js"></script>
+<script src="js/cekirdek/kayit.js"></script>
+<!-- sahneler ve sistemler (sistemler OyunSahnesi'ne eklenir) -->
+<script src="js/sahneler/BootSahnesi.js"></script>
+<script src="js/sahneler/OyunSahnesi.js"></script>
+<script src="js/sistemler/oyuncu.js"></script>
+<script src="js/sistemler/dusmanlar.js"></script>
+<script src="js/sistemler/nesneler.js"></script>
+<script src="js/sistemler/efektler.js"></script>
+<script src="js/sistemler/dukkan.js"></script>
+<script src="js/sistemler/odalar.js"></script>
+<script src="js/sistemler/susler.js"></script>
+<script src="js/sahneler/ArayuzSahnesi.js"></script>
+<script src="js/sahneler/YuzmeSahnesi.js"></script>
+<script src="js/sahneler/AyarSahnesi.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
