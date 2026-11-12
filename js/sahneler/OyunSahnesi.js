@@ -151,16 +151,15 @@ class OyunSahnesi extends Phaser.Scene {
   }
 
   // v1.66: metal bölüm — bloklar ve arka duvar 64 px metal karolarla (karo/metal_<kat>.png, 9 çeşit). Kat, hücrenin y'sine göre
-  // L.metal'den seçilir; çeşit hücre konumundan (her açılışta aynı). Arka duvar aynı karolar, üstünde koyu örtü. Blitter: hızlı çizim.
+  // L.metal'den seçilir; çeşit hücre konumundan (her açılışta aynı). Arka duvar aynı karolar, üstünde koyu örtü.
+  // v1.67: Blitter yerine tek tek görsel — bazı cihazlarda Blitter ölçeği uygulanmıyor, karolar 2 kat büyük çıkıyordu.
   metalCiz() {
     const L = this.L, S = 64, izgara = new Set();
     const kat = y => L.metal.find(([y0]) => y >= y0)[1];
     const cesit = (c, r) => ((c * 73856093) ^ (r * 19349663)) >>> 0;
-    const blit = {};
     const yaz = (c, r, d) => {
-      const k = kat(r * S + S / 2), key = 'metal_' + k + d;
-      if (!blit[key]) blit[key] = this.add.blitter(0, 0, 'metal_' + k).setScale(S / 128).setDepth(d === 'a' ? -6 : 1);
-      blit[key].create(c * 128, r * 128, cesit(c, r) % 9);
+      this.add.image(c * S, r * S, 'metal_' + kat(r * S + S / 2), cesit(c, r) % 9).setOrigin(0, 0)
+        .setDisplaySize(S + 0.5, S + 0.5).setDepth(d === 'a' ? -6 : 1);   // +0.5: karo arası ince çizgi kalmasın
     };
     L.bloklar.forEach(([x, y, w, h]) => {
       for (let r = y / S; r < (y + h) / S; r++) for (let c = x / S; c < (x + w) / S; c++) { izgara.add(c + ',' + r); yaz(c, r, 'o'); }
