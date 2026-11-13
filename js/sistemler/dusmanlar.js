@@ -443,7 +443,7 @@ Object.assign(OyunSahnesi.prototype, {
       const arenada = this.oda && this.oda.tip === 'arena' && !this.gecisVar;   // v1.37: arenaya girince hemen uyanır
       if ((arenada || (Math.abs(p.x - d.x) < CONFIG.patron.uyanMesafe && Math.abs(p.y - d.y) < 300)) && !this.durum.olu) {
         d.aktif = true;
-        this.bossSes(true);
+        this.bossSes(true, d);
         this.popup(d.x, d.y - 90, 'PATRON!');
       } else { b.setVelocityX(0); d.anims.pause(); return; }
     }
@@ -512,7 +512,7 @@ Object.assign(OyunSahnesi.prototype, {
             mizrak: Math.abs(dx) < C.yakin && Math.abs(p.body.bottom - b.bottom) < 110 });
           b.setVelocityX(0);
           d.play('d_kobra_saldir');
-          this.bossSes();
+          this.bossSes(true, d);   // tıslama
         }
         break;
       }
@@ -522,7 +522,7 @@ Object.assign(OyunSahnesi.prototype, {
         if (!d.vurdu && kare >= K.vur[0] && kare <= K.vur[1]) {   // mızrak ileride: gövdeden uca kadar olan şerit
           const uz = K.uc[0] * s, y = b.bottom - K.uc[1] * s;
           const alan = new Phaser.Geom.Rectangle(d.yon > 0 ? d.x : d.x - uz, y - 20, uz, 40);
-          if (!d.sesVur) { d.sesVur = true; this.ses('mizrak'); }
+          if (!d.sesVur) { d.sesVur = true; this.mizrakSira = !this.mizrakSira; this.ses(this.mizrakSira ? 'kobraMizrak1' : 'kobraMizrak2'); }
           if (this.dokunulmaz <= 0 && !this.durum.olu && Phaser.Geom.Rectangle.Overlaps(alan, govdeRect(p.body))) {
             d.vurdu = true;
             this.oyuncuHasar(d.x);
@@ -557,8 +557,8 @@ Object.assign(OyunSahnesi.prototype, {
     m.body.setAllowGravity(false);
     m.body.setSize(Z.h * 0.7, Z.h * 0.7, true);
     m.setVelocity(Math.cos(aci) * hiz, Math.sin(aci) * hiz);
-    m.omur = 4;
-    this.ses('zehirAt');
+    m.omur = 4; m.vurSes = 'kobraZehirVur';
+    this.ses('kobraTukur');
   },
 
   // ---- v1.70 Paslı Dev (4. bölüm patronu, 20 can): yürü → saldır (birkaç kez) → oyuncu uzaktaysa üstüne zıpla → baygın ----
@@ -627,7 +627,7 @@ Object.assign(OyunSahnesi.prototype, {
           b.setVelocity(0, 0);
           d.setFrame(A.zipla[6]);
           this.cameras.main.shake(320, 0.014);
-          this.ses('tasKir'); this.ses('olBoss', { volume: 0.5 });
+          this.ses('patronDus');   // v1.74: ağır iniş
           gec('inis', 0.3);
         }
         break;
@@ -658,9 +658,15 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   // Patron sesi: boss1..13 rastgele; zorla değilse başka patron sesi çalarken çalmaz (üst üste binmez)
-  bossSes(zorla) {
+  // v1.74: Kobra Bekçi'nin kendi sesleri — tıslama (uyanma / saldırı başı), vurulunca acı sesi (ikisi sırayla)
+  bossSes(zorla, d, hasar) {
     if (!zorla && this.bossSesObj && this.bossSesObj.isPlaying) return;
     this.bossSesObj = sesDurdur(this.bossSesObj);
+    if (d && d.kobra) {
+      if (hasar) this.kobraSira = !this.kobraSira;
+      this.bossSesObj = sesBaslat(this, hasar ? (this.kobraSira ? 'kobraHasar1' : 'kobraHasar2') : 'kobraTis', { volume: hasar ? 0.8 : 0.7 });
+      return;
+    }
     this.bossSira = (this.bossSira || 0) % 13 + 1;   // boss1 … boss13 sırayla
     this.bossSesObj = sesBaslat(this, 'boss' + this.bossSira);
   },
@@ -671,6 +677,7 @@ Object.assign(OyunSahnesi.prototype, {
     Object.assign(d, { oldu: true, aktif: false });
     d.clearTint().setAlpha(1);
     this.puanEkle(CONFIG.puan.patron, d.x, d.y - 80);
+    this.time.delayedCall(d.kobra || d.robot ? 350 : 500, () => this.ses('patronDus'));   // v1.74: yere yığılma
     const x = d.x, y = d.y;
     // v1.37: arenadaki patron ölünce bölüm biter (kazandın ekranı); eski düzende ödül sandığı + çıkış kapısı
     if (this.oda && this.oda.tip === 'arena') this.dusmanOlum(d, () => this.time.delayedCall(700, () => this.bolumBitti()));
@@ -757,7 +764,7 @@ Object.assign(OyunSahnesi.prototype, {
       if (d.robot && d.durum !== 'baygin') { this.efektPatla(d.x, d.y - 40, 'ui_kivilcim', 30); return false; }   // v1.70: sadece baygınken vurulur
       d.hp -= n > 1 ? 2 : n;
       d.dokunulmaz = d.robot ? CONFIG.patron3.vurusAra : 1.1;
-      this.bossSes(true);
+      this.bossSes(true, d, true);
       this.cameras.main.shake(150, 0.006);
       if (d.hp <= 0) this.bossYen(d);
       return true;
@@ -820,7 +827,8 @@ Object.assign(OyunSahnesi.prototype, {
     d.sesObj = sesDurdur(d.sesObj);
     if (d.ipSpr) this.ipKopar(d);
     if (d.topImg) { d.topImg.destroy(); d.topImg = null; d.setVisible(true); }
-    if (OLUM_SESI[d.tip]) this.ses(OLUM_SESI[d.tip]);
+    if (d.kobra) this.ses('kobraOl');   // v1.74
+    else if (OLUM_SESI[d.tip]) this.ses(OLUM_SESI[d.tip]);
     d.clearTint();
     d.body.setVelocity(0, 0);
     d.body.enable = false;

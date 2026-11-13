@@ -10,6 +10,7 @@ python3 araclar/yuzmeKes.py
 python3 araclar/mayinKes.py
 python3 araclar/dmayinKes.py
 python3 araclar/yuzmeSes.py
+python3 araclar/patronSes.py
 python3 araclar/ayarUiKes.py
 python3 araclar/dusmanKes.py
 python3 araclar/yarasaOlKes.py   # dusmanKes'ten sonra (yarasa ölçeği)

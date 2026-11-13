@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.73',
+  surum: 'v1.74',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -128,7 +128,8 @@ const SES_KLASOR = {
   cevre: ['kapiGir', 'kapiCik', 'gizliBonus', 'gizli', 'bayrak', 'sandikDus', 'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale'],
   dusmanlar: ['ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri',
     'olOrumcek', 'olYilan'],
-  patron: ['olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13'],
+  patron: ['olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13',
+    'kobraTis', 'kobraMizrak1', 'kobraMizrak2', 'kobraTukur', 'kobraZehirVur', 'kobraHasar1', 'kobraHasar2', 'kobraOl', 'patronDus'],   // v1.74
   arayuz: ['tik', 'odulElmas'],
   // v1.60: yüzme bölümü (araclar/yuzmeSes.py) — roket fırlatma, zincirli mayın patlaması, döngü ambiyans, kulaç sesleri
   yuzme: ['yzFirlat', 'yzPatla', 'yzAmbiyans', ...Array.from({ length: 16 }, (_, i) => 'yzKulac' + (i + 1))],
