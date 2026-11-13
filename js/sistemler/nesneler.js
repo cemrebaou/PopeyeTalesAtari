@@ -328,6 +328,7 @@ Object.assign(OyunSahnesi.prototype, {
       if (alt && alt !== s && Math.abs(alt.body.top - s.body.bottom) < 3) d = (alt.gommeD || 0) + CONFIG.ustUsteGomme;   // alttakinin üst payına
       else if (!this.cimliZemin(s.body.center.x, s.body.bottom)) d = 0;   // çimsiz zemin (sahte duvar altı vb.): gömülmez
       else d = this.zeminGomme + (tas ? -CONFIG.tasYukari : s.kirTas ? 0 : CONFIG.sandikGomme);
+      if (!s.kirTas && this.L.tema === 'metal') d += CONFIG.metalSandikAsagi;   // v1.76: metal sandık görseli 40 birim aşağıda
       if (s.gommeD === d) return;
       s.gommeD = d;
       s.setDepth(2 + d / 1000);
