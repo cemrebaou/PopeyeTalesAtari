@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.76',
+  surum: 'v1.77',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -64,6 +64,20 @@ const CONFIG = {
   puan: { elmas: 10, buyuk: 100, kizil: 50, altin: 5, capa: 25, tane: 15, kalpFazla: 50, dusman: 20, patron: 500, yildiz: 1000 },   // yildiz: bölüm sonu ödül mücevheri (v1.33)
   yildizEsik: [0.33, 0.66, 0.99],   // v1.33: toplanabilirlerin bu oranı dolunca 1 / 2 / 3 mücevher
   toplanBoy: { elmas: 16, buyukelmas: 26, kizilelmas: 24, kalp: 22, capa: 20, altin: 16, tane: 9 },
+  // v1.77: Android paketi (scripts/hazirla.js, .github/workflows/derle.yml) ve reklamlar (js/cekirdek/reklam.js)
+  mobil: {
+    paketAdi: 'com.air.popeyetales', oyunAdi: 'Popeye Tales Atari',
+    surumTaban: 1000,   // versionCode = taban + derleme numarası (Play'deki eski sürümlerin üstünde kalsın)
+    reklam: {
+      testModu: false,   // true: Google'ın test reklamları
+      uygulamaId: 'ca-app-pub-7983529419004158~2440234577',
+      banner: 'ca-app-pub-7983529419004158/5546514728',    // kayıtlı, şimdilik gösterilmiyor
+      gecis: 'ca-app-pub-7983529419004158/4233433051',     // bölüm sonu
+      odullu: 'ca-app-pub-7983529419004158/7633622012',    // hazır, henüz bağlı değil
+      acilis: 'ca-app-pub-7983529419004158/2129684245',    // açılışta / uygulamaya dönüşte
+      gecisSikligi: 1    // kaç bölüm sonunda bir geçiş reklamı
+    }
+  },
   metalSandikAsagi: 11.5,   // v1.76: metal temalı bölümde sandık görseli bu kadar px (40 birim) aşağıda çizilir; gövde yerinde
   patron: { can: 5, uyanMesafe: 520 },
   // v1.69: 2. bölüm patronu Kobra Bekçi. yakin: bu mesafeden yakındaysa zehir yerine mızrak; hiz / bekle / zehirHiz: [normal, yarı canın altında];

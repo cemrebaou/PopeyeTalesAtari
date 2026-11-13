@@ -1,0 +1,13 @@
+{
+  "name": "popeyetalesatari",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Popeye Tales (Atari) — Android paketi (Capacitor + AdMob). Oyun kökteki index.html / js / assets; www/ derlemede üretilir.",
+  "dependencies": {
+    "@capacitor-community/admob": "^8.2.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "phaser": "3.80.1"
+  }
+}

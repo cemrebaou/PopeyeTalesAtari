@@ -35,3 +35,5 @@ const yenidenBoyutla = () => {
 window.addEventListener('resize', yenidenBoyutla);
 window.addEventListener('orientationchange', yenidenBoyutla);
 document.addEventListener('fullscreenchange', yenidenBoyutla);
+
+Reklam.baslat();   // v1.77: uygulamada AdMob (web'de boş)

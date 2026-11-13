@@ -87,8 +87,8 @@ Object.assign(OyunSahnesi.prototype, {
       altYazi: () => 'Puan: ' + S.puan,
       // v1.48: bölüm sonu tuşları
       tusListe: [
-        { ad: 'Tekrar Oyna', fn: () => { this.registry.set('bolum', no); this.scene.restart(); } },
-        ...(sonraki ? [{ ad: 'Sonraki Bölüm', fn: () => { this.registry.set('bolum', no + 1); this.scene.restart(); } }] : [])
+        { ad: 'Tekrar Oyna', fn: () => Reklam.bolumGecti().then(() => { this.registry.set('bolum', no); this.scene.restart(); }) },   // v1.77: önce geçiş reklamı (uygulamada)
+        ...(sonraki ? [{ ad: 'Sonraki Bölüm', fn: () => Reklam.bolumGecti().then(() => { this.registry.set('bolum', no + 1); this.scene.restart(); }) }] : [])
       ] });
   },
 

@@ -715,8 +715,10 @@ class YuzmeSahnesi extends Phaser.Scene {
       // v1.71: dokununca sonraki bölüm (yoksa bu bölüm baştan)
       this.time.delayedCall(600, () => this.input.once('pointerup', () => {
         const no = this.bolumNo, sonraki = no + 1 < BOLUMLER.length ? no + 1 : no;
-        this.registry.set('bolum', sonraki);
-        BOLUMLER[sonraki].yuzme ? this.scene.restart() : this.scene.start('Game');
+        Reklam.bolumGecti().then(() => {   // v1.77: önce geçiş reklamı (uygulamada)
+          this.registry.set('bolum', sonraki);
+          BOLUMLER[sonraki].yuzme ? this.scene.restart() : this.scene.start('Game');
+        });
       }));
     }
 

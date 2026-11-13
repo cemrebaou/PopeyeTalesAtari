@@ -1,0 +1,74 @@
+name: Android derle (APK + AAB)
+
+# Sadece "mobil-..." etiketi gönderilince ya da Actions sayfasından elle çalıştırılınca derler (her push'ta değil).
+on:
+  push:
+    tags: ["mobil-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: derle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Paketleri kur
+        run: npm ci
+
+      - name: Android projesini oluştur
+        run: |
+          node scripts/hazirla.js www
+          node scripts/hazirla.js config
+          npx cap add android
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > $RUNNER_TEMP/upload.jks
+            echo "KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> $GITHUB_ENV
+            export KEYSTORE_PATH=$RUNNER_TEMP/upload.jks
+          fi
+          node scripts/hazirla.js android
+          npx cap sync android
+
+      - name: Test APK derle
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Yayın AAB derle (imzalı)
+        if: env.KEYSTORE_BASE64 != ''
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Dosyaları hazırla
+        run: |
+          mkdir -p cikti
+          cp android/app/build/outputs/apk/debug/app-debug.apk cikti/popeye-tales-test.apk
+          if [ -f android/app/build/outputs/bundle/release/app-release.aab ]; then
+            cp android/app/build/outputs/bundle/release/app-release.aab cikti/popeye-tales-yayin.aab
+          fi
+
+      - name: Son sürüm sayfasına yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete son --yes --cleanup-tag || true
+          gh release create son cikti/* --title "Son sürüm (#${{ github.run_number }})" --notes "Otomatik derleme #${{ github.run_number }}" --latest

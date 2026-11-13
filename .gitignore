@@ -1,1 +1,8 @@
 araclar/model/
+node_modules/
+android/
+www/
+capacitor.config.json
+cikti/
+*.keystore
+*.jks
