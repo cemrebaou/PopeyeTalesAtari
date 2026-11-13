@@ -7,7 +7,7 @@
 //    ortasında altın tik rozeti durur. Kamera genişliğe oturur, yukarı / aşağı oyuncuyu izler.
 //  • Patron arenası (L.patron.kapi): patron açıkta beklemez; kapalı patron kapısı oyuncu yaklaşınca açılır, ↑ ile arenaya
 //    ışınlanılır (kamera sabit, odanın tamamı). Patron arenanın sağında bekler, yaklaşınca uyanır. Öldürülünce bölüm biter.
-//    2. bölüm patronu şimdilik 1. bölüm patronunun mor tonlu kopyası (yılan başlı patron görseli gelince değişecek).
+//    2. bölüm patronu Kobra Bekçi (v1.69, dusmanlar.js kobraGuncelle).
 const ODA = { kare: 64, cerceve: 9.6 };
 
 Object.assign(OyunSahnesi.prototype, {
@@ -61,19 +61,19 @@ Object.assign(OyunSahnesi.prototype, {
   arenaKur() {
     const L = this.L, K = ODA.kare;
     const ox = this.odaSiradakiX(), oy = 1024;
-    const O = this.odaOr(ox, oy, 16, 7, this.bolumNo === 2 ? 0x2e2438 : 0x3a3232);
+    const O = this.odaOr(ox, oy, 16, 7, this.bolumNo === 1 ? 0x2e2438 : 0x3a3232);
     O.tip = 'arena';
     this.sonOdaSag = O.x + O.w;
     this.arena = O;
     O.giris = { x: O.x + K + 40, y: O.zeminY - 2 };
     // Bölümdeki patron kapısı (kapalı; yaklaşınca açılır)
-    const [kx, ky] = L.patron.kapi, ad = this.bolumNo === 2 ? 'patron2Kapi' : 'patron1Kapi';
+    const [kx, ky] = L.patron.kapi, ad = this.bolumNo === 1 ? 'patron2Kapi' : 'patron1Kapi';
     const k = this.kapiSprite(kx, ky, ad, ad + 'Acik', CONFIG.patronKapiEn);
     this.dukkanKapilar.push({ x: kx, y: ky, hedef: 'arena', spr: k.spr, kapali: k.kapali, acik: k.acik, koy: k.koy });
     // Patron arenanın sağ yarısında bekler (uyanma: dusmanlar.js bossGuncelle)
     const bx = O.x + O.w - 3 * K, by = O.zeminY;
-    this.patronSpr = this.dusmanYarat({ tip: 'boss', x: bx, y: by });
-    if (this.patronSpr) { this.patronSpr.zeminY = by; if (this.bolumNo === 2) this.patronSpr.renk = 0xcc99ff; }
+    this.patronSpr = this.dusmanYarat({ tip: this.bolumNo === 1 ? 'kobra' : 'boss', x: bx, y: by });   // v1.69: 2. bölümde Kobra Bekçi
+    if (this.patronSpr) this.patronSpr.zeminY = by;
     this.patronBas = { x: bx, y: by, hp: this.patronSpr ? this.patronSpr.hp : CONFIG.patron.can };
     this.events.once('shutdown', () => { this.patronMuzik = sesDurdur(this.patronMuzik); });
   },
@@ -81,7 +81,7 @@ Object.assign(OyunSahnesi.prototype, {
   // v1.43: patron müziği — arenaya girince ve savaş baştan başlayınca en baştan çalar (döngü); yenilince / oyun bitince durur
   patronMuzikBaslat() {
     this.patronMuzik = sesDurdur(this.patronMuzik);
-    const ad = { 1: 'patron1Muzik' }[this.bolumNo];
+    const ad = { 0: 'patron1Muzik' }[this.bolumNo];   // v1.69: bolumNo sıfırdan başlar (0 = 1. bölüm)
     if (ad) this.patronMuzik = sesBaslat(this, ad, { loop: true, volume: 0.45 });
   },
   patronMuzikDurdur() { this.patronMuzik = sesDurdur(this.patronMuzik); },
@@ -98,10 +98,11 @@ Object.assign(OyunSahnesi.prototype, {
       if (d && d.active && !d.oldu) {
         d.body.reset(B.x, B.y);
         Object.assign(d, { hp: B.hp, aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1 });
-        d.setFlipX(true).setAlpha(1);
+        d.setFlipX(!d.kobra).setAlpha(1);   // kobra görseli sola bakar
         d.renk ? d.setTint(d.renk) : d.clearTint();
-        d.play('d_boss_yuru'); d.anims.pause();
+        d.play('d_' + d.ad + '_yuru'); d.anims.pause();
       }
+      this.mermiler.clear(true, true);   // havadaki zehirler
       this.bossSesObj = sesDurdur(this.bossSesObj);
       this.patronMuzikBaslat();
       cam.fadeIn(300, 0, 0, 0);
@@ -171,8 +172,8 @@ Object.assign(OyunSahnesi.prototype, {
     L.push({ tur: 'tas', tip: 'kasa', x: cx(7) - 16, y: altZ - 2 * T });
     for (let c = 12; c <= 16; c += 2) L.push({ tur: 'tas', tip: 'kristal', x: cx(c) - 16, y: altZ - T });
     L.push({ tur: 'tas', tip: 'kristal', x: cx(14) - 16, y: altZ - 2 * T });
-    L.push({ tur: 'tas', tip: this.bolumNo === 2 ? 'koyu' : 'gri', x: cx(19) - 16, y: altZ - T, sabit: 0 });
-    L.push({ tur: 'tas', tip: this.bolumNo === 2 ? 'koyu' : 'gri', x: cx(19) - 16, y: altZ - 2 * T, sabit: 0 });
+    L.push({ tur: 'tas', tip: this.bolumNo === 1 ? 'koyu' : 'gri', x: cx(19) - 16, y: altZ - T, sabit: 0 });
+    L.push({ tur: 'tas', tip: this.bolumNo === 1 ? 'koyu' : 'gri', x: cx(19) - 16, y: altZ - 2 * T, sabit: 0 });
     L.push({ tur: 'sandik', odul: 'kalp', x: cx(21), y: altZ });
     for (let c = 3; c <= 21; c += 3) L.push({ tur: 'elmas', x: cx(c), y: altZ - 18 - 3 * T });
     L.push({ tur: 'ozel', tip: 'buyuk', x: cx(11), y: altZ - 22 - 4 * T });

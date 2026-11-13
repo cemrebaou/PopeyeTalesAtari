@@ -29,7 +29,8 @@ class BootSahnesi extends Phaser.Scene {
     L.image('dmayinHalka', 'assets/nesne/dmayinHalka.png');
     L.image('dmayinTaban', 'assets/nesne/dmayinTaban.png');
     // Düşmanlar (her biri yatay şerit) ve mermiler · v1.47: ek düşmanlar (yumurta, yavru örümcek) katılır
-    Object.assign(A.dusman, A.dusmanEk || {});
+    Object.assign(A.dusman, A.dusmanEk || {}, { kobra: A.kobra });   // v1.69: 2. bölüm patronu
+    L.image('kobraZehir', 'assets/dusman/kobraZehir.png');
     Object.entries(A.dusman).forEach(([ad, D]) => {
       if (D.anim) L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
       else L.image(ad, 'assets/dusman/' + ad + '.png');
@@ -158,6 +159,7 @@ class BootSahnesi extends Phaser.Scene {
           ekle('dinlen', [kareler[3]], 1, false);
         } else if (ad === 'yumurta') ekle(k, kareler, k === 'bekle' ? 6 : 10, k === 'bekle');   // v1.47 (GIF 160 ms)
         else if (ad === 'yavru') ekle(k, kareler, k === 'saldir' ? 12 : 9, k !== 'ol');
+        else if (ad === 'kobra') ekle(k, kareler, k === 'saldir' ? CONFIG.patron2.saldiriFps : 8, k === 'yuru');   // v1.69
         else ekle(k, kareler, ad === 'bitki' && k === 'bekle' ? 8 : HIZ[k] || 10, DONGU[k]);
       });
     });

@@ -70,3 +70,7 @@ ASSETLER.mayin = {"w": 362, "h": 362, "kare": 8, "zeminY": 328, "zeminEn": 313, 
 
 // Zincirli mayın (araclar/dmayinKes.py): top karesi + tutma noktası, top ortası / yarıçapı, ek halka (adım, ölçek), taban
 ASSETLER.dmayin = {"w": 443, "h": 443, "ox": 0.5097, "oy": 0.9707, "merkez": 277.0, "yaricap": 78.7, "ustZincir": 161, "zinEn": 36, "halka": {"w": 37, "h": 47, "adim": 41, "pay": 3, "olcek": 1.125}, "taban": {"w": 115, "h": 119, "halkaX": 58.2}};
+
+
+// Kobra Bekçi (araclar/kobraKes.py): 2. bölüm patronu — hücre, ayak / kafa çizgisi, kareler; agiz / uc: çapaya göre [ileri, yukarı] (hücre px)
+ASSETLER.kobra = {"w": 458, "h": 248, "ayak": 244, "ust": 43, "boy": 120, "anim": {"yuru": [0, 1, 2, 3, 4, 5, 6, 7], "saldir": [8, 9, 10, 11, 12, 13, 14, 15, 16, 17], "ol": [8]}, "tukur": 6, "vur": [3, 5], "agiz": [125, 119], "uc": [225, 84], "zehir": {"w": 85, "h": 37, "gen": 34}};

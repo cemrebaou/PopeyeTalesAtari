@@ -5,6 +5,7 @@ const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: '
 // tip: [gövde g, gövde y, can, hız, uçan]
 const DUSMAN_TIP = {
   boss:     [56, 60, CONFIG.patron.can, 0, false],
+  kobra:    [52, 100, CONFIG.patron2.can, 0, false],   // v1.69: 2. bölüm patronu (Kobra Bekçi) — yaratılınca tip 'boss', ad 'kobra'
   gul:      [24, 26, 1, 55, false],
   yilan:    [30, 14, 1, 45, false],
   yuvarlak: [26, 26, 1, 120, false],
@@ -27,7 +28,7 @@ const DUSMAN_TIP = {
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
 // v1.23: 1. bölüm patronu 29 kullanıcı birimi (8.35 px) aşağıda çizilir
-const DUSMAN_GOMME = { yumurta: 4, yavru: 5, kopek: 5, boss: 8.35, yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 11, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
+const DUSMAN_GOMME = { kobra: 6, yumurta: 4, yavru: 5, kopek: 5, boss: 8.35, yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 11, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -41,7 +42,7 @@ Object.assign(OyunSahnesi.prototype, {
     const bw = bw0 * O / s, bh = bh0 * O / s;
     const gom = (DUSMAN_GOMME[e.tip] || 0) * O / s / O;   // görsel px → kare px
     const oy = (ucan ? (D.ust + D.ayak) / 2 : D.ayak) - gom;
-    if (e.tip !== 'boss' && e.tip !== 'orumcek' && !e.firla) e = { ...e, x: this.dusmanBosX(e.x, e.y, bw0 * O, bh0 * O, ucan) };
+    if (e.tip !== 'boss' && e.tip !== 'kobra' && e.tip !== 'orumcek' && !e.firla) e = { ...e, x: this.dusmanBosX(e.x, e.y, bw0 * O, bh0 * O, ucan) };
     const y = e.tip === 'orumcek' ? e.tavan + 20 : e.y;
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
     d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
@@ -61,6 +62,8 @@ Object.assign(OyunSahnesi.prototype, {
     if (e.tip === 'boss') {
       Object.assign(d, { aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1 });
       d.setFlipX(true);
+    } else if (e.tip === 'kobra') {   // v1.69: patron mantığının tamamı (hasar, yenilme, arena) 'boss' tipiyle çalışır; görsel sola bakar
+      Object.assign(d, { tip: 'boss', kobra: true, aktif: false, durum: 'yuru', durumZaman: 1.5, dokunulmaz: 0, yon: -1 });
     } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele' || e.tip === 'buyucu' || e.tip === 'bitki') {
       d.atesBekle = 1 + Math.random(); d.hazir = 0;
     } else if (e.tip === 'ari' || e.tip === 'yarasa') {
@@ -71,9 +74,9 @@ Object.assign(OyunSahnesi.prototype, {
     if (YURUYEN.includes(e.tip)) this.devriyeAlani(d, e);
     if (e.tip === 'yavru') Object.assign(d, { havada: !!e.firla, zararsiz: 0, saldiri: 0, dinlen: 0 });
     if (e.tip === 'fici') Object.assign(d, { durum: 'yuru', donus: 2, sonYon: 1 });
-    this.dusmanAnim(d, { boss: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur', bitki: 'bekle', yumurta: 'bekle' }[e.tip] || 'yuru');
+    this.dusmanAnim(d, { boss: 'yuru', kobra: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur', bitki: 'bekle', yumurta: 'bekle' }[e.tip] || 'yuru');
     if (e.tip === 'yumurta') d.anims.setProgress(Math.random());   // yumurtalar aynı anda sallanmasın
-    if (e.tip === 'boss') d.anims.pause();
+    if (d.tip === 'boss') d.anims.pause();
     if (e.renk) d.setTint(e.renk);
     return d;
   },
@@ -445,6 +448,7 @@ Object.assign(OyunSahnesi.prototype, {
     // Kapı önündeki çukur açılıp içine düşerse yenilir
     if (d.y > (d.zeminY !== undefined ? d.zeminY : this.L.boss[1]) + 60) { d.hp = 0; this.bossYen(d); return; }
 
+    if (d.kobra) return this.kobraGuncelle(d, dt);
     const hizli = d.hp <= Math.ceil(CONFIG.patron.can / 2);
     d.durumZaman -= dt;
     switch (d.durum) {
@@ -479,6 +483,77 @@ Object.assign(OyunSahnesi.prototype, {
         if (d.durumZaman <= 0) Object.assign(d, { durum: 'yuru', durumZaman: hizli ? 1.8 : 2.6 });
         break;
     }
+  },
+
+  // ---- v1.69 Kobra Bekçi (2. bölüm patronu): yürü → saldır → dinlen ----
+  // Saldırı tek animasyon (10 kare): gerilir, üç dişli mızrağı ileri saplar, ağzını açar.
+  //  • Oyuncu uzaktaysa (saldırı başında CONFIG.patron2.yakin'den uzak): zehrin çıktığı karede ağzından mor zehir atar —
+  //    o anda oyuncunun gövdesinin tam ortasına nişanlanır, düz gider, takip etmez (zıplayınca ıskalar).
+  //  • Yakındaysa zehir atmaz, aynı hareketle mızrağı vurmaya çalışır. Mızrak ilerideyken (her iki durumda) ucuna kadar olan
+  //    alana değen oyuncu 1 can kaybeder ve vuruş yönüne ileri fırlar (CONFIG.patron2.firlat). Mızrak vurduysa zehir atılmaz.
+  // Yarı canın altında daha hızlı yürür, daha sık saldırır, zehir daha hızlı gider. Görsel sola bakar (sağa dönünce çevrilir).
+  kobraGuncelle(d, dt) {
+    const p = this.player, b = d.body, C = CONFIG.patron2, K = ASSETLER.kobra;
+    const hizli = d.hp <= Math.ceil(C.can / 2), dx = p.x - d.x;
+    d.durumZaman -= dt;
+    switch (d.durum) {
+      case 'yuru': {
+        const yon = Math.sign(dx) || d.yon, yakin = Math.abs(dx) < C.yakin * 0.6;
+        d.yon = yon; d.setFlipX(yon > 0);
+        b.setVelocityX(yakin ? 0 : yon * (hizli ? C.hiz[1] : C.hiz[0]));   // dibine girmez, mızrak boyunda durur
+        if (yakin) { d.anims.pause(); d.setFrame(K.anim.yuru[0]); } else this.dusmanAnim(d, 'yuru');
+        if (d.durumZaman <= 0 && !this.durum.olu) {
+          Object.assign(d, { durum: 'saldir', durumZaman: 3, vurdu: false, atti: false,
+            mizrak: Math.abs(dx) < C.yakin && Math.abs(p.body.bottom - b.bottom) < 110 });
+          b.setVelocityX(0);
+          d.play('d_kobra_saldir');
+          this.bossSes();
+        }
+        break;
+      }
+      case 'saldir': {
+        b.setVelocityX(0);
+        const s = Math.abs(d.scaleX), kare = d.anims.currentFrame ? d.anims.currentFrame.index - 1 : 0;
+        if (!d.vurdu && kare >= K.vur[0] && kare <= K.vur[1]) {   // mızrak ileride: gövdeden uca kadar olan şerit
+          const uz = K.uc[0] * s, y = b.bottom - K.uc[1] * s;
+          const alan = new Phaser.Geom.Rectangle(d.yon > 0 ? d.x : d.x - uz, y - 20, uz, 40);
+          if (!d.sesVur) { d.sesVur = true; this.ses('mizrak'); }
+          if (this.dokunulmaz <= 0 && !this.durum.olu && Phaser.Geom.Rectangle.Overlaps(alan, govdeRect(p.body))) {
+            d.vurdu = true;
+            this.oyuncuHasar(d.x);
+            if (!this.durum.olu) {   // ileri (vuruş yönüne) fırlat
+              p.body.setVelocity(d.yon * C.firlat[0], -C.firlat[1]);
+              this.knock = C.firlat[2];
+              this.cameras.main.shake(160, 0.007);
+            }
+          }
+        }
+        if (!d.mizrak && !d.atti && !d.vurdu && kare >= K.tukur) { d.atti = true; this.kobraZehir(d, hizli); }
+        if (!d.anims.isPlaying || d.durumZaman <= 0) {
+          Object.assign(d, { durum: 'dinlen', durumZaman: hizli ? 0.35 : 0.6, sesVur: false });
+          d.setFrame(K.anim.yuru[0]);
+        }
+        break;
+      }
+      case 'dinlen':
+        b.setVelocityX(0);
+        if (d.durumZaman <= 0) Object.assign(d, { durum: 'yuru', durumZaman: hizli ? C.bekle[1] : C.bekle[0] });
+        break;
+    }
+  },
+
+  // Zehir: ağızdan çıkar, atıldığı anda oyuncunun gövde ortasına doğru düz gider (görsel uçuş yönüne döner; çizim sola bakar)
+  kobraZehir(d, hizli) {
+    const p = this.player, K = ASSETLER.kobra, Z = K.zehir, C = CONFIG.patron2, s = Math.abs(d.scaleX);
+    const x = d.x + d.yon * K.agiz[0] * s, y = d.body.bottom - K.agiz[1] * s;
+    const aci = Math.atan2(p.body.center.y - y, p.body.center.x - x), hiz = hizli ? C.zehirHiz[1] : C.zehirHiz[0];
+    const m = this.mermiler.create(x, y, 'kobraZehir').setDepth(7);
+    m.setDisplaySize(Z.gen * CONFIG.olcek, Z.gen * CONFIG.olcek * Z.h / Z.w).setRotation(aci + Math.PI);
+    m.body.setAllowGravity(false);
+    m.body.setSize(Z.h * 0.7, Z.h * 0.7, true);
+    m.setVelocity(Math.cos(aci) * hiz, Math.sin(aci) * hiz);
+    m.omur = 4;
+    this.ses('zehirAt');
   },
 
   // Patron sesi: boss1..13 rastgele; zorla değilse başka patron sesi çalarken çalmaz (üst üste binmez)
