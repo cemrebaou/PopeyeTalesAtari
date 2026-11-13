@@ -5,7 +5,9 @@ const OLUM_SESI = { boss: 'olBoss', maymun: 'olMaymun', kopek: 'olKopek', gul: '
 // tip: [gövde g, gövde y, can, hız, uçan]
 const DUSMAN_TIP = {
   boss:     [56, 60, CONFIG.patron.can, 0, false],
-  kobra:    [52, 100, CONFIG.patron2.can, 0, false],   // v1.69: 2. bölüm patronu (Kobra Bekçi) — yaratılınca tip 'boss', ad 'kobra'
+  kobra:    [52, 100, CONFIG.patron2.can, 0, false],
+  robot:    [96, 104, CONFIG.patron3.can, 0, false],   // v1.70: 4. bölüm patronu (Paslı Dev) — tip 'boss', ad 'robot'
+    // v1.69: 2. bölüm patronu (Kobra Bekçi) — yaratılınca tip 'boss', ad 'kobra'
   gul:      [24, 26, 1, 55, false],
   yilan:    [30, 14, 1, 45, false],
   yuvarlak: [26, 26, 1, 120, false],
@@ -28,7 +30,7 @@ const DUSMAN_TIP = {
 };
 // Ayakları zemin çizgisinin bu kadar altına çizilenler (px, çimi örtsün)
 // v1.23: 1. bölüm patronu 29 kullanıcı birimi (8.35 px) aşağıda çizilir
-const DUSMAN_GOMME = { kobra: 6, yumurta: 4, yavru: 5, kopek: 5, boss: 8.35, yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 11, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
+const DUSMAN_GOMME = { kobra: 6, robot: 6, yumurta: 4, yavru: 5, kopek: 5, boss: 8.35, yuvarlak: 7, kedi: 5, domuz: 5, kertenkele: 5, golem: 5, bitki: 11, fici: 5, buyucu: 5, maymun: 5, yilan: 5, gul: 5 };
 
 Object.assign(OyunSahnesi.prototype, {
 
@@ -42,7 +44,7 @@ Object.assign(OyunSahnesi.prototype, {
     const bw = bw0 * O / s, bh = bh0 * O / s;
     const gom = (DUSMAN_GOMME[e.tip] || 0) * O / s / O;   // görsel px → kare px
     const oy = (ucan ? (D.ust + D.ayak) / 2 : D.ayak) - gom;
-    if (e.tip !== 'boss' && e.tip !== 'kobra' && e.tip !== 'orumcek' && !e.firla) e = { ...e, x: this.dusmanBosX(e.x, e.y, bw0 * O, bh0 * O, ucan) };
+    if (e.tip !== 'boss' && e.tip !== 'kobra' && e.tip !== 'robot' && e.tip !== 'orumcek' && !e.firla) e = { ...e, x: this.dusmanBosX(e.x, e.y, bw0 * O, bh0 * O, ucan) };
     const y = e.tip === 'orumcek' ? e.tavan + 20 : e.y;
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
     d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
@@ -64,6 +66,8 @@ Object.assign(OyunSahnesi.prototype, {
       d.setFlipX(true);
     } else if (e.tip === 'kobra') {   // v1.69: patron mantığının tamamı (hasar, yenilme, arena) 'boss' tipiyle çalışır; görsel sola bakar
       Object.assign(d, { tip: 'boss', kobra: true, aktif: false, durum: 'yuru', durumZaman: 1.5, dokunulmaz: 0, yon: -1 });
+    } else if (e.tip === 'robot') {   // v1.70
+      Object.assign(d, { tip: 'boss', robot: true, aktif: false, durum: 'yuru', durumZaman: 1.5, dokunulmaz: 0, yon: -1, sayac: 0 });
     } else if (e.tip === 'maymun' || e.tip === 'kopek' || e.tip === 'kertenkele' || e.tip === 'buyucu' || e.tip === 'bitki') {
       d.atesBekle = 1 + Math.random(); d.hazir = 0;
     } else if (e.tip === 'ari' || e.tip === 'yarasa') {
@@ -74,7 +78,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (YURUYEN.includes(e.tip)) this.devriyeAlani(d, e);
     if (e.tip === 'yavru') Object.assign(d, { havada: !!e.firla, zararsiz: 0, saldiri: 0, dinlen: 0 });
     if (e.tip === 'fici') Object.assign(d, { durum: 'yuru', donus: 2, sonYon: 1 });
-    this.dusmanAnim(d, { boss: 'yuru', kobra: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur', bitki: 'bekle', yumurta: 'bekle' }[e.tip] || 'yuru');
+    this.dusmanAnim(d, { boss: 'yuru', kobra: 'yuru', robot: 'yuru', ari: 'uc', yarasa: 'uc', orumcek: 'bekle', maymun: 'dur', bitki: 'bekle', yumurta: 'bekle' }[e.tip] || 'yuru');
     if (e.tip === 'yumurta') d.anims.setProgress(Math.random());   // yumurtalar aynı anda sallanmasın
     if (d.tip === 'boss') d.anims.pause();
     if (e.renk) d.setTint(e.renk);
@@ -449,6 +453,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (d.y > (d.zeminY !== undefined ? d.zeminY : this.L.boss[1]) + 60) { d.hp = 0; this.bossYen(d); return; }
 
     if (d.kobra) return this.kobraGuncelle(d, dt);
+    if (d.robot) return this.robotGuncelle(d, dt);
     const hizli = d.hp <= Math.ceil(CONFIG.patron.can / 2);
     d.durumZaman -= dt;
     switch (d.durum) {
@@ -556,6 +561,102 @@ Object.assign(OyunSahnesi.prototype, {
     this.ses('zehirAt');
   },
 
+  // ---- v1.70 Paslı Dev (4. bölüm patronu, 20 can): yürü → saldır (birkaç kez) → oyuncu uzaktaysa üstüne zıpla → baygın ----
+  // Sadece BAYGINKEN vurulabilir (öbür zaman vuruş işlemez); baygınken dokunmak can götürmez.
+  //  • Saldırı tek animasyon: pres yumruğunu kaldırıp önüne indirir (yumruk yerdeyken önündeki alana değen oyuncu 1 can
+  //    kaybeder ve ileri fırlar), sonra namlu parlayınca kızgın perçin atar — atıldığı anda oyuncunun gövde ortasına, düz, takipsiz.
+  //  • CONFIG.patron3.saldiriSayi kadar saldırıdan sonra oyuncu `uzak`tan uzaktaysa çömelir ve oyuncunun o anki yerine zıplar
+  //    (güm: sarsıntı; üstüne inerse 1 can). İner inmez gücü biter: `baygin` sn baygın kalır, sonra yeniden çalışır.
+  //    Oyuncu yakındaysa zıplamaz, saldırmaya devam eder — amaç uzaklaşıp zıplatmak, bayılınca vurmak.
+  robotGuncelle(d, dt) {
+    const p = this.player, b = d.body, C = CONFIG.patron3, K = ASSETLER.robot, A = K.anim;
+    const dx = p.x - d.x, s = Math.abs(d.scaleX);
+    const kare = () => d.anims.currentFrame ? d.anims.currentFrame.index - 1 : 0;
+    const gec = (durum, sure, ek) => Object.assign(d, { durum, durumZaman: sure }, ek);
+    d.durumZaman -= dt;
+    switch (d.durum) {
+      case 'yuru': {
+        const yon = Math.sign(dx) || d.yon, yakin = Math.abs(dx) < 120;
+        d.yon = yon; d.setFlipX(yon > 0);
+        b.setVelocityX(yakin ? 0 : yon * C.hiz);
+        if (yakin) { d.anims.pause(); d.setFrame(A.yuru[0]); } else this.dusmanAnim(d, 'yuru');
+        if (d.durumZaman > 0 || this.durum.olu) break;
+        b.setVelocityX(0);
+        if (d.sayac >= C.saldiriSayi && Math.abs(dx) > C.uzak) {   // yeterince saldırdı, oyuncu uzakta: zıpla
+          gec('comel', 0.45, { hedefX: p.x });
+          d.play('d_robot_zipla'); d.anims.pause(); d.setFrame(A.zipla[0]);
+          this.bossSes();
+        } else {
+          gec('saldir', 3, { vurdu: false, atti: false, sesVur: false });
+          d.sayac++;
+          d.play('d_robot_saldir');
+        }
+        break;
+      }
+      case 'saldir': {
+        b.setVelocityX(0);
+        const k = kare();
+        if (k >= K.yumruk[0] && k <= K.yumruk[1]) {
+          if (!d.sesVur) { d.sesVur = true; this.ses('tasKir'); this.cameras.main.shake(120, 0.005); }
+          const uz = K.yumrukUc * s, alan = new Phaser.Geom.Rectangle(d.yon > 0 ? d.x : d.x - uz, b.bottom - 70, uz, 70);
+          if (!d.vurdu && this.dokunulmaz <= 0 && !this.durum.olu && Phaser.Geom.Rectangle.Overlaps(alan, govdeRect(p.body))) {
+            d.vurdu = true;
+            this.oyuncuHasar(d.x);
+            if (!this.durum.olu) { p.body.setVelocity(d.yon * C.firlat[0], -C.firlat[1]); this.knock = C.firlat[2]; }
+          }
+        }
+        if (!d.atti && k >= K.ates) { d.atti = true; this.robotMermi(d); }
+        if (!d.anims.isPlaying || d.durumZaman <= 0) { gec('yuru', C.bekle); d.setFrame(A.yuru[0]); }
+        break;
+      }
+      case 'comel':   // çömelme kareleri (0 → 1), sonra fırla
+        b.setVelocityX(0);
+        if (d.durumZaman < 0.22) d.setFrame(A.zipla[1]);
+        if (d.durumZaman <= 0) {
+          const O = this.arena, T = C.ziplaSure, yari = b.width / 2 + 4;
+          const hx = O ? Phaser.Math.Clamp(d.hedefX, O.x + O.K + yari, O.x + O.w - O.K - yari) : d.hedefX;
+          b.setVelocity((hx - d.x) / T, -CONFIG.fizik.yercekimi * T / 2);
+          gec('hava', T + 1); d.setFrame(A.zipla[2]);
+          this.ses('sekme1');
+        }
+        break;
+      case 'hava': {
+        const vy = b.velocity.y;
+        d.setFrame(A.zipla[vy < -250 ? 3 : vy < 150 ? 4 : 5]);
+        if ((yerdeMi(b) && vy >= 0) || d.durumZaman <= 0) {   // güm
+          b.setVelocity(0, 0);
+          d.setFrame(A.zipla[6]);
+          this.cameras.main.shake(320, 0.014);
+          this.ses('tasKir'); this.ses('olBoss', { volume: 0.5 });
+          gec('inis', 0.3);
+        }
+        break;
+      }
+      case 'inis':
+        b.setVelocityX(0);
+        if (d.durumZaman <= 0) { gec('baygin', C.baygin, { sayac: 0 }); d.play('d_robot_baygin'); }
+        break;
+      case 'baygin':   // gücü bitti: zarar vermez, vurulabilir
+        b.setVelocityX(0);
+        if (d.durumZaman <= 0) { gec('yuru', 0.8); this.bossSes(true); d.setFrame(A.yuru[0]); }
+        break;
+    }
+  },
+
+  // Kızgın perçin: namludan çıkar, atıldığı anda oyuncunun gövde ortasına doğru düz gider (çizim sola bakar, uçuş yönüne döner)
+  robotMermi(d) {
+    const p = this.player, K = ASSETLER.robot, M = K.mermi, C = CONFIG.patron3, s = Math.abs(d.scaleX);
+    const x = d.x + d.yon * K.namlu[0] * s, y = d.body.bottom - K.namlu[1] * s;
+    const aci = Math.atan2(p.body.center.y - y, p.body.center.x - x), o = M.boy * CONFIG.olcek / M.h;
+    const m = this.mermiler.create(x, y, 'robotMermi', 0).setDepth(7).setOrigin(M.kafa / 2 / M.w, 0.5).setScale(o).setRotation(aci + Math.PI);
+    m.play('robotMermi');
+    m.body.setAllowGravity(false);
+    m.body.setSize(M.h * 0.6, M.h * 0.6, false).setOffset(M.kafa / 2 - M.h * 0.3, M.h * 0.2);
+    m.setVelocity(Math.cos(aci) * C.mermiHiz, Math.sin(aci) * C.mermiHiz);
+    m.omur = 4;
+    this.atesSira = !this.atesSira; this.ses(this.atesSira ? 'ates1' : 'ates2');
+  },
+
   // Patron sesi: boss1..13 rastgele; zorla değilse başka patron sesi çalarken çalmaz (üst üste binmez)
   bossSes(zorla) {
     if (!zorla && this.bossSesObj && this.bossSesObj.isPlaying) return;
@@ -643,6 +744,7 @@ Object.assign(OyunSahnesi.prototype, {
       return;
     }
     if (d.tip === 'boss' && !d.aktif) return;
+    if (d.robot && d.durum === 'baygin') return;   // v1.70: baygın robot zarar vermez
     if (d.tip === 'yumurta') return;   // v1.47: yumurta zarar vermez
     if (d.tip === 'yavru' && (d.havada || d.zararsiz > 0)) return;   // fırlarken / indikten sonraki 0,25 sn
     this.oyuncuHasar(d.x);
@@ -652,8 +754,9 @@ Object.assign(OyunSahnesi.prototype, {
     if (!d.active || d.oldu) return false;
     if (d.tip === 'boss') {
       if (d.dokunulmaz > 0 || !d.aktif) return false;
+      if (d.robot && d.durum !== 'baygin') { this.efektPatla(d.x, d.y - 40, 'ui_kivilcim', 30); return false; }   // v1.70: sadece baygınken vurulur
       d.hp -= n > 1 ? 2 : n;
-      d.dokunulmaz = 1.1;
+      d.dokunulmaz = d.robot ? CONFIG.patron3.vurusAra : 1.1;
       this.bossSes(true);
       this.cameras.main.shake(150, 0.006);
       if (d.hp <= 0) this.bossYen(d);

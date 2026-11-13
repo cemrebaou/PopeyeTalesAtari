@@ -414,6 +414,7 @@ s += "  tirmanma: 'zincir',\n"
 s += "  sussuz: true,   // bitki / kaya süsü yok (metal bölüm)\n"
 s += "  bolgeler: [[0,'z'],[66,'y'],[132,'x']],   // üst parlak çelik · orta koyu çelik · alt pas\n"
 s += f'  dukkan: {{ kapi: {json.dumps(orta(DUKKAN))} }},\n'
+s += f'  patron: {{ kapi: {json.dumps(orta(CIKIS))} }},   // v1.70: çıkıştaki patron kapısından arenaya (Paslı Dev)\n'
 s += f'  anahtar: {json.dumps(ANAHTAR)},\n'
 s += '  // [kapı x, kapı y (zemin), varış x, varış y (zemin)] kilitli kapı: anahtarla açılır, ↑ ile Hazine Kasası\'na; ilk geçişten sonra iki yönlü\n'
 s += f'  kilitKapi: {json.dumps(orta(KILIT_UST) + orta(KILIT_VARIS))},\n'

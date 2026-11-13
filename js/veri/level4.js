@@ -10,6 +10,7 @@ const LEVEL4 = {
   sussuz: true,   // bitki / kaya süsü yok (metal bölüm)
   bolgeler: [[0,'z'],[66,'y'],[132,'x']],   // üst parlak çelik · orta koyu çelik · alt pas
   dukkan: { kapi: [272, 6208] },
+  patron: { kapi: [7376, 416] },   // v1.70: çıkıştaki patron kapısından arenaya (Paslı Dev)
   anahtar: [6720, 5992],
   // [kapı x, kapı y (zemin), varış x, varış y (zemin)] kilitli kapı: anahtarla açılır, ↑ ile Hazine Kasası'na; ilk geçişten sonra iki yönlü
   kilitKapi: [7280, 4640, 6096, 1888],

@@ -74,3 +74,8 @@ ASSETLER.dmayin = {"w": 443, "h": 443, "ox": 0.5097, "oy": 0.9707, "merkez": 277
 
 // Kobra Bekçi (araclar/kobraKes.py): 2. bölüm patronu — hücre, ayak / kafa çizgisi, kareler; agiz / uc: çapaya göre [ileri, yukarı] (hücre px)
 ASSETLER.kobra = {"w": 458, "h": 248, "ayak": 244, "ust": 43, "boy": 120, "anim": {"yuru": [0, 1, 2, 3, 4, 5, 6, 7], "saldir": [8, 9, 10, 11, 12, 13, 14, 15, 16, 17], "ol": [8]}, "tukur": 6, "vur": [3, 5], "agiz": [125, 119], "uc": [225, 84], "zehir": {"w": 85, "h": 37, "gen": 34}};
+
+
+
+// Paslı Dev (araclar/robotKes.py): 4. bölüm patronu — hücre, ayak / üst çizgisi, kareler; yumrukUc: çapadan ileri px; namlu: [ileri, yukarı] (hücre px)
+ASSETLER.robot = {"w": 228, "h": 203, "ayak": 199, "ust": 32, "boy": 150, "anim": {"saldir": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "yuru": [10, 11, 12, 13, 14, 15, 16, 17], "baygin": [18, 19, 20, 21, 22, 23, 24, 25], "zipla": [26, 27, 28, 29, 30, 31, 32, 33], "ol": [18]}, "yumruk": [4, 5], "ates": 6, "yumrukUc": 109, "namlu": [-21, 48], "mermi": {"w": 131, "h": 60, "kare": 8, "kafa": 68, "boy": 26}};

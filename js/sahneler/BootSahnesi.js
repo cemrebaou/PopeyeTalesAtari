@@ -29,7 +29,8 @@ class BootSahnesi extends Phaser.Scene {
     L.image('dmayinHalka', 'assets/nesne/dmayinHalka.png');
     L.image('dmayinTaban', 'assets/nesne/dmayinTaban.png');
     // Düşmanlar (her biri yatay şerit) ve mermiler · v1.47: ek düşmanlar (yumurta, yavru örümcek) katılır
-    Object.assign(A.dusman, A.dusmanEk || {}, { kobra: A.kobra });   // v1.69: 2. bölüm patronu
+    Object.assign(A.dusman, A.dusmanEk || {}, { kobra: A.kobra, robot: A.robot });   // v1.69 / v1.70: 2. ve 4. bölüm patronları
+    L.spritesheet('robotMermi', 'assets/dusman/robotMermi.png', { frameWidth: A.robot.mermi.w, frameHeight: A.robot.mermi.h });
     L.image('kobraZehir', 'assets/dusman/kobraZehir.png');
     Object.entries(A.dusman).forEach(([ad, D]) => {
       if (D.anim) L.spritesheet('d_' + ad, 'assets/dusman/' + ad + '.png', { frameWidth: D.w, frameHeight: D.h });
@@ -159,10 +160,12 @@ class BootSahnesi extends Phaser.Scene {
           ekle('dinlen', [kareler[3]], 1, false);
         } else if (ad === 'yumurta') ekle(k, kareler, k === 'bekle' ? 6 : 10, k === 'bekle');   // v1.47 (GIF 160 ms)
         else if (ad === 'yavru') ekle(k, kareler, k === 'saldir' ? 12 : 9, k !== 'ol');
+        else if (ad === 'robot') ekle(k, kareler, { saldir: 9, yuru: 6, baygin: 4 }[k] || 8, k === 'yuru' || k === 'baygin');   // v1.70
         else if (ad === 'kobra') ekle(k, kareler, k === 'saldir' ? CONFIG.patron2.saldiriFps : 8, k === 'yuru');   // v1.69
         else ekle(k, kareler, ad === 'bitki' && k === 'bekle' ? 8 : HIZ[k] || 10, DONGU[k]);
       });
     });
+    this.anims.create({ key: 'robotMermi', frames: this.anims.generateFrameNumbers('robotMermi', { start: 0, end: ASSETLER.robot.mermi.kare - 1 }), frameRate: 12, repeat: -1 });   // v1.70
     // v0.98: yarasa ölümü — 0–3 havada (bir kez), 5–8 yere düşünce (bir kez); 3 düşerken, 4 yere yaklaşınca kare olarak
     const yk = (k, kareler) => this.anims.create({ key: 'd_yarasaOl_' + k, frames: kareler.map(frame => ({ key: 'd_yarasaOl', frame })), frameRate: 12, repeat: 0 });   // v1.07: 8 → 12
     yk('hava', [0, 1, 2, 3]); yk('yer', [5, 6, 7, 8]);

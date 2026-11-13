@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.69',
+  surum: 'v1.70',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -64,10 +64,13 @@ const CONFIG = {
   puan: { elmas: 10, buyuk: 100, kizil: 50, altin: 5, capa: 25, tane: 15, kalpFazla: 50, dusman: 20, patron: 500, yildiz: 1000 },   // yildiz: bölüm sonu ödül mücevheri (v1.33)
   yildizEsik: [0.33, 0.66, 0.99],   // v1.33: toplanabilirlerin bu oranı dolunca 1 / 2 / 3 mücevher
   toplanBoy: { elmas: 16, buyukelmas: 26, kizilelmas: 24, kalp: 22, capa: 20, altin: 16, tane: 9 },
-  patron: { can: 4, uyanMesafe: 520 },
+  patron: { can: 5, uyanMesafe: 520 },
   // v1.69: 2. bölüm patronu Kobra Bekçi. yakin: bu mesafeden yakındaysa zehir yerine mızrak; hiz / bekle / zehirHiz: [normal, yarı canın altında];
   // firlat: mızrak vurunca oyuncuya verilen [yatay hız, yukarı hız, kontrolsüz süre sn]
-  patron2: { can: 6, yakin: 170, hiz: [70, 100], bekle: [1.8, 1.1], saldiriFps: 9, zehirHiz: [340, 420], firlat: [420, 300, 0.4] },
+  patron2: { can: 10, yakin: 170, hiz: [70, 100], bekle: [1.8, 1.1], saldiriFps: 9, zehirHiz: [340, 420], firlat: [420, 300, 0.4] },
+  // v1.70: 4. bölüm patronu Paslı Dev. saldiriSayi: zıplamadan önceki en az saldırı; uzak: oyuncu bundan uzaktaysa zıplar (px);
+  // baygin: baygın kalma süresi (sn); vurusAra: baygınken iki vuruş arası dokunulmazlık; ziplaSure: havada kalma (sn)
+  patron3: { can: 20, hiz: 55, bekle: 1.3, saldiriSayi: 2, uzak: 240, baygin: 4.5, vurusAra: 0.45, mermiHiz: 360, ziplaSure: 0.9, firlat: [420, 300, 0.4] },
   // v1.55: yüzme bölümü (js/sahneler/YuzmeSahnesi.js). Uzunluklar dünya pikseli (ekran yüksekliği 360), hızlar px/sn.
   yuzme: {
     akisHiz: 150,       // denizin sola akış hızı (biz sağa yüzüyoruz)

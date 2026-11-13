@@ -7,7 +7,7 @@
 //    ortasında altın tik rozeti durur. Kamera genişliğe oturur, yukarı / aşağı oyuncuyu izler.
 //  • Patron arenası (L.patron.kapi): patron açıkta beklemez; kapalı patron kapısı oyuncu yaklaşınca açılır, ↑ ile arenaya
 //    ışınlanılır (kamera sabit, odanın tamamı). Patron arenanın sağında bekler, yaklaşınca uyanır. Öldürülünce bölüm biter.
-//    2. bölüm patronu Kobra Bekçi (v1.69, dusmanlar.js kobraGuncelle).
+//    2. bölüm patronu Kobra Bekçi (v1.69, dusmanlar.js kobraGuncelle), 4. bölüm patronu Paslı Dev (v1.70, robotGuncelle).
 const ODA = { kare: 64, cerceve: 9.6 };
 
 Object.assign(OyunSahnesi.prototype, {
@@ -61,7 +61,7 @@ Object.assign(OyunSahnesi.prototype, {
   arenaKur() {
     const L = this.L, K = ODA.kare;
     const ox = this.odaSiradakiX(), oy = 1024;
-    const O = this.odaOr(ox, oy, 16, 7, this.bolumNo === 1 ? 0x2e2438 : 0x3a3232);
+    const O = this.odaOr(ox, oy, 16, 7, { 1: 0x2e2438, 3: 0x26292e }[this.bolumNo] || 0x3a3232);
     O.tip = 'arena';
     this.sonOdaSag = O.x + O.w;
     this.arena = O;
@@ -72,7 +72,7 @@ Object.assign(OyunSahnesi.prototype, {
     this.dukkanKapilar.push({ x: kx, y: ky, hedef: 'arena', spr: k.spr, kapali: k.kapali, acik: k.acik, koy: k.koy });
     // Patron arenanın sağ yarısında bekler (uyanma: dusmanlar.js bossGuncelle)
     const bx = O.x + O.w - 3 * K, by = O.zeminY;
-    this.patronSpr = this.dusmanYarat({ tip: this.bolumNo === 1 ? 'kobra' : 'boss', x: bx, y: by });   // v1.69: 2. bölümde Kobra Bekçi
+    this.patronSpr = this.dusmanYarat({ tip: { 1: 'kobra', 3: 'robot' }[this.bolumNo] || 'boss', x: bx, y: by });   // v1.69: 2. bölümde Kobra Bekçi · v1.70: 4. bölümde Paslı Dev
     if (this.patronSpr) this.patronSpr.zeminY = by;
     this.patronBas = { x: bx, y: by, hp: this.patronSpr ? this.patronSpr.hp : CONFIG.patron.can };
     this.events.once('shutdown', () => { this.patronMuzik = sesDurdur(this.patronMuzik); });
@@ -97,8 +97,8 @@ Object.assign(OyunSahnesi.prototype, {
       const d = this.patronSpr, B = this.patronBas;
       if (d && d.active && !d.oldu) {
         d.body.reset(B.x, B.y);
-        Object.assign(d, { hp: B.hp, aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1 });
-        d.setFlipX(!d.kobra).setAlpha(1);   // kobra görseli sola bakar
+        Object.assign(d, { hp: B.hp, aktif: false, durum: 'yuru', durumZaman: 2, dokunulmaz: 0, yon: -1, sayac: 0 });
+        d.setFlipX(!d.kobra && !d.robot).setAlpha(1);   // kobra görseli sola bakar
         d.renk ? d.setTint(d.renk) : d.clearTint();
         d.play('d_' + d.ad + '_yuru'); d.anims.pause();
       }
