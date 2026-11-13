@@ -6,7 +6,9 @@ const ekranH = () => Math.max(1, Math.round(window.innerHeight * DPR));
 
 // Bölümler sırayla; adres çubuğunda ?bolum=2 ile doğrudan o bölüm açılır
 const BOLUMLER = [LEVEL1, LEVEL2, LEVEL3, LEVEL4];
-const ilkBolum = Math.min(BOLUMLER.length, Math.max(1, parseInt(new URLSearchParams(location.search).get('bolum')) || 1)) - 1;
+// v1.78: adres yoksa (ve uygulamada her zaman) kalınan bölümden devam: KAYIT.sonBolum = ulaşılan en ileri bölüm
+const adresBolum = GELISTIRME ? parseInt(new URLSearchParams(location.search).get('bolum')) : 0;
+const ilkBolum = Math.min(BOLUMLER.length - 1, Math.max(0, adresBolum ? adresBolum - 1 : (KAYIT.sonBolum || 0)));
 
 const oyun = new Phaser.Game({
   type: Phaser.AUTO,

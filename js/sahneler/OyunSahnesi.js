@@ -334,6 +334,7 @@ class OyunSahnesi extends Phaser.Scene {
       zipla: 'SPACE', z: 'Z', saldir: 'X', k: 'K', j: 'J', cek: 'C', l: 'L'
     });
     kb.addCapture('SPACE,UP,DOWN,LEFT,RIGHT');
+    if (!GELISTIRME) return;   // v1.78: aşağıdakiler yalnız web'de (geliştirme)
     kb.on('keydown-R', () => this.scene.restart());
     kb.on('keydown-P', () => this.haritaDegistir());
     // GELİŞTİRME (yayından önce silinecek): O → +10 000 puan (dükkanı denemek için)

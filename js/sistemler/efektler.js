@@ -77,6 +77,7 @@ Object.assign(OyunSahnesi.prototype, {
     this.player.body.setVelocity(0, 0).setAllowGravity(false);
     const no = this.bolumNo, sonraki = no + 1 < BOLUMLER.length;
     this.registry.set('bolum', sonraki ? no + 1 : no);   // dokununca sonraki bölüm açılır
+    if (sonraki && (KAYIT.sonBolum || 0) < no + 1) { KAYIT.sonBolum = no + 1; kayitYaz(); }   // v1.78: oyun açılınca kalınan bölümden
     // v1.33: bölüm sonu ekranı — çetele (tür tür alınan / toplam), toplam yüzdesi barı, %33 / %66 / %99'da ödül mücevheri yanar;
     // ilk kez yanan her mücevherden turuncu elmas çıkıp puana uçar (+CONFIG.puan.yildiz); daha önce alınmış olan yeniden vermez
     const B = this.kayitB, satirlar = this.toplananSayim(), u = this.ui();

@@ -319,10 +319,10 @@ class YuzmeSahnesi extends Phaser.Scene {
   // v1.56: yön tuşu yok — ekranda parmak / fare basılıyken sürüklemek Popeye'yi aynı yöne götürür (parmak üstünü kapatmaz)
   girdiKur() {
     const kb = this.input.keyboard;
-    kb.on('keydown-R', () => this.scene.restart());
-    kb.on('keydown-F', tamEkranDegistir);
-    // 1, 2, … → o bölümü yükle (bilgisayarda)
-    ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'].slice(0, BOLUMLER.length).forEach((ad, i) => {
+    if (GELISTIRME) kb.on('keydown-R', () => this.scene.restart());
+    if (GELISTIRME) kb.on('keydown-F', tamEkranDegistir);
+    // 1, 2, … → o bölümü yükle (bilgisayarda; v1.78: yalnız web'de)
+    if (GELISTIRME) ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'].slice(0, BOLUMLER.length).forEach((ad, i) => {
       const ac = () => { this.registry.set('bolum', i); this.scene.start('Game'); };
       kb.on('keydown-' + ad, ac);
       kb.on('keydown-NUMPAD_' + ad, ac);
@@ -356,7 +356,7 @@ class YuzmeSahnesi extends Phaser.Scene {
       this.ui.push(o);
       return o;
     };
-    ekle(this.add.text(8 * u, H - 6 * u, CONFIG.surum + '  ' + this.L.ad, { fontFamily: 'monospace', color: '#ffffff', fontSize: Math.round(11 * u) + 'px' })
+    if (GELISTIRME) ekle(this.add.text(8 * u, H - 6 * u, CONFIG.surum + '  ' + this.L.ad, { fontFamily: 'monospace', color: '#ffffff', fontSize: Math.round(11 * u) + 'px' })
       .setOrigin(0, 1).setAlpha(0.7));
     // v1.71: öbür bölümlerle aynı yerleşim — sağ üstte para, altında ayarlar tuşu (yetenek tuşu yok); tam ekran tuşu kaldırıldı
     // (sürüklemeyi başlatmasın diye dokunma burada biter)
@@ -711,6 +711,7 @@ class YuzmeSahnesi extends Phaser.Scene {
     if (this.cubuk) this.cubuk.scaleX = Math.min(1, this.yol / this.mesafe);
     if (!this.bitti && !this.olu && !this.olaylar.length && !this.elmaslar.length && this.yol >= this.mesafe) {
       this.bitti = true;
+      if (this.bolumNo + 1 < BOLUMLER.length && (KAYIT.sonBolum || 0) < this.bolumNo + 1) { KAYIT.sonBolum = this.bolumNo + 1; kayitYaz(); }   // v1.78
       this.bitisPaneli();
       // v1.71: dokununca sonraki bölüm (yoksa bu bölüm baştan)
       this.time.delayedCall(600, () => this.input.once('pointerup', () => {

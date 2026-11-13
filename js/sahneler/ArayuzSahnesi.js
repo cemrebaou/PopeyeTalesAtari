@@ -20,7 +20,7 @@ class ArayuzSahnesi extends Phaser.Scene {
     this.tamBtn = null;
     this.yetenekAcik = false;   // v1.44: yetenekler şeridi açık mı
     this.ekran = null;   // bitiş ekranı
-    this.input.keyboard.on('keydown-F', tamEkranDegistir);
+    if (GELISTIRME) this.input.keyboard.on('keydown-F', tamEkranDegistir);
     this.surumYazi = this.add.text(0, 0, CONFIG.surum + '  ' + this.oyunS.L.ad, { fontFamily: 'monospace', color: '#ffffff' })
       .setOrigin(0, 1).setAlpha(0.7);
     this.tuslariKur();
@@ -77,7 +77,7 @@ class ArayuzSahnesi extends Phaser.Scene {
       .on('pointerup', () => { this.tik(); this.yetenekAcik = !this.yetenekAcik; this.yetenekCiz(); });
     this.yetenekCiz();
 
-    this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u);
+    this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u).setVisible(GELISTIRME);   // v1.78: uygulamada gizli
     this.tusB = 78 * u;
     this.tuslar.forEach(({ ad, r }) => {
       const [x, y] = TUSLAR[ad];

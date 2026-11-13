@@ -98,3 +98,7 @@ const Reklam = (() => {
 
   return { baslat, bolumGecti, odulluIzle, native };
 })();
+
+// v1.78: geliştirme özellikleri (O +puan, P harita / ışınlanma, 1–4 bölüm tuşları, ?bolum=N, sürüm yazısı, R, F) yalnız web'de;
+// telefondaki uygulamada (Capacitor) kapalı
+const GELISTIRME = !Reklam.native;

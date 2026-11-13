@@ -562,7 +562,7 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   // ---- v1.70 Paslı Dev (4. bölüm patronu, 20 can): yürü → saldır (birkaç kez) → oyuncu uzaktaysa üstüne zıpla → baygın ----
-  // Sadece BAYGINKEN vurulabilir (öbür zaman vuruş işlemez); baygınken dokunmak can götürmez.
+  // v1.78: her zaman vurulabilir; baygınken dokunmak can götürmez (rahat vurma fırsatı).
   //  • Saldırı tek animasyon: pres yumruğunu kaldırıp önüne indirir (yumruk yerdeyken önündeki alana değen oyuncu 1 can
   //    kaybeder ve ileri fırlar), sonra namlu parlayınca kızgın perçin atar — atıldığı anda oyuncunun gövde ortasına, düz, takipsiz.
   //  • CONFIG.patron3.saldiriSayi kadar saldırıdan sonra oyuncu `uzak`tan uzaktaysa çömelir ve oyuncunun o anki yerine zıplar
@@ -760,8 +760,10 @@ Object.assign(OyunSahnesi.prototype, {
   dusmanHasar(d, n) {
     if (!d.active || d.oldu) return false;
     if (d.tip === 'boss') {
-      if (d.dokunulmaz > 0 || !d.aktif) return false;
-      if (d.robot && d.durum !== 'baygin') { this.efektPatla(d.x, d.y - 40, 'ui_kivilcim', 30); return false; }   // v1.70: sadece baygınken vurulur
+      if (!d.aktif) return false;
+      // v1.78: vuruş efekti her zaman çıkar (dokunulmazken de); Paslı Dev artık her durumda vurulur (baygınlık: değince can gitmeyen fırsat anı)
+      this.efektPatla(d.x, d.body.center.y - 6, 'ui_kivilcim', 46);
+      if (d.dokunulmaz > 0) return false;
       d.hp -= n > 1 ? 2 : n;
       d.dokunulmaz = d.robot ? CONFIG.patron3.vurusAra : 1.1;
       this.bossSes(true, d, true);
