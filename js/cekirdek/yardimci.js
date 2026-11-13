@@ -96,7 +96,7 @@ function gorselYazi(sahne, parcalar, boy, ikonBoy) {
 // hiza: 'orta' | 'sol'. Container döner: sol üst orijin, genislik / yukseklik alanlarıyla.
 function harfYazi(sahne, metin, boy, hiza) {
   const H = ASSETLER.harf, s0 = boy / H.capH, ara = boy * 0.02;
-  metin = String(metin);
+  metin = cevir(String(metin));   // v1.80: seçili dile
   const satirH = boy * (metin.includes('{') ? 2.1 : 1.55);
   const c = sahne.add.container(0, 0);
   const satirlar = metin.split('\n').map(satir => {

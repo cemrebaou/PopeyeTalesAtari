@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.79',
+  surum: 'v1.80',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -79,6 +79,7 @@ const CONFIG = {
     }
   },
   metalSandikAsagi: 11.5,   // v1.76: metal temalı bölümde sandık görseli bu kadar px (40 birim) aşağıda çizilir; gövde yerinde
+  ikiX: { ton: -22, doygunluk: 0.15, parlaklik: 0.88 },   // v1.80: 2x renk efekti (ton kayması °, doygunluk artışı, parlaklık)
   muzikSes: 0.4,   // v1.79: bölüm / patron müziği ses düzeyi
   patron: { can: 5, uyanMesafe: 520 },
   // v1.69: 2. bölüm patronu Kobra Bekçi. yakin: bu mesafeden yakındaysa zehir yerine mızrak; hiz / bekle / zehirHiz: [normal, yarı canın altında];

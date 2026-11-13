@@ -1,5 +1,20 @@
-// v1.79: Giriş ekranı — assets/ui/giris.jpg ekranı kaplar (oran korunur, taşan kenar kırpılır); dokununca / tuşa basınca oyun başlar.
-// Görseldeki "Press Start" levhası hafifçe yanıp söner (üstüne açık bir parlama). Web'de adreste ?bolum=N varsa atlanır (BootSahnesi).
+// v1.79: Giriş ekranı — dokununca / tuşa basınca oyun başlar. "Press Start" levhası hafifçe yanıp söner.
+// v1.80: görsel (assets/ui/giris.jpg) geniş çizilmiş: 16:9 asıl resim tam ortasında, GIRIS_IC oranında. Asıl resim ekrana SIĞDIRILIR;
+// ekran 16:9'dan geniş (ya da uzun) ise kenarlar görselin devamıyla dolar (girisYerlesim). Web'de adreste ?bolum=N varsa atlanır.
+const GIRIS_IC = 3216 / 5250;   // araclar/mobilGorsel.py GENIS_IC ile aynı
+function girisYerlesim(W, H) {
+  const src = oyun.textures.get('giris').getSourceImage();
+  const s = Math.min(W / (src.width * GIRIS_IC), H / (src.height * GIRIS_IC));
+  return { s, k: s * src.width * GIRIS_IC / 1672 };   // s: görsel ölçeği · k: asıl resmin (1672×941) pikseli → ekran
+}
+
+// En baştaki sahne: yalnız giriş görselini yükler (yükleme ekranı onu kullanır), sonra Boot'a geçer
+class OnSahnesi extends Phaser.Scene {
+  constructor() { super('On'); }
+  preload() { this.cameras.main.setBackgroundColor('#000000'); this.load.image('giris', 'assets/ui/giris.jpg'); }
+  create() { this.scene.start('Boot'); }
+}
+
 class GirisSahnesi extends Phaser.Scene {
   constructor() { super('Giris'); }
 
@@ -22,10 +37,10 @@ class GirisSahnesi extends Phaser.Scene {
     this.tweens.killAll();
     const W = this.scale.width, H = this.scale.height;
     this.cameras.main.setSize(W, H);
-    const g = this.add.image(W / 2, H / 2, 'giris'), s = Math.max(W / g.width, H / g.height);
-    g.setScale(s);
-    // "Press Start" levhası: görselde ortada, alttan ~%7,5 yukarıda (1672×941'de 835, 870; 420×80)
-    const p = this.add.rectangle(W / 2 + (835 - 836) * s, H / 2 + (870 - 470.5) * s, 400 * s, 64 * s, 0xfff2b0, 0.28).setBlendMode(Phaser.BlendModes.ADD);
+    const Y = girisYerlesim(W, H), k = Y.k;
+    this.add.image(W / 2, H / 2, 'giris').setScale(Y.s);
+    // "Press Start" levhası: asıl resimde (1672×941) merkezi (835, 870), 400×64
+    const p = this.add.rectangle(W / 2 + (835 - 836) * k, H / 2 + (870 - 470.5) * k, 400 * k, 64 * k, 0xfff2b0, 0.28).setBlendMode(Phaser.BlendModes.ADD);
     this.tweens.add({ targets: p, alpha: 0, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 }

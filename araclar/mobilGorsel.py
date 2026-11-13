@@ -26,7 +26,13 @@ os.makedirs(KOK + '/android-res/values', exist_ok=True)
 open(KOK + '/android-res/values/ic_launcher_background.xml', 'w').write(
     '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#%02X%02X%02X</color>\n</resources>\n' % ZEMIN)
 giris = Image.open(KOK + '/assets/kaynak/giris.png').convert('RGB')
-giris.save(KOK + '/assets/ui/giris.jpg', quality=88, optimize=True)
+# v1.80: oyundaki giriş görseli geniş sürümden (kaynak/giris_genis.png): 16:9 asıl görsel bunun tam ortasında, GENIS_IC oranında
+# (ölçüldü: 5250 px'in 3216'sı). Asıl kısım 1672 px genişliğe gelecek kadar küçültülür; oyun asıl kısmı ekrana sığdırır,
+# daha geniş / uzun ekranlarda kenarlar bu görselin devamıyla dolar (ASSETLER.giris.ic).
+GENIS_IC = 3216 / 5250
+genis = Image.open(KOK + '/assets/kaynak/giris_genis.png').convert('RGB')
+gw = round(1672 / GENIS_IC)
+genis.resize((gw, round(gw * genis.height / genis.width)), Image.LANCZOS).save(KOK + '/assets/ui/giris.jpg', quality=86, optimize=True)
 os.makedirs(KOK + '/android-res/drawable', exist_ok=True)
 giris.resize((1280, round(1280 * giris.height / giris.width)), Image.LANCZOS).save(KOK + '/android-res/drawable/splash.png', optimize=True)
 os.makedirs(KOK + '/assets/ses/muzik', exist_ok=True)

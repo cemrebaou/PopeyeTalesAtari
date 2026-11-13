@@ -180,6 +180,11 @@ class ArayuzSahnesi extends Phaser.Scene {
     const puan = gorselYazi(this, ['ui_altin', String(S.puan)], 24 * u, 30 * u);
     puan.setPosition(W - 12 * u - puan.genislik, 24 * u);
     this.hud.push(yasam, elmas, puan);
+    if (zorluk() === 2) {   // v1.80: 2x rozeti (elmas sayacının sağında)
+      const z = harfYazi(this, '2x', 20 * u, 'sol');
+      z.setPosition(elmas.x + elmas.genislik + 16 * u, 60 * u); z.list.forEach(o => o.setTint && o.setTint(0xff6a4a));
+      this.hud.push(z);
+    }
     this.hud.forEach(n => n.setDepth(300));   // bölüm sonu ekranının da üstünde
     this.puanYazi = puan;
     this.puanHedef = { x: puan.x + 15 * u, y: 24 * u };
@@ -417,10 +422,16 @@ class ArayuzSahnesi extends Phaser.Scene {
   }
 
   // Bitiş ekranı (bölüm bitti / oyun bitti); dokununca bölüm yeniden başlar
-  bitisEkrani(baslik, alt) {
-    this.ekran = { baslik, alt, nesneler: [] };
+  // v1.80: tuslar verilirse ([{ ad, fn }]) dokunmak yerine alttaki tuşlarla seçilir
+  bitisEkrani(baslik, alt, tuslar) {
+    this.ekran = { baslik, alt, tuslar, nesneler: [] };
     this.ekranCiz();
-    this.time.delayedCall(800, () => this.input.once('pointerdown', () => { this.tik(); this.oyunS.scene.restart(); }));
+    if (!tuslar) this.time.delayedCall(800, () => this.input.once('pointerdown', () => { this.tik(); this.oyunS.scene.restart(); }));
+  }
+  ekranKapat() {
+    if (!this.ekran) return;
+    (this.ekran.nesneler || []).forEach(n => n.destroy());
+    this.ekran = null;
   }
 
   // Taş çerçeveli panel; başlık ve alt yazı harf görselleriyle, panele sığacak şekilde küçülür
@@ -436,11 +447,28 @@ class ArayuzSahnesi extends Phaser.Scene {
     const ic = this.panelIc(pw, ph);   // v1.29: yazı çerçeveye değmez
     const kur = (olcek) => [harfYazi(this, E.baslik, 26 * u * olcek, 'orta'), harfYazi(this, E.alt, 14 * u * olcek, 'orta')];
     let [b, a] = kur(1);
-    const sigdir = Math.min(1, ic.w / Math.max(b.genislik, a.genislik), ic.h / (b.yukseklik + a.yukseklik + 18 * u));
+    const th = E.tuslar ? 36 * u : 0, tusPay = E.tuslar ? th + 16 * u : 0;
+    const sigdir = Math.min(1, ic.w / Math.max(b.genislik, a.genislik), ic.h / (b.yukseklik + a.yukseklik + 18 * u + tusPay));
     if (sigdir < 1) { b.destroy(); a.destroy(); [b, a] = kur(sigdir); }
-    const bosluk = 18 * u * sigdir, y0 = ic.y + (ic.h - (b.yukseklik + bosluk + a.yukseklik)) / 2;
+    const bosluk = 18 * u * sigdir, y0 = ic.y + (ic.h - (b.yukseklik + bosluk + a.yukseklik + tusPay)) / 2;
     b.setPosition(W / 2 - b.genislik / 2, y0);
     a.setPosition(W / 2 - a.genislik / 2, y0 + b.yukseklik + bosluk);
     E.nesneler.push(b, a);
+    if (E.tuslar) {   // v1.80: tuşlar (tabela), yan yana, panelin iç alanına sığar
+      const ara = 12 * u, pay = 16 * u, ty = y0 + b.yukseklik + bosluk + a.yukseklik + 16 * u;
+      const yz = E.tuslar.map(t => harfYazi(this, t.ad, 12 * u, 'sol'));
+      let gen = yz.map(t => t.genislik + 2 * pay);
+      const top = gen.reduce((p, q) => p + q, 0) + ara * (gen.length - 1), ks = Math.min(1, ic.w / top);
+      let x = W / 2 - top * ks / 2;
+      E.tuslar.forEach((t, i) => {
+        const g = gen[i] * ks, c = ucParca(this, 'ui_tabela', x, ty, g, th);
+        this.children.bringToTop(yz[i]);
+        yz[i].setScale(ks).setPosition(x + g / 2 - yz[i].genislik * ks / 2, ty + th / 2 - yz[i].yukseklik * ks / 2);
+        const alan = this.add.zone(x, ty, g, th).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+        alan.on('pointerup', () => { this.tik(); t.fn(); });
+        E.nesneler.push(c, yz[i], alan);
+        x += g + ara * ks;
+      });
+    }
   }
 }

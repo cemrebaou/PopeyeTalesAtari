@@ -99,7 +99,21 @@ Object.assign(OyunSahnesi.prototype, {
     this.durum.oyunBitti = true;
     this.patronMuzikDurdur && this.patronMuzikDurdur();
     this.ses('tamKaybet');
-    this.bitisGoster('OYUN BİTTİ', 'Puan: ' + this.durum.puan + '\n\nDokun: tekrar dene');
+    // v1.80: iki seçenek — ödüllü reklam izleyip kaldığı yerden (son kontrol noktası, tam yaşam) devam, ya da bölüm baştan
+    const u = this.ui(), S = this.durum;
+    if (!u) return;
+    const goster = (alt) => u.bitisEkrani('OYUN BİTTİ', alt, [
+      { ad: 'Reklam İzle: Devam Et', fn: () => Reklam.odulluIzle().then((odul) => {
+          if (!odul) { u.ekranKapat(); goster('Reklam hazır değil'); return; }
+          u.ekranKapat();
+          S.oyunBitti = false; S.yasam = CONFIG.oyuncu.yasam;
+          this.hudGuncelle();
+          if (this.oda && this.oda.tip === 'arena') this.arenaBastan(); else this.canlan();
+          this.bolumMuzik = this.bolumMuzik || (this.oda ? null : muzikBaslat(this, 'bolum' + (this.bolumNo + 1) + 'Muzik'));
+        }) },
+      { ad: 'Baştan Başla', fn: () => this.scene.restart() }
+    ]);
+    goster('Puan: ' + S.puan);
   },
 
   bitisGoster(baslik, alt) {

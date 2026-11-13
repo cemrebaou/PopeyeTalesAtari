@@ -11,7 +11,7 @@ class BootSahnesi extends Phaser.Scene {
     // Nesneler (sandık, kapı, bayrak, diken, sarmaşık) — boyutları ASSETLER.obje
     Object.keys(A.obje).filter(ad => !A.nesne2[ad]).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
     L.image('zincir', 'assets/nesne/zincir.png');
-    L.image('giris', 'assets/ui/giris.jpg');   // v1.79: giriş ekranı
+    L.image('ik_dilTr', 'assets/ui/ik_dilTr.png'); L.image('ik_dilEn', 'assets/ui/ik_dilEn.png');   // v1.80: dil bayrakları
     Object.keys(ASSETLER.metalNesne).forEach(ad => L.image(ad + '_metal', 'assets/nesne/' + ad + '_metal.png'));   // v1.73: 4. bölüm (metal tema) nesneleri
     // v1.35: kapılar (dükkan / kilitli), anahtar, kontrol bayrağı, tabela, ok balonu, simgeler — ASSETLER.nesne2
     Object.keys(A.nesne2).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
@@ -57,34 +57,14 @@ class BootSahnesi extends Phaser.Scene {
     L.atlas('harf', 'assets/harf/harf.png', 'assets/harf/harf.json');   // araclar/harfAtlas.py
   }
 
-  // Siyah ekranda beklemesin: ortada çubuk + yüzde
+  // v1.80: yükleme ekranı — siyah ekranda giriş görseli yükleme ilerledikçe soldan sağa açılır (%0 siyah, %50 yarısı, %100 tamamı).
+  // Görsel önceki sahnede (OnSahnesi) yüklendi; yerleşimi giriş ekranıyla aynı (girisYerlesim), bitince aynı görselle Giris'e geçilir.
   yuklemeEkrani() {
-    const W = this.scale.width, H = this.scale.height, u = Math.min(W, H) / 400;
-    this.cameras.main.setBackgroundColor('#1a0f08');
-    const bw = Math.min(W * 0.6, 420 * u), bh = 14 * u, x = (W - bw) / 2, y = H / 2;
-    const cerceve = this.add.rectangle(W / 2, y, bw + 6 * u, bh + 6 * u).setStrokeStyle(2 * u, 0xffc21a);
-    const cubuk = this.add.rectangle(x, y, 1, bh, 0xffc21a).setOrigin(0, 0.5);
-    const yazi = this.add.text(W / 2, y - 26 * u, 'Yükleniyor 0%', {
-      fontFamily: 'Arial Black, Arial, sans-serif', fontSize: Math.round(18 * u) + 'px', color: '#ffc21a'
-    }).setOrigin(0.5);
-    // v1.28: bar görselleri (ui_yukBos / ui_yukDolu) kuyruğun başında; ikisi de inince düz çubuğun yerini alır
-    let gBar = null, son = 0;
-    this.load.image('ui_yukBos', 'assets/ui/yukBos.png');
-    this.load.image('ui_yukDolu', 'assets/ui/yukDolu.png');
-    this.load.on('filecomplete', () => {
-      if (gBar || !this.textures.exists('ui_yukBos') || !this.textures.exists('ui_yukDolu')) return;
-      const gw = Math.min(W * 0.7, 480 * u);
-      gBar = doluBar(this, 'ui_yukBos', 'ui_yukDolu', (W - gw) / 2, y - 12 * u, gw, 0.07, 0.93);
-      gBar.ayarla(son);
-      cerceve.setVisible(false); cubuk.setVisible(false);
-      yazi.setY(y - 12 * u - 22 * u);
-    });
-    this.load.on('progress', p => {
-      son = p;
-      cubuk.width = Math.max(1, bw * p);
-      if (gBar) gBar.ayarla(p);
-      yazi.setText('Yükleniyor ' + Math.round(p * 100) + '%');
-    });
+    const W = this.scale.width, H = this.scale.height;
+    this.cameras.main.setBackgroundColor('#000000');
+    const g = this.add.image(W / 2, H / 2, 'giris').setScale(girisYerlesim(W, H).s);
+    const ortu = this.add.rectangle(0, 0, W, H, 0x000000).setOrigin(0, 0);
+    this.load.on('progress', p => { ortu.x = W * p; });
   }
 
   create() {

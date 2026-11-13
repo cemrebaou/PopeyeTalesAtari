@@ -42,6 +42,11 @@ class OyunSahnesi extends Phaser.Scene {
       this.bossSesObj = sesDurdur(this.bossSesObj);
       this.bolumMuzikDurdur();
     });
+    // v1.80: 2x'te bütün bölüm alacakaranlık tonunda (tek renk matrisi geçişi; grafik ayarı düşükken kapalı)
+    if (zorluk() === 2 && ayarAl().gr > 0 && this.cameras.main.postFX) {
+      const fx = this.cameras.main.postFX.addColorMatrix();
+      fx.hue(CONFIG.ikiX.ton); fx.saturate(CONFIG.ikiX.doygunluk, true); fx.brightness(CONFIG.ikiX.parlaklik, true);
+    }
     this.bolumMuzik = muzikBaslat(this, 'bolum' + (this.bolumNo + 1) + 'Muzik');   // v1.79: bölüm müziği (patron arenasında susar)
     // Arayüz (HUD, dokunmatik tuşlar) ayrı sahnede: kamera yakınlaştırmasından etkilenmez
     if (this.scene.isActive('UI')) this.scene.get('UI').scene.restart();
