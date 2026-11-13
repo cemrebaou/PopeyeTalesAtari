@@ -64,13 +64,7 @@ class ArayuzSahnesi extends Phaser.Scene {
     this.u = u;
     this.cameras.main.setSize(W, H);
 
-    // Tam ekran tuşu: koyu zemin + harf görselleriyle yazı
-    if (this.tamBtn) this.tamBtn.destroy();
-    const ty = harfYazi(this, 'Tam ekran', 13 * u, 'sol');
-    const pad = 7 * u, bw = ty.genislik + pad * 2, bh = ty.yukseklik + pad * 2;
-    const zemin = this.add.rectangle(0, 0, bw, bh, 0x000000, 0).setOrigin(0, 0);   // dokunma alanı (görünmez)
-    const tabela = ucParca(this, 'ui_tabela', 0, 0, bw, bh);   // v1.28
-    ty.setPosition(pad, pad);
+    if (this.tamBtn) { this.tamBtn.destroy(); this.tamBtn = null; }   // v1.71: tam ekran tuşu kaldırıldı (F tuşu duruyor)
     // v1.44: puanın altında, en sağda yetenekler rozeti (v1.61: kollu parşömen, paraya yakın; solunda ayarlar); tam ekran altta yerinde
     const rb = 46 * u, ry = 56 * u;
     // v1.62: en sağda ayarlar (dişli), solunda yetenekler rozeti
@@ -81,9 +75,7 @@ class ArayuzSahnesi extends Phaser.Scene {
     this.yetBtn = this.add.image(this.ayarBtn.x - rb - 8 * u, ry + rb / 2, 'ui_yetenekBtn').setDepth(310);
     this.yetBtn.setScale(rb / this.yetBtn.height).setInteractive({ useHandCursor: true })
       .on('pointerup', () => { this.tik(); this.yetenekAcik = !this.yetenekAcik; this.yetenekCiz(); });
-    this.tamBtn = this.add.container(W - 12 * u - bw, 116 * u, [tabela, zemin, ty]);
     this.yetenekCiz();
-    zemin.setInteractive({ useHandCursor: true }).on('pointerup', () => { this.tik(); tamEkranDegistir(); });
 
     this.surumYazi.setFontSize(Math.round(11 * u) + 'px').setPosition(8 * u, H - 6 * u);
     this.tusB = 78 * u;

@@ -358,26 +358,20 @@ class YuzmeSahnesi extends Phaser.Scene {
     };
     ekle(this.add.text(8 * u, H - 6 * u, CONFIG.surum + '  ' + this.L.ad, { fontFamily: 'monospace', color: '#ffffff', fontSize: Math.round(11 * u) + 'px' })
       .setOrigin(0, 1).setAlpha(0.7));
-    // Tam ekran tuşu (yazı tabela çerçevesinin içinde)
-    const ty = harfYazi(this, 'Tam ekran', 13 * u, 'sol');
-    const pad = 7 * u, bw = ty.genislik + pad * 2, bh = ty.yukseklik + pad * 2;
-    const zemin = this.add.rectangle(0, 0, bw, bh, 0x000000, 0).setOrigin(0, 0);
-    ty.setPosition(pad, pad);
-    ekle(this.add.container(W - 12 * u - bw, 12 * u, [ucParca(this, 'ui_tabela', 0, 0, bw, bh), zemin, ty]));
-    zemin.setInteractive({ useHandCursor: true }).on('pointerup', () => { sesCal(this, 'tik'); tamEkranDegistir(); });
-    // v1.61: ayarlar tuşu (tam ekranın solunda) — sürüklemeyi başlatmasın diye dokunma burada biter
-    const ab = 40 * u;
-    ekle(this.add.image(W - 12 * u - bw - 8 * u - ab / 2, 12 * u + bh / 2, 'ik_ayarlar').setDisplaySize(ab, ab)
+    // v1.71: öbür bölümlerle aynı yerleşim — sağ üstte para, altında ayarlar tuşu (yetenek tuşu yok); tam ekran tuşu kaldırıldı
+    // (sürüklemeyi başlatmasın diye dokunma burada biter)
+    const rb = 46 * u;
+    ekle(this.add.image(W - 12 * u - rb / 2, 56 * u + rb / 2, 'ik_ayarlar').setDisplaySize(rb, rb)
       .setInteractive({ useHandCursor: true }).on('pointerdown', (p, x, y, e) => { e.stopPropagation(); this.ayarAc(); }));
     // toplanan para (sol üst) ve bölüm ilerlemesi (üst orta)
     this.u = u;
-    this.sayac = ekle(this.add.container(14 * u, 24 * u));
+    this.sayac = ekle(this.add.container(0, 0));
     this.sayacYaz();
     const cw = Math.min(W * 0.32, 260 * u), ch = 7 * u;
     ekle(this.add.rectangle(W / 2, 18 * u, cw + 4 * u, ch + 4 * u, 0x032a44, 0.55).setStrokeStyle(1.5 * u, 0xbff4ff, 0.6));
     this.cubuk = ekle(this.add.rectangle(W / 2 - cw / 2, 18 * u, cw, ch, 0x8ff0ff, 0.9).setOrigin(0, 0.5));
     this.cubuk.scaleX = Math.min(1, this.yol / this.mesafe);
-    this.kalpler = ekle(this.add.container(14 * u, 52 * u));
+    this.kalpler = ekle(this.add.container(12 * u, 10 * u));
     this.kalpYaz();
     if (this.bitti) this.bitisPaneli();
   }
@@ -403,8 +397,8 @@ class YuzmeSahnesi extends Phaser.Scene {
     if (!this.kalpler) return;
     this.kalpler.removeAll(true);
     for (let i = 0; i < canMaxi(); i++) {
-      const k = this.add.image(i * 30 * this.u, 0, i < this.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0.5);
-      k.setScale(26 * this.u / k.height);
+      const k = this.add.image(i * 46 * this.u, 0, i < this.can ? 'ui_kalp' : 'ui_kalpBos').setOrigin(0, 0);
+      k.setScale(30 * this.u / k.height);
       this.cameras.main.ignore(k);
       this.kalpler.add(k);
     }
@@ -570,9 +564,11 @@ class YuzmeSahnesi extends Phaser.Scene {
   sayacYaz() {
     if (!this.sayac) return;
     this.sayac.removeAll(true);
-    const y = gorselYazi(this, ['ui_elmas', String(this.toplanan)], 20 * this.u);
-    this.cameras.main.ignore(y); y.list.forEach(o => this.cameras.main.ignore(o));
-    this.sayac.add(y);
+    // sol üstte (kalplerin altında) bu bölümde toplanan / toplam, sağ üstte toplam para — öbür bölümlerdeki yerlerinde
+    const u = this.u, gizle = (y) => { this.cameras.main.ignore(y); y.list.forEach(o => this.cameras.main.ignore(o)); this.sayac.add(y); };
+    gizle(gorselYazi(this, ['ui_elmas', this.toplanan + '/' + this.toplam], 20 * u, 26 * u).setPosition(12 * u, 60 * u));
+    const para = gorselYazi(this, ['ui_altin', String(KAYIT.puan)], 24 * u, 30 * u);
+    gizle(para.setPosition(this.scale.width - 12 * u - para.genislik, 24 * u));
   }
 
   // ---- Elmaslar (v1.56) ----
@@ -643,7 +639,7 @@ class YuzmeSahnesi extends Phaser.Scene {
     gizle(b.setPosition(W / 2 - b.genislik / 2, H * 0.3));
     const s = gorselYazi(this, ['ui_elmas', this.toplanan + '/' + this.toplam], 30 * u);
     gizle(s.setPosition(W / 2 - s.genislik / 2, H * 0.52));
-    const t = harfYazi(this, 'Tekrar oynamak için dokun', 15 * u, 'orta');
+    const t = harfYazi(this, this.bolumNo + 1 < BOLUMLER.length ? 'Sonraki bölüm için dokun' : 'Tekrar oynamak için dokun', 15 * u, 'orta');
     gizle(t.setPosition(W / 2 - t.genislik / 2, H * 0.68));
   }
 
@@ -716,7 +712,12 @@ class YuzmeSahnesi extends Phaser.Scene {
     if (!this.bitti && !this.olu && !this.olaylar.length && !this.elmaslar.length && this.yol >= this.mesafe) {
       this.bitti = true;
       this.bitisPaneli();
-      this.time.delayedCall(600, () => this.input.once('pointerup', () => this.scene.restart()));
+      // v1.71: dokununca sonraki bölüm (yoksa bu bölüm baştan)
+      this.time.delayedCall(600, () => this.input.once('pointerup', () => {
+        const no = this.bolumNo, sonraki = no + 1 < BOLUMLER.length ? no + 1 : no;
+        this.registry.set('bolum', sonraki);
+        BOLUMLER[sonraki].yuzme ? this.scene.restart() : this.scene.start('Game');
+      }));
     }
 
     // ---- Toz ve akıntı çizgileri ----
