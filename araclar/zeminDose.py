@@ -70,7 +70,7 @@ for j in range(GY):
         sol, sag = bos(i - 1, j, dolu[j][i]), bos(i + 1, j, dolu[j][i])
         yan = 'L' if sol and not sag else 'R' if sag and not sol else 'M'
         p = ('T' if bos(i, j - 1, dolu[j][i]) else 'F') + yan
-        if m in METAL: p = 'M' + str(metalOn(m, i, j, p[0] == 'T', yan != 'M'))
+        if m in METAL: p = 'U' + str('LMR'.index(yan)) if p[0] == 'T' else 'M' + str(metalOn(m, i, j, False, False))   # v1.72: üstte baklava saclı platform karosu
         r += alf[NO[m + p] + 1]
     on.append(r)
 m = re.search(r"\n  on: \[.*?\n  \]", L, re.S)

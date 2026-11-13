@@ -113,6 +113,40 @@ for on, dosya in METAL.items():
             timg = Image.fromarray(t)
             ts.paste(timg.resize((P, P), Image.NEAREST), (ox, oy))
             ts.paste(timg, (ox + EX, oy + EX))
+# --- Metal üst zemin (v1.72): kaynak/metal_ust.png — 3 sıra (pas · parlak, sarı kenarlı · koyu çelik) × 3 platform parçası.
+# Her sıradan basılan üst karolar: <önek>U0 sol uç (ilk parçanın sol ucu), U1 orta (ortadaki parçanın ortası, aynalanarak
+# yan yana eksiz), U2 sağ uç (son parçanın sağ ucu). Karo = parçanın baklava saclı üst yüzü + ön dudağı (yüksekliğin UST_ORAN'ı);
+# arka zemin ayıklanır (kenarsız düz alan dıştan taşırılır), uçların pahlı köşeleri saydam kalır.
+import cv2
+from scipy import ndimage
+UST_SIRA, UST_ORAN = ['x', 'z', 'y'], 0.415
+im = np.array(Image.open(KOK + '/assets/kaynak/metal_ust.png').convert('RGB'))
+g = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY).astype(np.float32)
+kenar = cv2.dilate((np.hypot(cv2.Sobel(g, cv2.CV_32F, 1, 0), cv2.Sobel(g, cv2.CV_32F, 0, 1)) > 60).astype(np.uint8), np.ones((3, 3), np.uint8))
+lab, n = ndimage.label(kenar == 0)
+dis = set(np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])) - {0}
+nesne = ndimage.binary_opening(ndimage.binary_fill_holes(~np.isin(lab, list(dis))), np.ones((5, 5)))
+lab, n = ndimage.label(nesne)
+boy = ndimage.sum(nesne, lab, range(1, n + 1))
+siralar = sorted([ndimage.find_objects(lab)[i] for i in np.argsort(-boy)[:3]], key=lambda s: s[0].start)
+rgba = np.dstack([im, (nesne * 255).astype(np.uint8)])
+for on, (ys, xs) in zip(UST_SIRA, siralar):
+    y0, x0, x1 = ys.start, xs.start, xs.stop
+    k = round((ys.stop - y0) * UST_ORAN)                       # karonun kaynaktaki kenarı (kare)
+    orta = (x0 + x1) // 2
+    sol = rgba[y0:y0 + k, x0:x0 + k]
+    sag = rgba[y0:y0 + k, x1 - k:x1]
+    yarim = rgba[y0:y0 + k, orta - k // 2:orta]
+    ort = np.concatenate([yarim, yarim[:, ::-1]], 1)
+    ort[:, :, 3] = np.where(np.arange(k)[:, None] < k * 0.2, ort[:, :, 3], 255)   # orta karo alttan dolu (üst kenar çizgisi kalsın)
+    for no, t in enumerate((sol, ort, sag)):
+        timg = Image.fromarray(t).resize((B, B), Image.LANCZOS)
+        i = len(NO); NO[on + 'U' + str(no)] = i
+        ox, oy = (i % KOLON) * P, (i // KOLON) * P
+        if oy + P > ts.height:
+            y = Image.new('RGBA', (ts.width, oy + P), (0, 0, 0, 0)); y.paste(ts, (0, 0)); ts = y
+        ts.paste(timg.resize((P, P), Image.NEAREST), (ox, oy))
+        ts.paste(timg, (ox + EX, oy + EX))
 ts.save(KOK + '/assets/karo/tileset.png', optimize=True)
 ap = KOK + '/js/veri/assetlar.js'
 s = open(ap, encoding='utf8').read()
