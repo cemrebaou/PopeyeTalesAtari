@@ -345,6 +345,32 @@ for r in range(5, H - 3):
                 elif tur == 2 and yuksek and k + 4 < c: elmasYay(k, k + 4, r, 1.6, 5); k += 9   # yaylar
                 else: elmas(k, r, 1 if yuksek and (k // 2) % 2 else 0); k += 2     # dalgalı sıra
 
+# ============================================================================================ düşmanlar (v1.79)
+# Güçlü yürüyenler: domuz (3 can, gürz), golem (4 can, yumruk), büyücü (2 can götüren büyü), fıçı (dönerek atılır).
+# Çiçek / arı / örümcek / yarasa / zayıflar yok. En az 6 karoluk, üstü 3 kare açık düz zeminlere, ~10 karoda bir;
+# başlangıç, kontrol noktası, kapı, sandık, zincir, diken ve sahte duvarlı gizli odaların yakınına konmaz.
+DUS = []
+KATLAR = (('golem', 'buyucu', 'fici', 'domuz'), ('golem', 'buyucu', 'golem', 'fici'), ('domuz', 'fici', 'domuz', 'buyucu'))   # üst · orta · alt kat
+yasak = [(x // T, y // T) for x, y in KON] + [BASLA, DUKKAN, CIKIS, KILIT_UST, KILIT_VARIS, (BONUS[0] // T, BONUS[1] // T)]
+yasak += [(x // T, y // T) for x, y, _ in SAN] + [(x // T, (y + h) // T) for x, y, h in ZIN]
+sahteH = set((r, c) for x, y, w, h in SAH for r in range(y // T - 1, (y + h) // T + 2) for c in range(x // T - 3, (x + w) // T + 3))
+tasSut = set((y // T + 1, x // T) for x, y, tur, sb, gc in TAS)
+def uygun(r, c):
+    return (g[r][c] and not g[r - 1][c] and not g[r - 2][c] and not g[r - 3][c] and (r, c) not in dikenH and (r, c) not in sahteH
+            and (r, c) not in tasSut and not any(abs(c - yc) < 5 and abs(r - yr) < 4 for yc, yr in yasak))
+for r in range(6, H - 3):
+    c = 1
+    while c < W - 1:
+        if not uygun(r, c): c += 1; continue
+        s0 = c
+        while c < W - 1 and uygun(r, c): c += 1
+        if c - s0 < 6: continue
+        tipler = KATLAR[0 if r < 66 else 1 if r < 132 else 2]
+        k = s0 + 3 + kar(r, s0) % 2
+        while k < c - 2:
+            DUS.append({'tip': tipler[kar(k, r) % 4], 'x': k * T + 16, 'y': r * T})
+            k += 8 + kar(k, r) % 4
+
 # ============================================================================================ doğrulama
 tasH = {}
 for x, y, tur, sabit, gecit in TAS: tasH[(y // T, x // T)] = tur
@@ -426,13 +452,13 @@ s += satir('bloklar', B)
 s += satir('dikenler', DIK) + satir('sarmasiklar', ZIN) + satir('sandiklar', SAN) + satir('elmaslar', E)
 s += satir('ozeller', OZ) + '  kayalar: [\n\n  ],\n'
 s += '  // [x, y (sol üst), tür, sabit, geçit]\n' + satir('kirTaslar', TAS)
-s += satir('kontrol', KON) + satir('ipuclari', IPU) + '  dusmanlar: [\n\n  ],\n'
+s += satir('kontrol', KON) + satir('ipuclari', IPU) + satir('dusmanlar', DUS)
 s += satir('gizliler', GIZ)
 s += '  // [x, y, w, h] sahte duvar: metal görünür, çarpışmasız gizli yer\n' + satir('sahte', SAH)
 s += "  on: [\n  ],\n  arka: [\n  ]\n};\n"
 open(KOK + '/js/veri/level4.js', 'w', encoding='utf8').write(s)
 print('blok', len(B), 'elmas', len(E), '(atılan', atilan, ') özel', len(OZ), 'sandık', len(SAN), 'taş', sum(t[2] not in ('kasa', 'kristal') for t in TAS),
-      'kasa', sum(t[2] == 'kasa' for t in TAS), 'kristal', sum(t[2] == 'kristal' for t in TAS), 'zincir', len(ZIN), 'gizli', len(GIZ), 'bayrak', len(KON))
+      'kasa', sum(t[2] == 'kasa' for t in TAS), 'kristal', sum(t[2] == 'kristal' for t in TAS), 'zincir', len(ZIN), 'gizli', len(GIZ), 'bayrak', len(KON), 'düşman', len(DUS), {t: sum(d['tip'] == t for d in DUS) for t in ('domuz', 'golem', 'buyucu', 'fici')})
 
 # küçük harita görseli (depoya girmez)
 onz = os.environ.get('L4_ONIZLEME')

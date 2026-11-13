@@ -50,6 +50,8 @@ function sesAyarUygula(game) {
 function grafikUygula(game) {
   game.scene.getScenes(false).forEach(s => { if (s.grafikAyarla) s.grafikAyarla(); });
 }
+// v1.79: zorluk çarpanı — oyun bitirilip '2x Yeniden Oyna' seçilince 2: düşmanların (patronlar dahil) canı ve vuruşu iki katı
+function zorluk() { return KAYIT.zorluk === 2 ? 2 : 1; }
 function kayitYaz() { try { localStorage.setItem('popeyeTalesKayit', JSON.stringify(KAYIT)); } catch (e) { /* özel pencere */ } }
 
 // v1.33: bölüm başına kalıcı toplama kaydı — puana yazılan hiçbir şey yeniden toplanamaz (tekrar oynayınca eksikler toplanır).

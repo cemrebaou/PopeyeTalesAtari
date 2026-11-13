@@ -22,7 +22,7 @@ const oyun = new Phaser.Game({
   physics: { default: 'arcade', arcade: { gravity: { y: CONFIG.fizik.yercekimi }, debug: false } },
   scale: { mode: Phaser.Scale.NONE, zoom: 1 / DPR },
   input: { activePointers: 4 },
-  scene: [BootSahnesi, OyunSahnesi, ArayuzSahnesi, YuzmeSahnesi, AyarSahnesi]
+  scene: [BootSahnesi, GirisSahnesi, OyunSahnesi, ArayuzSahnesi, YuzmeSahnesi, AyarSahnesi]
 });
 
 // Pencere boyutu / telefon yönü / tam ekran değişince tuvali yeniden boyutla

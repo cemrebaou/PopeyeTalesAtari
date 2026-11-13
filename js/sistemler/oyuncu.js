@@ -201,7 +201,7 @@ Object.assign(OyunSahnesi.prototype, {
     const diken = this.dikenRect.find(s => Phaser.Geom.Intersects.RectangleToRectangle(pr, s));
     if (diken) {
       if (this.pogoModu && b.velocity.y > 0) this.pogoZipla();
-      else this.oyuncuHasar(diken.centerX);
+      else this.oyuncuHasar(diken.centerX, 1, true);
     }
     this.animasyon(yerde);
   },
@@ -488,9 +488,11 @@ Object.assign(OyunSahnesi.prototype, {
   },
 
   // ---- Hasar, ölüm ----
-  oyuncuHasar(kaynakX, miktar = 1) {
+  // cevre: diken gibi düşman olmayan hasar (2x'te katlanmaz)
+  oyuncuHasar(kaynakX, miktar = 1, cevre = false) {
     const S = this.durum, p = this.player, b = p.body;
     if (this.dokunulmaz > 0 || S.olu || S.bitti) return;
+    if (!cevre) miktar *= zorluk();   // v1.79: 2x'te düşman vuruşları iki katı
     // Darbe karesi o anki duruma göre (yerde ayakta → sersem)
     this.hasarAnim = this.asili ? 'h_asili' : this.tirmaniyor ? 'h_tirman' : this.cekDurum ? 'h_cek'
       : this.itiyor ? 'h_it' : this.egik ? 'h_egil' : !yerdeMi(b) ? 'h_hava' : null;

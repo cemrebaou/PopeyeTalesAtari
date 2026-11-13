@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.78',
+  surum: 'v1.79',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -79,6 +79,7 @@ const CONFIG = {
     }
   },
   metalSandikAsagi: 11.5,   // v1.76: metal temalı bölümde sandık görseli bu kadar px (40 birim) aşağıda çizilir; gövde yerinde
+  muzikSes: 0.4,   // v1.79: bölüm / patron müziği ses düzeyi
   patron: { can: 5, uyanMesafe: 520 },
   // v1.69: 2. bölüm patronu Kobra Bekçi. yakin: bu mesafeden yakındaysa zehir yerine mızrak; hiz / bekle / zehirHiz: [normal, yarı canın altında];
   // firlat: mızrak vurunca oyuncuya verilen [yatay hız, yukarı hız, kontrolsüz süre sn]
@@ -88,6 +89,7 @@ const CONFIG = {
   patron3: { can: 20, hiz: 55, bekle: 1.3, saldiriSayi: 2, uzak: 240, baygin: 2, vurusAra: 0.45, mermiHiz: 360, ziplaSure: 0.9, firlat: [420, 300, 0.4] },
   // v1.55: yüzme bölümü (js/sahneler/YuzmeSahnesi.js). Uzunluklar dünya pikseli (ekran yüksekliği 360), hızlar px/sn.
   yuzme: {
+    geriOran: 0.1,      // v1.79: can bitince toplam yolun bu oranı kadar geriden devam
     akisHiz: 150,       // denizin sola akış hızı (biz sağa yüzüyoruz)
     akisIleri: 1.3,     // sağa basarken akış çarpanı (hızlanma hissi)
     akisGeri: 0.8,      // sola basarken
@@ -148,9 +150,10 @@ const SES_KLASOR = {
   arayuz: ['tik', 'odulElmas'],
   // v1.60: yüzme bölümü (araclar/yuzmeSes.py) — roket fırlatma, zincirli mayın patlaması, döngü ambiyans, kulaç sesleri
   yuzme: ['yzFirlat', 'yzPatla', 'yzAmbiyans', ...Array.from({ length: 16 }, (_, i) => 'yzKulac' + (i + 1))],
-  muzik: ['patron1Muzik']   // v1.43: 1. bölüm patron savaşı müziği (döngü)   // odulElmas (v1.33): bölüm sonu ödül mücevherinden turuncu elmas çıkarken
+  muzik: ['patron1Muzik', 'patron2Muzik', 'patron3Muzik', 'bolum1Muzik', 'bolum2Muzik', 'bolum3Muzik', 'bolum4Muzik']   // v1.43: 1. bölüm patron savaşı müziği (döngü)   // odulElmas (v1.33): bölüm sonu ödül mücevherinden turuncu elmas çıkarken
 };
-const SESLER = Object.values(SES_KLASOR).flat();
+// v1.79: müzikler büyük dosyalar — açılışta topluca değil, çalınacağı zaman yüklenir (yardimci.js muzikBaslat)
+const SESLER = Object.values(SES_KLASOR).flat().filter(ad => !SES_KLASOR.muzik.includes(ad));
 const SES_YOL = {};
 Object.entries(SES_KLASOR).forEach(([k, l]) => l.forEach(ad => { SES_YOL[ad] = 'assets/ses/' + k + '/' + ad + '.mp3'; }));
 

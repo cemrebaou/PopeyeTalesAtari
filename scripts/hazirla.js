@@ -87,7 +87,13 @@ if (adim === 'android') {
 
   // Simge / açılış görseli: android-res/ varsa res klasörüne kopyalanır (yoksa Capacitor'ın varsayılanı kalır)
   const kaynak = path.join(kok, 'android-res'), res = path.join(app, 'src/main/res');
-  if (fs.existsSync(kaynak)) fs.cpSync(kaynak, res, { recursive: true });
+  if (fs.existsSync(kaynak)) {
+    fs.cpSync(kaynak, res, { recursive: true });
+    const splash = path.join(kaynak, 'drawable/splash.png');   // şablondaki bütün yoğunluk klasörlerine (yoksa bazılarında varsayılan kalır)
+    if (fs.existsSync(splash)) for (const d of fs.readdirSync(res)) {
+      if (d.startsWith('drawable') && fs.existsSync(path.join(res, d, 'splash.png'))) fs.copyFileSync(splash, path.join(res, d, 'splash.png'));
+    }
+  }
 
   console.log('Android ayarlandı. AdMob:', admobId, 'versionCode:', no, 'versionName:', C.surum);
 }

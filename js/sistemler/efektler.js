@@ -85,12 +85,14 @@ Object.assign(OyunSahnesi.prototype, {
     const yuzde = top ? al / top : 1;
     if (u) u.sonucEkrani({ baslik: (no + 1) + '. BÖLÜM TAMAMLANDI!', satirlar, yuzde, eskiYildiz: B.yildiz || 0,
       yildizVer: (n) => { B.yildiz = Math.max(B.yildiz || 0, n); kayitYaz(); },
-      altYazi: () => 'Puan: ' + S.puan,
-      // v1.48: bölüm sonu tuşları
-      tusListe: [
-        { ad: 'Tekrar Oyna', fn: () => Reklam.bolumGecti().then(() => { this.registry.set('bolum', no); this.scene.restart(); }) },   // v1.77: önce geçiş reklamı (uygulamada)
-        ...(sonraki ? [{ ad: 'Sonraki Bölüm', fn: () => Reklam.bolumGecti().then(() => { this.registry.set('bolum', no + 1); this.scene.restart(); }) }] : [])
-      ] });
+      // v1.79: son bölümde oyun biter — alt yazı 2x'i anlatır, tuş "2x Yeniden Oyna"; "Tekrar Oyna" tuşu yok
+      altYazi: () => sonraki ? 'Puan: ' + S.puan : (zorluk() === 2 ? '2x bitti! Bir tur daha!' : 'Oyun bitti! 2x: düşmanlar 2 kat can, 2 kat vuruş'),
+      tusListe: [sonraki
+        ? { ad: 'Sonraki Bölüm', fn: () => Reklam.bolumGecti().then(() => { this.registry.set('bolum', no + 1); this.scene.restart(); }) }
+        : { ad: '2x Yeniden Oyna', fn: () => Reklam.bolumGecti().then(() => {
+            KAYIT.zorluk = 2; KAYIT.sonBolum = 0; kayitYaz();
+            this.registry.set('bolum', 0); this.scene.restart();
+          }) }] });
   },
 
   oyunBitti() {

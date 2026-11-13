@@ -38,7 +38,8 @@ Object.assign(OyunSahnesi.prototype, {
   dusmanYarat(e) {
     const t = DUSMAN_TIP[e.tip];
     if (!t) return null;
-    const [bw0, bh0, hp, hiz, ucan] = t;
+    const [bw0, bh0, hp0, hiz, ucan] = t;
+    const hp = hp0 * (e.tip === 'yumurta' ? 1 : zorluk());   // v1.79: 2x'te can iki katı
     // Görsel ASSETLER.dusman[tip] şeridinden, görünür boya ölçekli; gövde ayak çizgisinde (uçanlarda merkezde) ortalı
     const O = CONFIG.dusmanOlcek, D = ASSETLER.dusman[e.tip], s = D.boy * O / (D.ayak - D.ust);
     const bw = bw0 * O / s, bh = bh0 * O / s;
@@ -48,7 +49,7 @@ Object.assign(OyunSahnesi.prototype, {
     const y = e.tip === 'orumcek' ? e.tavan + 20 : e.y;
     const d = this.dusmanlar.create(e.x, y, 'd_' + e.tip, 0).setOrigin(0.5, oy / D.h).setScale(s).setDepth(6);
     d.body.setSize(bw, bh, false).setOffset((D.w - bw) / 2, ucan ? oy - bh / 2 : D.ayak - bh - gom);
-    Object.assign(d, { ad: e.tip, tip: e.tip, hp, hiz, oldu: false, yon: 1 });
+    Object.assign(d, { ad: e.tip, tip: e.tip, hp, hpMax: hp, hiz, oldu: false, yon: 1 });
     // v1.00: ek şeritlere (ASSETLER.ekKare) geçen animasyonlarda hücre farklı: ayak çizgisi ve gövde dünyada aynı yerde kalsın
     if (Object.values(ASSETLER.ekKare).some(E => E.dusman === e.tip)) {
       const taban = { w: D.w, oy, ox: d.body.offset.x, oyOff: d.body.offset.y };
@@ -454,7 +455,7 @@ Object.assign(OyunSahnesi.prototype, {
 
     if (d.kobra) return this.kobraGuncelle(d, dt);
     if (d.robot) return this.robotGuncelle(d, dt);
-    const hizli = d.hp <= Math.ceil(CONFIG.patron.can / 2);
+    const hizli = d.hp <= Math.ceil(d.hpMax / 2);
     d.durumZaman -= dt;
     switch (d.durum) {
       case 'yuru': {
@@ -499,7 +500,7 @@ Object.assign(OyunSahnesi.prototype, {
   // Yarı canın altında daha hızlı yürür, daha sık saldırır, zehir daha hızlı gider. Görsel sola bakar (sağa dönünce çevrilir).
   kobraGuncelle(d, dt) {
     const p = this.player, b = d.body, C = CONFIG.patron2, K = ASSETLER.kobra;
-    const hizli = d.hp <= Math.ceil(C.can / 2), dx = p.x - d.x;
+    const hizli = d.hp <= Math.ceil(d.hpMax / 2), dx = p.x - d.x;
     d.durumZaman -= dt;
     switch (d.durum) {
       case 'yuru': {

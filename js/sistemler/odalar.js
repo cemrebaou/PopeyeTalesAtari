@@ -75,16 +75,17 @@ Object.assign(OyunSahnesi.prototype, {
     this.patronSpr = this.dusmanYarat({ tip: { 1: 'kobra', 3: 'robot' }[this.bolumNo] || 'boss', x: bx, y: by });   // v1.69: 2. bölümde Kobra Bekçi · v1.70: 4. bölümde Paslı Dev
     if (this.patronSpr) this.patronSpr.zeminY = by;
     this.patronBas = { x: bx, y: by, hp: this.patronSpr ? this.patronSpr.hp : CONFIG.patron.can };
-    this.events.once('shutdown', () => { this.patronMuzik = sesDurdur(this.patronMuzik); });
+    this.events.once('shutdown', () => this.patronMuzikDurdur());
   },
 
   // v1.43: patron müziği — arenaya girince ve savaş baştan başlayınca en baştan çalar (döngü); yenilince / oyun bitince durur
   patronMuzikBaslat() {
-    this.patronMuzik = sesDurdur(this.patronMuzik);
-    const ad = { 0: 'patron1Muzik' }[this.bolumNo];   // v1.69: bolumNo sıfırdan başlar (0 = 1. bölüm)
-    if (ad) this.patronMuzik = sesBaslat(this, ad, { loop: true, volume: 0.45 });
+    this.patronMuzikDurdur();
+    this.bolumMuzikDurdur();   // v1.79: arenada bölüm müziği susar
+    const ad = { 0: 'patron1Muzik', 1: 'patron2Muzik', 3: 'patron3Muzik' }[this.bolumNo];   // bolumNo sıfırdan başlar (0 = 1. bölüm)
+    if (ad) this.patronMuzik = muzikBaslat(this, ad, { volume: 0.45 });
   },
-  patronMuzikDurdur() { this.patronMuzik = sesDurdur(this.patronMuzik); },
+  patronMuzikDurdur() { if (this.patronMuzik) { this.patronMuzik.durdur(); this.patronMuzik = null; } },
 
   // v1.43: arenada ölüp canı kalan oyuncu: ekran kararır, patron canı / yeri / durumu sıfırlanır, oyuncu girişte doğar,
   // müzik baştan başlar, ekran açılır

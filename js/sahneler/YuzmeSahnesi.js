@@ -263,6 +263,8 @@ class YuzmeSahnesi extends Phaser.Scene {
       this.ambSesler = [];
     });
     this.sesKur();
+    this.muzik = muzikBaslat(this, 'bolum' + (this.bolumNo + 1) + 'Muzik');   // v1.79
+    this.events.once('shutdown', () => this.muzik.durdur());
     this.grafikAyarla();
   }
 
@@ -427,18 +429,25 @@ class YuzmeSahnesi extends Phaser.Scene {
 
   hasarAl() {
     const Y = CONFIG.yuzme;
-    this.can--;
+    this.can -= zorluk();   // v1.79: 2x'te mayınlar da 2 can götürür
     this.kalpYaz();
     this.dokunulmaz = Y.dokunulmaz;
     this.hiz.y = Math.max(this.hiz.y, 0) + 160;   // darbeyle aşağı itilir
     this.cameras.main.shake(260, 0.01);
     sesCal(this, 'tasVur1', { volume: 0.6 });
     if (this.can > 0) return;
-    // can bitti: bölüm baştan (toplanan para kalıcı puana zaten yazıldı)
+    // v1.79: can bitti — bölüm baştan değil, toplam yolun %10'u kadar geriden (CONFIG.yuzme.geriOran) tam canla devam.
+    // Geri alınan kısımda elmas yeniden gelmez (toplam para sabit kalsın), mayınlar yeniden gelir.
     this.olu = true; this.surukle = null;
     sesCal(this, 'tamKaybet', { volume: 0.6 });
-    this.cameras.main.fadeOut(900, 0, 20, 40);
-    this.time.delayedCall(1000, () => this.scene.restart());
+    this.cameras.main.fadeOut(700, 0, 20, 40);
+    this.time.delayedCall(800, () => {
+      this.yol = Math.max(0, this.yol - this.mesafe * Y.geriOran);
+      this.sonrakiMayin = Math.min(this.sonrakiMayin, this.yol + Y.akisHiz * 1.5);
+      this.can = canMaxi(); this.kalpYaz();
+      this.olu = false; this.dokunulmaz = 2.5;
+      this.cameras.main.fadeIn(500, 0, 20, 40);
+    });
   }
 
   mayinGuncelle(dt, akisHiz) {

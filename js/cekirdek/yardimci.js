@@ -28,6 +28,20 @@ function sesleriYukle(sahne) {
   sahne.load.start();
 }
 
+// v1.79: müzik (döngü) — yüklü değilse önce yükler, yüklenince başlatır. Dönen tutacak .durdur() ile susturulur
+// (yükleme bitmeden durdurulursa hiç başlamaz).
+function muzikBaslat(sahne, ad, ayar) {
+  const t = { ses: null, bitti: false, durdur() { this.bitti = true; this.ses = sesDurdur(this.ses); } };
+  const cal = () => { if (!t.bitti && sahne.sys.isActive()) t.ses = sesBaslat(sahne, ad, Object.assign({ loop: true, volume: CONFIG.muzikSes }, ayar)); };
+  if (sahne.cache.audio.exists(ad)) cal();
+  else if (SES_YOL[ad]) {
+    sahne.load.once('filecomplete-audio-' + ad, cal);
+    sahne.load.audio(ad, SES_YOL[ad]);
+    sahne.load.start();
+  }
+  return t;
+}
+
 function sesDurdur(s) {
   if (s) { s.stop(); s.destroy(); }
   return null;

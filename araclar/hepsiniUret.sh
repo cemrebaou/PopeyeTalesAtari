@@ -35,3 +35,4 @@ python3 araclar/yumurtaKes.py
 python3 araclar/kobraKes.py
 python3 araclar/robotKes.py
 python3 araclar/metalNesneKes.py
+python3 araclar/mobilGorsel.py
