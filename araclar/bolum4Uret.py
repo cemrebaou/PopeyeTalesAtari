@@ -411,6 +411,7 @@ s += "  ad: '4. Bölüm - Demir Kule',\n"
 s += f'  genislik: {W * T},\n  yukseklik: {H * T},\n  karo: {T},\n'
 s += f'  baslangic: {json.dumps(orta(BASLA))},\n  cikis: {json.dumps(orta(CIKIS))},\n'
 s += "  tirmanma: 'zincir',\n"
+s += "  tema: 'metal',   // v1.73: kapı, bayrak, sandık, anahtar, diken, zincir metal görselleriyle (OyunSahnesi.tema)\n"
 s += "  sussuz: true,   // bitki / kaya süsü yok (metal bölüm)\n"
 s += "  bolgeler: [[0,'z'],[66,'y'],[132,'x']],   // üst parlak çelik · orta koyu çelik · alt pas\n"
 s += f'  dukkan: {{ kapi: {json.dumps(orta(DUKKAN))} }},\n'

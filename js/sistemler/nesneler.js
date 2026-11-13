@@ -40,7 +40,7 @@ Object.assign(OyunSahnesi.prototype, {
       s.kid = 'k' + i;
       if (A[s.kid]) s.bos = true;            // parası / elması alınmış kasa ve kristal: kırılır ama bir şey vermez
     });
-    if (!L.patron) this.kapi = this.boyutla(this.add.image(L.cikis[0], L.cikis[1] + this.zeminGomme, 'kapi').setOrigin(0.5, 1).setDepth(1.6), 'kapi', { h: CONFIG.cikisKapiBoy });   // v1.37: patron kapılı bölümde çıkış kapısı yok
+    if (!L.patron) this.kapi = this.boyutla(this.add.image(L.cikis[0], L.cikis[1] + this.zeminGomme, this.tema('kapi')).setOrigin(0.5, 1).setDepth(1.6), 'kapi', { h: CONFIG.cikisKapiBoy });   // v1.37: patron kapılı bölümde çıkış kapısı yok
     this.anahtarKur();
     this.gizliler = (L.gizliler || []).map(([x, y]) => ({ x, y, bulundu: false }));
     // v1.26: birbirine 300 px içindeki noktalar tek gizli alan (bölüm sonu bonusu alan sayısıyla)
@@ -133,10 +133,10 @@ Object.assign(OyunSahnesi.prototype, {
       { ad: 'elmas', ikon: ['toplanan', TP.sira.indexOf('elmas') * 6], ...ek('elmas', say('e', L.elmaslar.length), L.elmaslar.length) },
       { ad: 'kizil', ikon: ['toplanan', TP.sira.indexOf('kizilelmas') * 6], ...ek('kizil', alt('o', kizilI), kizilI.length) },
       { ad: 'buyuk', ikon: ['toplanan', TP.sira.indexOf('buyukelmas') * 6], ...ek('buyuk', alt('o', buyukI), buyukI.length) },
-      { ad: 'sandik', ikon: ['sandikAcik', null], ...ek('sandik', say('s', L.sandiklar.length), L.sandiklar.length) },
+      { ad: 'sandik', ikon: [this.tema('sandikAcik'), null], ...ek('sandik', say('s', L.sandiklar.length), L.sandiklar.length) },
       { ad: 'kasa', ikon: ['kirTas', KIRTAS.indexOf('kasa') * 5], ...ek('kasa', alt('k', kasaI), kasaI.length) },
       { ad: 'kristal', ikon: ['kirTas', KIRTAS.indexOf('kristal') * 5], ...ek('kristal', alt('k', krisI), krisI.length) },
-      { ad: 'anahtar', ikon: ['anahtar', null], al: this.kayitB.anahtar ? 1 : 0, top: L.anahtar ? 1 : 0 },
+      { ad: 'anahtar', ikon: [this.tema('anahtar'), null], al: this.kayitB.anahtar ? 1 : 0, top: L.anahtar ? 1 : 0 },
       { ad: 'gizli', ikon: ['gizliIkon', null], al: G.bulunan, top: G.toplam }
     ].filter(t => t.top > 0);
   },
@@ -155,8 +155,8 @@ Object.assign(OyunSahnesi.prototype, {
     this.varisKapi = this.nesneKoy(this.add.image(hx, hy + this.zeminGomme, 'kilitKapi').setDepth(1.6), 'kilitKapi', CONFIG.kapiBoy);
     if (L.anahtar) {
       const [ax, ay] = L.anahtar;
-      const a = this.ozeller.create(ax, ay, 'anahtar').setDepth(2);
-      a.setScale(30 * CONFIG.olcek / a.height).refreshBody();
+      const a = this.ozeller.create(ax, ay, this.tema('anahtar')).setDepth(2);
+      a.setScale(30 * CONFIG.olcek / Math.max(a.height, a.width * 0.6)).refreshBody();   // yatay çizilmiş anahtar (metal) da aynı boyda
       a.tip = 'anahtar';
       this.tweens.add({ targets: a, y: ay - 6, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
@@ -236,7 +236,7 @@ Object.assign(OyunSahnesi.prototype, {
   // ---- Sandık ----
   // x, zemin y, ödül. Ağırlıklı kutu: üstüne çıkılır, itilir / çekilir; vurunca ya da pogo ile açılır.
   sandikYarat(x, y, odul) {
-    const s = this.sandiklar.create(x, y - 1, 'sandik').setOrigin(0.5, 1).setDepth(2);
+    const s = this.sandiklar.create(x, y - 1, this.tema('sandik')).setOrigin(0.5, 1).setDepth(2);
     this.boyutla(s, 'sandik', { w: 32 });
     Object.assign(s, { odul, acik: false, govdeW: 30, govdeH: s.displayHeight - 2 });
     this.kutuGovdesi(s);
@@ -265,7 +265,7 @@ Object.assign(OyunSahnesi.prototype, {
   // Sandığı açık görsele çevirir (ödül vermez)
   sandikAcikKur(s) {
     s.acik = true;
-    s.setTexture('sandikAcik');
+    s.setTexture(this.tema('sandikAcik'));
     this.boyutla(s, 'sandikAcik', { w: 34 });
     this.kutuGovdesi(s);   // açık sandık da aynı kutu
   },
@@ -504,7 +504,7 @@ Object.assign(OyunSahnesi.prototype, {
   kapiAc(sessiz) {
     if (!sessiz) this.ses('kapiAcil');
     const k = this.kapi;
-    k.setTexture('kapiAcik').setOrigin(0.41, 1);
+    k.setTexture(this.tema('kapiAcik')).setOrigin(this.L.tema ? 0.5 : 0.41, 1);
     this.boyutla(k, 'kapiAcik', { h: CONFIG.cikisKapiBoy });
     const cikis = this.add.zone(k.x - 20, k.y - 64, 40, 64).setOrigin(0, 0);
     this.physics.add.existing(cikis, true);

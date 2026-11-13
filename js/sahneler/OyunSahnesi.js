@@ -240,10 +240,10 @@ class OyunSahnesi extends Phaser.Scene {
 
   // Dikenler: [x, zemin y, w]
   dikenleriKur() {
-    const O = ASSETLER.obje.diken;
+    const dAd = this.tema('diken'), O = this.nesneOlcu(dAd);
     this.L.dikenler.forEach(([x, y, w]) => {
       const n = Math.max(1, Math.round(w / 48)), pw = w / n, ph = pw * O.h / O.w;
-      for (let i = 0; i < n; i++) this.add.image(x + i * pw, y + 3, 'diken').setOrigin(0, 1).setDisplaySize(pw + 1, ph).setDepth(1.5);
+      for (let i = 0; i < n; i++) this.add.image(x + i * pw, y + 3, dAd).setOrigin(0, 1).setDisplaySize(pw + 1, ph).setDepth(1.5);
       this.dikenRect.push(new Phaser.Geom.Rectangle(x + 4, y - ph * 0.8, w - 8, ph * 0.8));
     });
   }
@@ -251,9 +251,9 @@ class OyunSahnesi extends Phaser.Scene {
   // Sarmaşıklar: [x, y (üst), h] tırmanma alanı. Görsel üstteki ilk taşın altından başlar, taşın 8 px içine girer,
   // zeminin arkasında çizilir; tam parça sayısıyla döşenir (son yaprak yarım kalmaz). L.tirmanma 'zincir' ise zincir çizilir.
   sarmasiklariKur() {
-    const T = this.L.karo, zincir = this.L.tirmanma === 'zincir', gen = zincir ? 14 : 21;
+    const T = this.L.karo, zincir = this.L.tirmanma === 'zincir', zAd = this.tema('zincir'), gen = zincir ? (zAd === 'zincir' ? 14 : 17) : 21;
     this.L.sarmasiklar.forEach(([x, y, h], i) => {
-      const ad = zincir ? 'zincir' : 'sarmasik' + (i % 3), O = ASSETLER.obje[ad], sx = gen / O.w;
+      const ad = zincir ? zAd : 'sarmasik' + (i % 3), O = this.nesneOlcu(ad), sx = gen / O.w;
       const c = Math.floor(x / T);
       let r = Math.floor((y - 1) / T), k = 0;
       while (r >= 0 && !this.izgara[r][c] && k < 12) { r--; k++; }
@@ -266,13 +266,24 @@ class OyunSahnesi extends Phaser.Scene {
 
   // Görseli kaynak oranında boyutlar (genişlik ya da yükseklik verilir)
   // v1.35: nesne2 görseli: dokuyu değiştirir, alt kenardaki gövde ortasından oturtur, boyunu h yapar
+  // v1.73: tema — bölümde `tema: 'metal'` varsa aynı adlı nesnenin metal görseli (<ad>_metal, ASSETLER.metalNesne) kullanılır
+  tema(ad) {
+    const t = this.L.tema;
+    return t && this.textures.exists(ad + '_' + t) ? ad + '_' + t : ad;
+  }
+  nesneOlcu(ad) {   // ad temalı da olabilir (kapi_metal)
+    const m = /^(.*)_metal$/.exec(ad);
+    return (m && ASSETLER.metalNesne[m[1]]) || ASSETLER.nesne2[ad] || ASSETLER.nesne3[ad] || ASSETLER.obje[ad];
+  }
+
   nesneKoy(img, ad, h) {
-    img.setTexture(ad).setOrigin((ASSETLER.nesne2[ad] || ASSETLER.nesne3[ad]).ox, 1);
+    ad = this.tema(ad);
+    img.setTexture(ad).setOrigin(this.nesneOlcu(ad).ox, 1);
     return this.boyutla(img, ad, { h });
   }
 
   boyutla(img, anahtar, { w, h }) {
-    const O = ASSETLER.nesne2[anahtar] || ASSETLER.nesne3[anahtar] || ASSETLER.obje[anahtar];
+    const O = this.nesneOlcu(this.tema(anahtar));
     return w ? img.setDisplaySize(w, w * O.h / O.w) : img.setDisplaySize(h * O.w / O.h, h);
   }
 

@@ -11,6 +11,7 @@ class BootSahnesi extends Phaser.Scene {
     // Nesneler (sandık, kapı, bayrak, diken, sarmaşık) — boyutları ASSETLER.obje
     Object.keys(A.obje).filter(ad => !A.nesne2[ad]).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
     L.image('zincir', 'assets/nesne/zincir.png');
+    Object.keys(ASSETLER.metalNesne).forEach(ad => L.image(ad + '_metal', 'assets/nesne/' + ad + '_metal.png'));   // v1.73: 4. bölüm (metal tema) nesneleri
     // v1.35: kapılar (dükkan / kilitli), anahtar, kontrol bayrağı, tabela, ok balonu, simgeler — ASSETLER.nesne2
     Object.keys(A.nesne2).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));
     Object.keys(A.nesne3).forEach(ad => L.image(ad, 'assets/nesne/' + ad + '.png'));   // v1.37: bonus / patron kapıları, süsler

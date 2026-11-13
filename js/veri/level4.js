@@ -7,6 +7,7 @@ const LEVEL4 = {
   baslangic: [400, 6208],
   cikis: [7376, 416],
   tirmanma: 'zincir',
+  tema: 'metal',   // v1.73: kapı, bayrak, sandık, anahtar, diken, zincir metal görselleriyle (OyunSahnesi.tema)
   sussuz: true,   // bitki / kaya süsü yok (metal bölüm)
   bolgeler: [[0,'z'],[66,'y'],[132,'x']],   // üst parlak çelik · orta koyu çelik · alt pas
   dukkan: { kapi: [272, 6208] },

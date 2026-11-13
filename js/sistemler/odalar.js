@@ -52,7 +52,7 @@ Object.assign(OyunSahnesi.prototype, {
   // Kapı sprite'ı: kapalı / açık görseli aynı genişlikte (nesne3 kapılarında açık ve kapalı boyları farklı olabilir)
   kapiSprite(x, y, kapali, acik, en, odada) {   // odada: oda zemini (bölüm zemin payı yerine 2 px)
     const spr = this.add.image(x, y + (odada ? 2 : this.zeminGomme), kapali).setDepth(1.6);
-    const koy = (ad) => { const O = ASSETLER.nesne2[ad] || ASSETLER.nesne3[ad]; spr.setTexture(ad).setOrigin(O.ox, 1).setDisplaySize(en, en * O.h / O.w); };
+    const koy = (ad) => { ad = this.tema(ad); const O = this.nesneOlcu(ad); spr.setTexture(ad).setOrigin(O.ox, 1).setDisplaySize(en, en * O.h / O.w); };   // v1.73: tema
     koy(kapali);
     return { spr, kapali, acik, koy };
   },
@@ -68,7 +68,7 @@ Object.assign(OyunSahnesi.prototype, {
     O.giris = { x: O.x + K + 40, y: O.zeminY - 2 };
     // Bölümdeki patron kapısı (kapalı; yaklaşınca açılır)
     const [kx, ky] = L.patron.kapi, ad = this.bolumNo === 1 ? 'patron2Kapi' : 'patron1Kapi';
-    const k = this.kapiSprite(kx, ky, ad, ad + 'Acik', CONFIG.patronKapiEn);
+    const k = this.kapiSprite(kx, ky, ad, ad + 'Acik', CONFIG.patronKapiEn * (L.tema ? 1.45 : 1));   // v1.73: metal patron kapısı yatık çizilmiş, geniş konur
     this.dukkanKapilar.push({ x: kx, y: ky, hedef: 'arena', spr: k.spr, kapali: k.kapali, acik: k.acik, koy: k.koy });
     // Patron arenanın sağ yarısında bekler (uyanma: dusmanlar.js bossGuncelle)
     const bx = O.x + O.w - 3 * K, by = O.zeminY;
