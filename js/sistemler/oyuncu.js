@@ -591,6 +591,7 @@ Object.assign(OyunSahnesi.prototype, {
     if (this.adimZaman > 0) return;
     this.adimZaman = aralik;
     if (kaydir) { this.kaydirNo = ((this.kaydirNo || 0) % 2) + 1; this.ses('kaydir' + this.kaydirNo, { volume: 0.5 }); }
+    else if (this.L.tema === 'metal' && !this.oda) { this.adimNo = ((this.adimNo || 0) % 4) + 1; this.ses('metalAdim' + this.adimNo, { volume: 0.3 }); }   // v1.75: metal zemin (odalar taş)
     else { this.adimNo = ((this.adimNo || 0) % 3) + 1; this.ses('adim' + this.adimNo, { volume: 0.35 }); }
   }
 });

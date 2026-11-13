@@ -617,7 +617,7 @@ Object.assign(OyunSahnesi.prototype, {
           const hx = O ? Phaser.Math.Clamp(d.hedefX, O.x + O.K + yari, O.x + O.w - O.K - yari) : d.hedefX;
           b.setVelocity((hx - d.x) / T, -CONFIG.fizik.yercekimi * T / 2);
           gec('hava', T + 1); d.setFrame(A.zipla[2]);
-          this.ses('sekme1');
+          this.ses('robotZipla');
         }
         break;
       case 'hava': {

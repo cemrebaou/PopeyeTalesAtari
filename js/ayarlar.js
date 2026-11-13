@@ -1,6 +1,6 @@
 // Popeye Tales (Atari) — oyun ayarları. Tüm uzunluklar dünya pikseli (1 karo = 32 px), süreler saniye.
 const CONFIG = {
-  surum: 'v1.74',
+  surum: 'v1.75',
   olcek: 0.9,           // v1.63: bölümdeki oyuncu, düşman, eşya, kapı, süs görselleri bu oranda (zemin karoları ve arka plan hariç)
   zeminGomme: 7,        // v1.63: tüm bölümlerde ortak — yere basan her şey zemin çizgisinin bu kadar altına çizilir (çimin içine oturur)
   bayrakBoy: 66,        // kontrol noktası bayrağının boyu (v1.35: kaideli yeni görsel)
@@ -122,14 +122,14 @@ Object.keys(CONFIG.toplanBoy).forEach(k => { CONFIG.toplanBoy[k] *= CONFIG.olcek
 
 const SES_KLASOR = {
   popeye: ['bastonSalla', 'bastonVur', 'bastonTakil', 'cekTakil', 'sekme1', 'sekme2', 'sekme3', 'inis', 'tirmanCik', 'tirmanIn',
-    'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'olum', 'tamKaybet', 'ayakVur'],
+    'adim1', 'adim2', 'adim3', 'kaydir1', 'kaydir2', 'zipla1', 'zipla2', 'zipla3', 'olum', 'tamKaybet', 'ayakVur', 'metalAdim1', 'metalAdim2', 'metalAdim3', 'metalAdim4'],   // v1.75: metal temalı bölümde adım
   elmaslar: ['para1', 'para2', 'para3', 'para4', 'para5', 'elmas', 'elmasDus', 'altin', 'capaAltin', 'kizilElmas', 'buyukElmas',
     'yasam', 'can'],
   cevre: ['kapiGir', 'kapiCik', 'gizliBonus', 'gizli', 'bayrak', 'sandikDus', 'tasVur1', 'tasVur2', 'tasKir', 'tahtaVur', 'tahtaKir', 'selale'],
   dusmanlar: ['ates1', 'ates2', 'mizrak', 'zehirAt', 'zehirVur', 'ari', 'olMaymun', 'olKopek', 'olGul', 'olYuvarlak', 'olAri',
     'olOrumcek', 'olYilan'],
   patron: ['olBoss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13',
-    'kobraTis', 'kobraMizrak1', 'kobraMizrak2', 'kobraTukur', 'kobraZehirVur', 'kobraHasar1', 'kobraHasar2', 'kobraOl', 'patronDus'],   // v1.74
+    'kobraTis', 'kobraMizrak1', 'kobraMizrak2', 'kobraTukur', 'kobraZehirVur', 'kobraHasar1', 'kobraHasar2', 'kobraOl', 'patronDus', 'robotZipla'],   // v1.74
   arayuz: ['tik', 'odulElmas'],
   // v1.60: yüzme bölümü (araclar/yuzmeSes.py) — roket fırlatma, zincirli mayın patlaması, döngü ambiyans, kulaç sesleri
   yuzme: ['yzFirlat', 'yzPatla', 'yzAmbiyans', ...Array.from({ length: 16 }, (_, i) => 'yzKulac' + (i + 1))],
